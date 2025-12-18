@@ -58,10 +58,10 @@
             <div class="mb-3 small">
               🕒 {{ f.start_time }} • 📍 {{ f.location }}
             </div>
-            <a href="#eventsGrid" class="btn btn-light btn-lg me-2">Browse events</a>
+            <a href="#eventsGrid" class="header-btn header-btn-primary btn-lg me-2">Browse events</a>
             {% if ident and ident.role != "admin" %}
             <form method="post" action="/events/{{ f.id }}/register" class="d-inline">
-              <button class="btn btn-primary btn-lg">Register</button>
+              <button class="header-btn header-btn-primary btn-lg">Register</button>
             </form>
             {% endif %}
           </div>

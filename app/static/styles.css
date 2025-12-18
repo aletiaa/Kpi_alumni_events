@@ -77,84 +77,109 @@ html, body { height: 100%; }
   .hero-title{ font-size: 1.7rem; }
 }
 
-/* Full-page animated background (renamed to avoid Bootstrap .container conflict) */
-.rain-bg {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  --c: #09f;
-  background-color: #000;
-  background-image: radial-gradient(4px 100px at 0px 235px, var(--c), #0000),
-    radial-gradient(4px 100px at 300px 235px, var(--c), #0000),
-    radial-gradient(1.5px 1.5px at 150px 117.5px, var(--c) 100%, #0000 150%),
-    radial-gradient(4px 100px at 0px 252px, var(--c), #0000),
-    radial-gradient(4px 100px at 300px 252px, var(--c), #0000),
-    radial-gradient(1.5px 1.5px at 150px 126px, var(--c) 100%, #0000 150%),
-    radial-gradient(4px 100px at 0px 150px, var(--c), #0000),
-    radial-gradient(4px 100px at 300px 150px, var(--c), #0000),
-    radial-gradient(1.5px 1.5px at 150px 75px, var(--c) 100%, #0000 150%);
-  background-size:
-    300px 235px,
-    300px 235px,
-    300px 235px,
-    300px 252px,
-    300px 252px,
-    300px 252px,
-    300px 150px,
-    300px 150px,
-    300px 150px;
-  animation: rain-hi 150s linear infinite;
-}
-
-.rain-bg::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  backdrop-filter: blur(1em) brightness(6);
-  background-image: radial-gradient(circle at 50% 50%, #0000 0, #0000 2px, hsl(0 0 4%) 2px);
-  background-size: 8px 8px;
-}
-
-@keyframes rain-hi {
-  0% {
-    background-position:
-      0px 220px,
-      3px 220px,
-      151.5px 337.5px,
-      25px 24px,
-      28px 24px,
-      176.5px 150px,
-      50px 16px,
-      53px 16px,
-      201.5px 91px;
-  }
-  to {
-    background-position:
-      0px 6800px,
-      3px 6800px,
-      151.5px 6917.5px,
-      25px 13632px,
-      28px 13632px,
-      176.5px 13758px,
-      50px 5416px,
-      53px 5416px,
-      201.5px 5491px;
-  }
-}
-
 /* Ensure your page content sits above the background */
 .page-content {
   position: relative;
   z-index: 2;
 }
 
-/* Let the animated background show through */
-body { background: transparent !important; }
-
-/* Reduce wash-out; tune as you like */
-.rain-bg::after { backdrop-filter: blur(1em) brightness(1.2); }
-
 /* Optional: slightly wider shell */
 .app-shell { max-width: 1320px; }
+
+/* Assistant button: transparent, border, rounded, no stars */
+.assistant-btn {
+  display: flex;
+  align-items: center;
+  background: transparent;
+  color: #111;
+  border: 2px solid #111;
+  border-radius: 32px;
+  padding: 10px 22px;
+  font-size: 1.08rem;
+  font-weight: 600;
+  box-shadow: none;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.assistant-btn:hover {
+  border-color: #6366f1;
+  transform: scale(1.04);
+}
+.assistant-label {
+  font-size: 1.08em;
+  letter-spacing: 0.02em;
+}
+
+/* Header redesign */
+.app-header {
+  background: linear-gradient(90deg, #6366f1 0%, #06b6d4 100%);
+  border-radius: 18px;
+  padding: 24px 32px;
+  margin-bottom: 18px;
+  box-shadow: 0 2px 12px rgba(60,60,120,0.08);
+}
+.header-title {
+  color: #fff;
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+  text-shadow: 0 2px 8px rgba(60,60,120,0.10);
+}
+.header-subtitle {
+  color: #e0e7ff;
+  font-size: 1.05rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+.header-nav {
+  display: flex;
+  gap: 12px;
+}
+.header-btn {
+  background: transparent;
+  color: #fff;
+  border: 2px solid #fff;
+  border-radius: 32px;
+  padding: 8px 22px;
+  font-size: 1.08rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.2s;
+  box-shadow: none;
+}
+.header-btn:hover {
+  background: #fff;
+  color: #6366f1;
+  border-color: #6366f1;
+  transform: scale(1.04);
+}
+.header-btn-primary {
+  background: #06b6d4;
+  color: #fff;
+  border-color: #06b6d4;
+}
+.header-btn-primary:hover {
+  background: #fff;
+  color: #06b6d4;
+  border-color: #06b6d4;
+}
+.header-btn-danger {
+  background: #ef4444;
+  color: #fff;
+  border-color: #ef4444;
+}
+.header-btn-danger:hover {
+  background: #fff;
+  color: #ef4444;
+  border-color: #ef4444;
+}
+
+/* Ensure Register and Browse Events buttons match header/nav style */
+.header-btn.w-100 {
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin-top: 18px;
+  font-size: 1.15rem;
+}

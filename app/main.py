@@ -9,7 +9,10 @@ from .routers import auth, web, admin, admin_events
 from .services.migrate import ensure_email_verified_column, ensure_event_time_columns, ensure_password_reset_columns
 from .services.seeding import seed_events_if_empty
 from .routers.assistant import router as assistant_router
+from app.routers.iot import router as iot_router
+
 app = FastAPI(title="KPI Events Dashboard")
+
 
 templates = Jinja2Templates(directory="app/templates")
 app.state.templates = templates
@@ -21,6 +24,7 @@ app.include_router(admin.router)
 app.include_router(admin_events.router)
 app.include_router(password_reset.router)
 app.include_router(assistant_router)
+app.include_router(iot_router)
 
 @app.on_event("startup")
 def on_startup():

@@ -14,38 +14,35 @@
 </head>
 
 <body>
-  <!-- Background -->
-  <div class="rain-bg"></div>
-
   <!-- All visible content must be above background -->
   <div class="page-content">
     <div class="app-page">
       <div class="app-shell">
 
         <header class="mb-3">
-          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <div class="app-header d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
-              <div class="fw-bold" style="font-size: 1.25rem;">{{ app_name }}</div>
-              <div class="text-muted small">KPI Students • Alumni • Guests</div>
+              <div class="header-title">KPI Events Dashboard</div>
+              <div class="header-subtitle">KPI Students • Alumni • Guests</div>
             </div>
 
-            <nav class="d-flex gap-2 flex-wrap">
-              <a class="btn btn-sm btn-outline-secondary" href="/">Home</a>
+            <nav class="header-nav d-flex gap-2 flex-wrap">
+              <a class="header-btn" href="/">Home</a>
 
               {% if ident and ident.role == "admin" %}
-                <a class="btn btn-sm btn-outline-primary" href="/admin">Admin</a>
-                <a class="btn btn-sm btn-primary" href="/admin/events">Manage events</a>
+                <a class="header-btn" href="/admin">Admin</a>
+                <a class="header-btn header-btn-primary" href="/admin/events">Manage events</a>
               {% endif %}
 
               {% if ident and ident.role != "admin" %}
-                <a class="btn btn-sm btn-outline-primary" href="/me/events">My events</a>
+                <a class="header-btn header-btn-primary" href="/me/events">My events</a>
               {% endif %}
 
               {% if ident %}
-                <a class="btn btn-sm btn-outline-danger" href="/logout">Logout</a>
+                <a class="header-btn header-btn-danger" href="/logout">Logout</a>
               {% else %}
-                <a class="btn btn-sm btn-outline-primary" href="/login">Login</a>
-                <a class="btn btn-sm btn-primary" href="/register">Register</a>
+                <a class="header-btn" href="/login">Login</a>
+                <a class="header-btn header-btn-primary" href="/register">Register</a>
               {% endif %}
             </nav>
           </div>
@@ -63,12 +60,12 @@
     </div>
 
     <!-- Assistant button -->
-    <button class="btn btn-dark position-fixed"
-            style="right:16px; bottom:16px; z-index:1050;"
+    <button class="assistant-btn position-fixed"
+            style="right:24px; bottom:24px; z-index:1050;"
             data-bs-toggle="offcanvas"
             data-bs-target="#aiAssistant"
             aria-controls="aiAssistant">
-      Assistant
+      <span class="assistant-label">Have questions</span>
     </button>
 
     <!-- Assistant offcanvas -->
