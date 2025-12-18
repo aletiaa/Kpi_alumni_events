@@ -1,0 +1,160 @@
+html, body { height: 100%; }
+
+.app-page{
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;  /* this forces centering */
+}
+
+.app-shell{
+  width: 100%;
+  max-width: 1120px;        /* adjust to taste: 1200px if you want wider */
+  padding: 28px 18px 60px;
+  position: relative;
+  z-index: 2;
+}
+
+.hero{
+  position: relative;
+  height: 380px;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.hero-img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.02);
+}
+
+.hero-overlay{
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(2,6,23,.78) 0%, rgba(2,6,23,.35) 55%, rgba(2,6,23,.15) 100%),
+    radial-gradient(closest-side at 25% 30%, rgba(124,58,237,.28), transparent 60%),
+    radial-gradient(closest-side at 60% 60%, rgba(6,182,212,.18), transparent 60%);
+}
+
+.hero-inner{
+  position: absolute;
+  inset: 0;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 860px;
+}
+
+.hero-kicker{
+  color: rgba(255,255,255,.75);
+  font-weight: 900;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  font-size: .8rem;
+  margin-bottom: 10px;
+}
+
+.hero-title{
+  color: #fff;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  font-size: 2.2rem;
+  line-height: 1.05;
+  margin-bottom: 10px;
+}
+
+.hero-meta{
+  color: rgba(255,255,255,.82);
+  font-size: 1.02rem;
+  margin-bottom: 18px;
+}
+
+@media (max-width: 768px){
+  .hero{ height: 320px; }
+  .hero-title{ font-size: 1.7rem; }
+}
+
+/* Full-page animated background (renamed to avoid Bootstrap .container conflict) */
+.rain-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  --c: #09f;
+  background-color: #000;
+  background-image: radial-gradient(4px 100px at 0px 235px, var(--c), #0000),
+    radial-gradient(4px 100px at 300px 235px, var(--c), #0000),
+    radial-gradient(1.5px 1.5px at 150px 117.5px, var(--c) 100%, #0000 150%),
+    radial-gradient(4px 100px at 0px 252px, var(--c), #0000),
+    radial-gradient(4px 100px at 300px 252px, var(--c), #0000),
+    radial-gradient(1.5px 1.5px at 150px 126px, var(--c) 100%, #0000 150%),
+    radial-gradient(4px 100px at 0px 150px, var(--c), #0000),
+    radial-gradient(4px 100px at 300px 150px, var(--c), #0000),
+    radial-gradient(1.5px 1.5px at 150px 75px, var(--c) 100%, #0000 150%);
+  background-size:
+    300px 235px,
+    300px 235px,
+    300px 235px,
+    300px 252px,
+    300px 252px,
+    300px 252px,
+    300px 150px,
+    300px 150px,
+    300px 150px;
+  animation: rain-hi 150s linear infinite;
+}
+
+.rain-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  backdrop-filter: blur(1em) brightness(6);
+  background-image: radial-gradient(circle at 50% 50%, #0000 0, #0000 2px, hsl(0 0 4%) 2px);
+  background-size: 8px 8px;
+}
+
+@keyframes rain-hi {
+  0% {
+    background-position:
+      0px 220px,
+      3px 220px,
+      151.5px 337.5px,
+      25px 24px,
+      28px 24px,
+      176.5px 150px,
+      50px 16px,
+      53px 16px,
+      201.5px 91px;
+  }
+  to {
+    background-position:
+      0px 6800px,
+      3px 6800px,
+      151.5px 6917.5px,
+      25px 13632px,
+      28px 13632px,
+      176.5px 13758px,
+      50px 5416px,
+      53px 5416px,
+      201.5px 5491px;
+  }
+}
+
+/* Ensure your page content sits above the background */
+.page-content {
+  position: relative;
+  z-index: 2;
+}
+
+/* Let the animated background show through */
+body { background: transparent !important; }
+
+/* Reduce wash-out; tune as you like */
+.rain-bg::after { backdrop-filter: blur(1em) brightness(1.2); }
+
+/* Optional: slightly wider shell */
+.app-shell { max-width: 1320px; }

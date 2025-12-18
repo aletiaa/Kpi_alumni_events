@@ -1,0 +1,135 @@
+{# ================= AI / NLP RECOMMENDATIONS ================= #}
+{% if ident and ident.role != "admin" %}
+<div class="card shadow-soft mb-3 border border-success-subtle">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <h5 class="fw-bold mb-0">AI / NLP Recommendations</h5>
+        <div class="text-muted small">
+          TF-IDF + cosine similarity, weighted by recency. Includes explainable keywords.
+        </div>
+      </div>
+      <span class="badge bg-success">ML enabled</span>
+    </div>
+
+    {% if recommended_items and recommended_items|length > 0 %}
+      <div class="row g-2 mt-3">
+        {% for item in recommended_items %}
+          {% set r = item.event %}
+          <div class="col-12 col-md-4">
+            <a href="#"
+               class="text-decoration-none"
+               data-bs-toggle="modal"
+               data-bs-target="#recModal{{ r.id }}">
+              <div class="card shadow-soft hover-lift h-100">
+                <div class="card-body">
+                  <div class="fw-bold text-dark">{{ r.title }}</div>
+                  <div class="text-muted small">{{ r.location }} • {{ r.start_time }}</div>
+
+                  <div class="mt-2 d-flex align-items-center gap-2 flex-wrap">
+                    <span class="badge text-bg-success">
+                      Score {{ "%.3f"|format(item.score) }}
+                    </span>
+                    <span class="badge text-bg-light border">View details</span>
+                  </div>
+
+                  {% if item.keywords and item.keywords|length > 0 %}
+                    <div class="mt-2 small text-muted">
+                      Why: {{ item.keywords[:4] | join(", ") }}
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="alert alert-light border mt-3 mb-0">
+        Register for at least one event to generate personalized recommendations.
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+{# ================= MODALS FOR RECOMMENDATIONS ================= #}
+{% if ident and ident.role != "admin" and recommended_items %}
+  {% for item in recommended_items %}
+    {% set r = item.event %}
+    {% set r_regs = reg_counts.get(r.id, 0) %}
+    {% set r_is_full = r_regs >= r.capacity %}
+    {% set r_deadline_passed = r.registration_deadline and r.registration_deadline < now %}
+    {% set r_is_registered = r.id in user_regs %}
+
+    <div class="modal fade" id="recModal{{ r.id }}" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <div>
+              <h5 class="modal-title fw-bold mb-0">{{ r.title }}</h5>
+              <div class="text-muted small">
+                🕒 {{ r.start_time }}{% if r.end_time %} – {{ r.end_time }}{% endif %}
+                • 📍 {{ r.location }}
+              </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+
+          <div class="modal-body">
+            <div class="d-flex align-items-center gap-2 flex-wrap mb-3">
+              <span class="badge text-bg-success">Score {{ "%.3f"|format(item.score) }}</span>
+
+              {% if r_is_registered %}
+                <span class="badge text-bg-success">Registered</span>
+              {% elif r_is_full %}
+                <span class="badge text-bg-danger">Full</span>
+              {% elif r_deadline_passed %}
+                <span class="badge text-bg-secondary">Closed</span>
+              {% else %}
+                <span class="badge text-bg-primary">Open</span>
+              {% endif %}
+
+              <span class="badge text-bg-info">Seats: {{ r_regs }} / {{ r.capacity }}</span>
+            </div>
+
+            {% if item.keywords and item.keywords|length > 0 %}
+              <div class="mb-3">
+                <div class="fw-bold">Why recommended</div>
+                <div class="text-muted small">
+                  Top contributing keywords: {{ item.keywords | join(", ") }}
+                </div>
+              </div>
+            {% endif %}
+
+            <p style="font-size: 1.05rem; line-height: 1.6;">
+              {{ r.description or "No description provided." }}
+            </p>
+
+            {% if r.registration_deadline %}
+              <div class="text-muted small mt-2">
+                Registration deadline: <b>{{ r.registration_deadline }}</b>
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="modal-footer">
+            {% if r_is_registered %}
+              <form method="post" action="/events/{{ r.id }}/unregister" class="m-0">
+                <button class="btn btn-outline-danger">Cancel registration</button>
+              </form>
+            {% else %}
+              <form method="post" action="/events/{{ r.id }}/register" class="m-0">
+                <button class="btn btn-primary"
+                        {% if r_is_full or r_deadline_passed %}disabled{% endif %}>
+                  Register
+                </button>
+              </form>
+            {% endif %}
+            <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+{% endif %}

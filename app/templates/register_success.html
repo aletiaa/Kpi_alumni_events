@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="alert alert-success">Account created.</div>
+
+{% if email_sent %}
+  <div class="alert alert-info">
+    Verification email sent to <b>{{ email }}</b>. Please check your inbox (and spam).
+  </div>
+{% else %}
+  <div class="alert alert-warning">
+    Email sending is not configured. Demo verification link:
+  </div>
+  <div class="border rounded p-3 bg-light">
+    <a href="{{ verify_link }}">{{ verify_link }}</a>
+  </div>
+{% endif %}
+
+<a class="btn btn-primary mt-3" href="/login">Go to login</a>
+
+{% endblock %}

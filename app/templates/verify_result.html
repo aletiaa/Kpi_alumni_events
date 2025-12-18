@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% if ok %}
+  <div class="alert alert-success">Email verified successfully. You can now log in.</div>
+  <a class="btn btn-primary" href="/login">Go to login</a>
+{% else %}
+  <div class="alert alert-danger">Verification failed{% if reason %}: {{ reason }}{% endif %}.</div>
+  <a class="btn btn-outline-primary" href="/register">Back to register</a>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+<h4>Admin: Manage events</h4>
+
+{% if request.query_params.get('created') == '1' %}
+  <div class="alert alert-success">Event created.</div>
+{% endif %}
+{% if request.query_params.get('updated') == '1' %}
+  <div class="alert alert-success">Event updated.</div>
+{% endif %}
+{% if request.query_params.get('deleted') == '1' %}
+  <div class="alert alert-success">Event deleted.</div>
+{% endif %}
+{% if request.query_params.get('error') %}
+  <div class="alert alert-danger">Error: {{ request.query_params.get('error') }}</div>
+{% endif %}
+
+<div class="card p-3 mb-4">
+  <h5 class="mb-3">Create new event</h5>
+  <form method="post" action="/admin/events/create">
+    <div class="mb-2">
+      <input class="form-control" name="title" placeholder="Event title" required>
+    </div>
+    <div class="mb-2">
+      <textarea class="form-control" name="description" placeholder="Description" rows="3" required></textarea>
+    </div>
+    <div class="row g-2">
+      <div class="col-md-4">
+        <input class="form-control" name="location" placeholder="Location (KPI/Online/etc)" value="KPI">
+      </div>
+      <div class="col-md-4">
+        <input class="form-control" name="start_time" type="datetime-local" required>
+      </div>
+      <div class="col-md-4">
+        <input class="form-control" name="capacity" type="number" min="1" value="100" required>
+      </div>
+    </div>
+    <button class="btn btn-primary mt-3">Create</button>
+  </form>
+</div>
+
+<h5>All events</h5>
+<div class="list-group">
+  {% for e in events %}
+    <div class="list-group-item">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div><b>{{ e.title }}</b></div>
+          <div class="text-muted small">{{ e.start_time }} — {{ e.location }} — capacity {{ e.capacity }}</div>
+          <div class="mt-2">{{ e.description }}</div>
+        </div>
+        <div class="ms-3 d-flex gap-2">
+          <a class="btn btn-sm btn-outline-primary" href="/admin/events/{{ e.id }}/edit">Edit</a>
+          <form method="post" action="/admin/events/{{ e.id }}/delete" onsubmit="return confirm('Delete this event?');">
+            <button class="btn btn-sm btn-outline-danger">Delete</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-secondary">No events yet.</div>
+  {% endfor %}
+</div>
+
+{% endblock %}

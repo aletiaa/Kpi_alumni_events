@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<h4>Register</h4>
+{% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+<form method="post">
+  <div class="mb-2"><input class="form-control" name="full_name" placeholder="Full name"></div>
+  <div class="mb-2"><input class="form-control" name="email" placeholder="Email"></div>
+  <div class="mb-2"><input class="form-control" name="password" type="password" placeholder="Password"></div>
+  <div class="mb-2">
+    <select class="form-select" name="role">
+      <option value="student">Student</option>
+      <option value="alumni">Alumni</option>
+      <option value="guest" selected>Guest</option>
+    </select>
+    <div class="form-text">Admin accounts are managed via admins.csv</div>
+  </div>
+  <button class="btn btn-primary">Create account</button>
+</form>
+{% endblock %}

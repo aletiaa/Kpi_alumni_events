@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6">
+
+    <div class="card shadow-soft overflow-hidden">
+      <div class="card-body p-4">
+        <div class="text-center mb-3">
+          <div class="section-title mb-1">Welcome back</div>
+          <div class="text-muted">Login to register for events and see your activity.</div>
+        </div>
+
+        {% if error is defined and error %}
+          <div class="alert alert-danger shadow-soft">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" action="/login">
+          <div class="mb-3">
+            <label class="form-label fw-bold">Email</label>
+            <input class="form-control form-control-lg" type="email" name="email" required
+                   placeholder="you@example.com" value="{{ email if email is defined else '' }}">
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label fw-bold">Password</label>
+            <input class="form-control form-control-lg" type="password" name="password" required
+                   placeholder="Your password">
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+            <a class="link-secondary" href="/forgot-password">Forgot password?</a>
+            <button class="btn btn-gradient btn-lg" type="submit">Login</button>
+          </div>
+        </form>
+
+        <hr class="my-4">
+
+        <div class="text-center">
+          <div class="text-muted">New here?</div>
+          <a class="btn btn-outline-primary mt-2" href="/register">Create an account</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
