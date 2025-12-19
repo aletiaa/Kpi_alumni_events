@@ -1,8 +1,13 @@
 import os
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from sqlalchemy import text
+
+from app.db import get_db
+
+router = APIRouter(prefix="/api/iot", tags=["iot"])
+
 
 from app.db import get_db
 
@@ -63,3 +68,59 @@ def visits_health(db: Session = Depends(get_db)):
         return {"ok": True, "db": "ok", "hint": "Use POST with JSON body + X-IoT-Key header."}
     except Exception as e:
         return {"ok": False, "db": "error", "detail": str(e)}
+
+
+@router.get("/events/{event_id}/stats")
+def event_iot_stats(event_id: int, db: Session = Depends(get_db)):
+    row = db.execute(
+        text("""
+            SELECT
+              COALESCE(SUM(CASE WHEN direction='in'  THEN 1 ELSE 0 END), 0) AS in_count,
+              COALESCE(SUM(CASE WHEN direction='out' THEN 1 ELSE 0 END), 0) AS out_count,
+              COALESCE(SUM(delta), 0) AS net,
+              MAX(ts) AS last_ts
+            FROM iot_visits
+            WHERE event_id = :event_id
+        """),
+        {"event_id": event_id},
+    ).mappings().one()
+
+    return {
+        "ok": True,
+        "event_id": event_id,
+        "in": int(row["in_count"]),
+        "out": int(row["out_count"]),
+        "net": int(row["net"]),
+        "last_ts": row["last_ts"].isoformat() if row["last_ts"] else None,
+    }
+
+
+@router.get("/stats")
+def all_events_iot_stats(db: Session = Depends(get_db)):
+    rows = db.execute(
+        text("""
+            SELECT
+              event_id,
+              COALESCE(SUM(CASE WHEN direction='in'  THEN 1 ELSE 0 END), 0) AS in_count,
+              COALESCE(SUM(CASE WHEN direction='out' THEN 1 ELSE 0 END), 0) AS out_count,
+              COALESCE(SUM(delta), 0) AS net,
+              MAX(ts) AS last_ts
+            FROM iot_visits
+            GROUP BY event_id
+            ORDER BY event_id
+        """)
+    ).mappings().all()
+
+    return {
+        "ok": True,
+        "events": [
+            {
+                "event_id": int(r["event_id"]),
+                "in": int(r["in_count"]),
+                "out": int(r["out_count"]),
+                "net": int(r["net"]),
+                "last_ts": r["last_ts"].isoformat() if r["last_ts"] else None,
+            }
+            for r in rows
+        ],
+    }
