@@ -85,13 +85,17 @@ def event_iot_stats(event_id: int, db: Session = Depends(get_db)):
         {"event_id": event_id},
     ).mappings().one()
 
+    last_ts = row["last_ts"]
+    # If last_ts is a string, return as is; if datetime, convert to isoformat
+    if last_ts and hasattr(last_ts, "isoformat"):
+        last_ts = last_ts.isoformat()
     return {
         "ok": True,
         "event_id": event_id,
         "in": int(row["in_count"]),
         "out": int(row["out_count"]),
         "net": int(row["net"]),
-        "last_ts": row["last_ts"].isoformat() if row["last_ts"] else None,
+        "last_ts": last_ts if last_ts else None,
     }
 
 
