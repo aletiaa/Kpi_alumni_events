@@ -10,10 +10,10 @@
 </section>
 
 <div class="analytics-metric-grid mb-3">
-  <div><span>Перегляди</span><strong>{{ analytics.overview.total_page_views }}</strong><small>усі meaningful page views</small></div>
+  <div><span>Перегляди</span><strong>{{ analytics.overview.total_page_views }}</strong><small>усі змістовні перегляди сторінок</small></div>
   <div><span>Сесії</span><strong>{{ analytics.overview.unique_sessions }}</strong><small>окремі відвідування</small></div>
-  <div><span>Auth views</span><strong>{{ analytics.overview.authenticated_views }}</strong><small>авторизовані перегляди</small></div>
-  <div><span>Avg page time</span><strong>{{ analytics.overview.avg_page_duration_seconds }}с</strong><small>час на сторінці</small></div>
+  <div><span>Авторизовані</span><strong>{{ analytics.overview.authenticated_views }}</strong><small>перегляди від зареєстрованих користувачів</small></div>
+  <div><span>Час сторінки</span><strong>{{ analytics.overview.avg_page_duration_seconds }}с</strong><small>середній час перегляду</small></div>
 </div>
 
 <div class="row g-3">
@@ -43,8 +43,8 @@
         {% set anon = analytics.overview.anonymous_views %}
         {% set total = analytics.overview.total_page_views or 1 %}
         <div class="analytics-split">
-          <div style="width: {{ (auth / total * 100)|round(1) }}%">Auth {{ auth }}</div>
-          <div style="width: {{ (anon / total * 100)|round(1) }}%">Anon {{ anon }}</div>
+          <div style="width: {{ (auth / total * 100)|round(1) }}%">Авторизовані {{ auth }}</div>
+          <div style="width: {{ (anon / total * 100)|round(1) }}%">Гості {{ anon }}</div>
         </div>
         <p class="text-muted mt-3 mb-0">Цей графік допомагає зрозуміти, скільки активності створюють зареєстровані користувачі порівняно з гостями.</p>
       </div>

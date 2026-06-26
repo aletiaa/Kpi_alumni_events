@@ -4,7 +4,7 @@ from sqlalchemy import text
 
 from app.models import PageDuration, PageView, User
 from app.security import create_session_token
-from app.services.analytics import average_page_duration_by_page, record_page_duration, top_pages
+from app.services.analytics import average_page_duration_by_page, page_metadata, record_page_duration, top_pages
 
 
 def test_analytics_middleware_records_page_view_and_session(client, db):
@@ -64,6 +64,17 @@ def test_analytics_page_available_for_admin(admin_client):
     assert "Зрозуміла активність AlumnixHub" in response.text
 
 
+def test_analytics_page_uses_clear_ukrainian_labels(admin_client):
+    response = admin_client.get("/analytics")
+    assert response.status_code == 200
+    assert "усі змістовні перегляди сторінок" in response.text
+    assert "перегляди від зареєстрованих користувачів" in response.text
+    assert "середній час перегляду" in response.text
+    assert "Auth views" not in response.text
+    assert "Avg page time" not in response.text
+    assert "meaningful page views" not in response.text
+
+
 def test_page_duration_beacon_endpoint_records_duration(client, db):
     opened_at = datetime.utcnow() - timedelta(seconds=45)
     response = client.post(
@@ -88,6 +99,19 @@ def test_page_duration_beacon_accepts_timezone_aware_opened_at(client, db):
     assert row is not None
     assert row["page"] == "/events"
     assert row["duration_seconds"] == 12
+
+
+def test_page_metadata_does_not_expose_unknown_raw_routes():
+    known = page_metadata("/events?msg=like_saved")
+    unknown = page_metadata("/technical-root-with-query?debug=1")
+    admin_unknown = page_metadata("/admin/experimental-panel")
+
+    assert known["path"] == "/events"
+    assert known["title"] == "Події"
+    assert unknown["path"] == "/technical-root-with-query"
+    assert unknown["title"] == "Інший розділ платформи"
+    assert "/technical-root-with-query" not in unknown["title"]
+    assert admin_unknown["title"] == "Адмін-панель"
 
 
 def test_record_page_duration_calculates_closed_at_from_payload(db):
@@ -158,3 +182,33 @@ def test_analytics_helpers_show_friendly_pages_without_query_duplicates(db):
     assert event_duration["samples"] == 2
     assert event_duration["avg_seconds"] == 60
     assert event_duration["avg_label"] == "1.0 хв"
+
+
+def test_admin_dashboard_hides_technical_analytics_paths(admin_client, db):
+    now = datetime.utcnow()
+    db.add_all(
+        [
+            PageView(
+                session_id="s1",
+                page="/events?msg=like_saved",
+                route="events",
+                http_method="GET",
+                viewed_at=now,
+                request_duration_ms=20,
+            ),
+            PageDuration(
+                session_id="s1",
+                page="/events?msg=like_saved",
+                opened_at=now,
+                closed_at=now + timedelta(seconds=30),
+                duration_seconds=30,
+            ),
+        ]
+    )
+    db.commit()
+
+    response = admin_client.get("/admin")
+    assert response.status_code == 200
+    assert "Події" in response.text
+    assert "Технічний шлях" not in response.text
+    assert "/events?msg=like_saved" not in response.text
