@@ -18,9 +18,16 @@ PAGE_LABELS: dict[str, tuple[str, str]] = {
     "/chats": ("Чати", "Тематичні обговорення спільноти"),
     "/assistant": ("ШІ-асистент", "Пошук подій природною мовою"),
     "/profile": ("Профіль", "Особистий кабінет користувача"),
+    "/search": ("Пошук", "Пошук по випускниках, подіях і новинах"),
+    "/notifications": ("Сповіщення", "Повідомлення для користувача"),
     "/messages": ("Повідомлення", "Особисте листування між користувачами"),
     "/me/events": ("Мої події", "Події, на які користувач зареєструвався"),
     "/surveys": ("Опитування", "Анкети та зворотний зв’язок"),
+    "/login": ("Вхід", "Авторизація користувача"),
+    "/register": ("Реєстрація", "Створення нового облікового запису"),
+    "/verify": ("Підтвердження email", "Перевірка електронної пошти"),
+    "/forgot-password": ("Відновлення пароля", "Запит на скидання пароля"),
+    "/reset-password": ("Скидання пароля", "Створення нового пароля"),
     "/admin": ("Адмін-панель", "Керування платформою та перегляд статистики"),
     "/admin/events": ("Адмін: події", "Керування подіями"),
     "/admin/news": ("Адмін: новини", "Керування новинами"),
@@ -28,6 +35,12 @@ PAGE_LABELS: dict[str, tuple[str, str]] = {
     "/admin/chats": ("Адмін: чати", "Модерація чатів"),
     "/admin/surveys": ("Адмін: опитування", "Керування анкетами"),
 }
+
+
+def _unknown_page_label(path: str) -> tuple[str, str]:
+    if path.startswith("/admin/"):
+        return ("Адмін-панель", "Додаткова сторінка керування платформою")
+    return ("Інший розділ платформи", "Сторінка застосунку без окремої назви")
 
 
 def page_metadata(page: str | None) -> dict[str, str]:
@@ -41,7 +54,7 @@ def page_metadata(page: str | None) -> dict[str, str]:
     if path.startswith("/surveys/"):
         return {"path": path, "title": "Сторінка опитування", "description": "Заповнення анкети користувачем"}
 
-    title, description = PAGE_LABELS.get(path, (path, "Сторінка застосунку"))
+    title, description = PAGE_LABELS.get(path, _unknown_page_label(path))
     return {"path": path, "title": title, "description": description}
 
 

@@ -8,11 +8,6 @@ from app.db import get_db
 
 router = APIRouter(prefix="/api/iot", tags=["iot"])
 
-
-from app.db import get_db
-
-router = APIRouter(prefix="/api/iot", tags=["iot"])
-
 def get_iot_key() -> str:
     return os.getenv("IOT_API_KEY", "")
 
