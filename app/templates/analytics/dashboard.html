@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="analytics-hero mb-3">
+  <div>
+    <div class="kicker">Аналітика</div>
+    <h2 class="section-title mb-2">Зрозуміла активність AlumnixHub</h2>
+    <p>Ця сторінка показує не технічні логи, а поведінку користувачів: які розділи відкривають, скільки тривають сесії та де люди проводять найбільше часу.</p>
+  </div>
+  <a href="/admin" class="btn btn-light">Назад до адмін-панелі</a>
+</section>
+
+<div class="analytics-metric-grid mb-3">
+  <div><span>Перегляди</span><strong>{{ analytics.overview.total_page_views }}</strong><small>усі meaningful page views</small></div>
+  <div><span>Сесії</span><strong>{{ analytics.overview.unique_sessions }}</strong><small>окремі відвідування</small></div>
+  <div><span>Auth views</span><strong>{{ analytics.overview.authenticated_views }}</strong><small>авторизовані перегляди</small></div>
+  <div><span>Avg page time</span><strong>{{ analytics.overview.avg_page_duration_seconds }}с</strong><small>час на сторінці</small></div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card shadow-soft h-100">
+      <div class="card-body">
+        <h4>Перегляди за днями</h4>
+        <div class="analytics-bars analytics-bars-daily">
+          {% for row in analytics.daily_views %}
+            <div class="analytics-bar-row">
+              <span>{{ row.day }}</span>
+              <div><i style="width: {{ (row.views / analytics.max_daily * 100)|round(1) }}%"></i></div>
+              <b>{{ row.views }}</b>
+            </div>
+          {% else %}
+            <div class="text-muted">Дані ще збираються.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card shadow-soft h-100">
+      <div class="card-body">
+        <h4>Авторизовані / анонімні</h4>
+        {% set auth = analytics.overview.authenticated_views %}
+        {% set anon = analytics.overview.anonymous_views %}
+        {% set total = analytics.overview.total_page_views or 1 %}
+        <div class="analytics-split">
+          <div style="width: {{ (auth / total * 100)|round(1) }}%">Auth {{ auth }}</div>
+          <div style="width: {{ (anon / total * 100)|round(1) }}%">Anon {{ anon }}</div>
+        </div>
+        <p class="text-muted mt-3 mb-0">Цей графік допомагає зрозуміти, скільки активності створюють зареєстровані користувачі порівняно з гостями.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card shadow-soft h-100">
+      <div class="card-body">
+        <h4>Найпопулярніші сторінки</h4>
+        <div class="analytics-bars">
+          {% for row in analytics.top_pages %}
+            <div class="analytics-bar-row">
+              <span title="{{ row.description }}">{{ row.title }}</span>
+              <div><i style="width: {{ (row.views / analytics.max_views * 100)|round(1) }}%"></i></div>
+              <b>{{ row.views }}</b>
+            </div>
+          {% else %}
+            <div class="text-muted">Дані ще збираються.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card shadow-soft h-100">
+      <div class="card-body">
+        <h4>Де проводять найбільше часу</h4>
+        <div class="analytics-bars">
+          {% for row in analytics.page_durations %}
+            <div class="analytics-bar-row">
+              <span title="{{ row.description }}">{{ row.title }}</span>
+              <div><i style="width: {{ (row.avg_seconds / analytics.max_duration * 100)|round(1) }}%"></i></div>
+              <b>{{ row.avg_label }}</b>
+            </div>
+          {% else %}
+            <div class="text-muted">Точний час з’явиться після переходів між сторінками.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

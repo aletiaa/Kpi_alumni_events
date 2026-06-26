@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="academic-band mb-3"><div class="kicker">Новини</div><h2 class="section-title mb-1">Оголошення та історії спільноти</h2><div class="text-muted">Публікації адміністрації, alumni-ініціативи та університетські оновлення.</div></section>
+<div class="row g-3">{% for item in news_items %}<div class="col-12 col-lg-6"><div class="card shadow-soft h-100 overflow-hidden"><img class="event-image" src="{{ item.image_url or '/static/img/kpi-main.png' }}" alt="{{ item.title }}"><div class="card-body"><div class="kicker">{{ item.created_at.date() if item.created_at else '' }}</div><h4>{{ item.title }}</h4><p>{{ item.short_description or item.content[:220] }}</p><a class="btn btn-outline-primary btn-sm" href="/news/{{ item.id }}">Читати далі</a></div></div></div>{% else %}<div class="col-12"><div class="alert alert-secondary">Опублікованих новин поки немає.</div></div>{% endfor %}</div>
+{% endblock %}

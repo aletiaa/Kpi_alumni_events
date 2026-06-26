@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="academic-band mb-3"><div class="kicker">ШІ-асистент</div><h2 class="section-title mb-1">Пошук подій природною мовою</h2><div class="text-muted">Напишіть, що шукаєте: наприклад, “події цього тижня”, “AI воркшоп” або “онлайн зустрічі”.</div></section>
+<div class="card shadow-soft"><div class="card-body">
+  <form id="assistantForm" class="row g-2">
+    <div class="col-12 col-md"><input id="assistantQuery" class="form-control form-control-lg" placeholder="Що знайти?" required></div>
+    <div class="col-12 col-md-auto"><button class="btn btn-primary btn-lg w-100" type="submit">Знайти</button></div>
+  </form>
+  <div id="assistantMessage" class="alert alert-info mt-3 d-none"></div>
+  <div id="assistantResults" class="list-group mt-3"></div>
+</div></div>
+<script>
+(()=>{const form=document.getElementById('assistantForm');const input=document.getElementById('assistantQuery');const message=document.getElementById('assistantMessage');const results=document.getElementById('assistantResults');form.addEventListener('submit',async e=>{e.preventDefault();if(!input.value.trim())return;message.className='alert alert-info mt-3';message.textContent='Шукаю...';results.innerHTML='';const response=await fetch('/assistant/query',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:input.value.trim()})});const data=await response.json();message.textContent=data.message;results.innerHTML=(data.events||[]).map(ev=>`<a class="list-group-item list-group-item-action" href="/events#event-${ev.id}"><div class="fw-bold">${ev.title}</div><div class="text-muted small">${ev.start_time} · ${ev.location}</div></a>`).join('');});})();
+</script>
+{% endblock %}

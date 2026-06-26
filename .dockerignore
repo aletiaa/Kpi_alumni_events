@@ -1,0 +1,10 @@
+.git
+.pytest_cache
+.venv
+__pycache__
+*.pyc
+.env
+dev.db
+dev.db-journal
+app/static/uploads/*
+!app/static/uploads/.gitkeep

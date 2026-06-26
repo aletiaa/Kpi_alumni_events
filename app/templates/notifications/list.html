@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="academic-band mb-3">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+      <div class="kicker">Сповіщення</div>
+      <h2 class="section-title mb-1">Ваші оновлення AlumnixHub</h2>
+      <div class="text-muted">Нові події, приватні повідомлення та важливі оновлення платформи.</div>
+    </div>
+    {% if unread_count %}
+      <form method="post" action="/notifications/read-all"><button class="btn btn-outline-primary">Позначити все прочитаним</button></form>
+    {% endif %}
+  </div>
+</section>
+
+<div class="notification-list">
+  {% for item in items %}
+    <a class="notification-card {% if not item.is_read %}notification-unread{% endif %}" href="{{ item.url or '#' }}">
+      <div>
+        <span class="badge text-bg-light border">{{ item.kind }}</span>
+        {% if not item.is_read %}<span class="badge text-bg-primary">нове</span>{% endif %}
+      </div>
+      <h3>{{ item.title }}</h3>
+      <p>{{ item.body }}</p>
+      <small>{{ item.created_at }}</small>
+    </a>
+  {% else %}
+    <div class="alert alert-secondary">Сповіщень поки немає.</div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -61,7 +61,8 @@ def generate_short_description(
         if s_norm == 0 or doc_norm == 0:
             scores.append(0.0)
         else:
-            scores.append(float((s @ doc_X.toarray().T) / (s_norm * doc_norm)))
+            similarity = ((s @ doc_X.toarray().T) / (s_norm * doc_norm)).item()
+            scores.append(float(similarity))
 
     ranked = sorted(range(len(sents)), key=lambda i: scores[i], reverse=True)
     picked = [sents[i] for i in ranked[:max_sentences]]
@@ -78,3 +79,5 @@ def generate_short_description(
         out = out[:max_chars].rstrip(" :") + ("…" if len(out) > max_chars else "")
 
     return out.strip()
+
+

@@ -1,0 +1,4 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card shadow-soft overflow-hidden"><img class="news-hero" src="{{ item.image_url or '/static/img/kpi-main.png' }}" alt="{{ item.title }}"><div class="card-body p-4"><a href="/news" class="btn btn-outline-secondary btn-sm mb-3">Назад до новин</a><div class="kicker">Новина</div><h2 class="section-title">{{ item.title }}</h2><div class="text-muted small mb-3">Опубліковано: {{ item.created_at }}{% if item.updated_at %} · оновлено: {{ item.updated_at }}{% endif %}</div>{% if item.short_description %}<p class="lead">{{ item.short_description }}</p>{% endif %}<div style="white-space: pre-wrap;">{{ item.content }}</div>{% if item.image_source_url %}<div class="small text-muted mt-3">Джерело зображення: <a href="{{ item.image_source_url }}" target="_blank">відкрити</a></div>{% endif %}</div></div>
+{% endblock %}

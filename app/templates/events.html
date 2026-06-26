@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+{% if flash %}<div class="alert shadow-soft {% if flash in ['registered','comment_added','like_saved','dislike_saved'] %}alert-success{% elif flash in ['already_registered','unregistered'] %}alert-info{% elif flash in ['verify_email_first','event_not_found','deadline_passed','full','account_blocked','empty_comment'] %}alert-danger{% else %}alert-secondary{% endif %}">{{ flash.replace("_"," ") }}</div>{% endif %}
+<section class="academic-band mb-3"><div class="d-flex justify-content-between align-items-center flex-wrap gap-3"><div><div class="kicker">Події КПІ</div><h2 class="section-title mb-1">Зустрічі, лекції та воркшопи alumni-спільноти</h2><div class="text-muted">Реєструйтесь на події, реагуйте, коментуйте і відкривайте рекомендації.</div></div>{% if ident and ident.role != "admin" %}<div class="d-flex gap-2 flex-wrap"><a class="btn btn-outline-primary" href="/me/events">Мої події</a><a class="btn btn-primary" href="/messages">Повідомлення</a></div>{% endif %}</div></section>
+{% include "partials/_recommendations.html" %}
+{% if calendar is defined %}
+<section class="event-calendar card shadow-soft mb-3">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+      <div>
+        <div class="kicker">Календар подій</div>
+        <h3 class="mb-0">{{ calendar.month_name }} {{ calendar.year }}</h3>
+      </div>
+      <div class="d-flex gap-2">
+        <a class="btn btn-outline-primary btn-sm" href="/events?year={{ calendar.prev_year }}&month={{ calendar.prev_month }}">‹ Попередній</a>
+        <a class="btn btn-outline-primary btn-sm" href="/events?year={{ calendar.next_year }}&month={{ calendar.next_month }}">Наступний ›</a>
+      </div>
+    </div>
+    <div class="calendar-grid">
+      {% for day_name in ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] %}<div class="calendar-head">{{ day_name }}</div>{% endfor %}
+      {% for week in calendar.weeks %}
+        {% for day in week %}
+          <div class="calendar-cell {% if not day %}calendar-empty{% endif %}">
+            {% if day %}
+              <div class="calendar-day">{{ day }}</div>
+              {% for event in calendar.events_by_day.get(day, [])[:2] %}
+                <a class="calendar-event" href="#event-{{ event.id }}">{{ event.title }}</a>
+              {% endfor %}
+              {% if calendar.events_by_day.get(day, [])|length > 2 %}<span class="calendar-more">+{{ calendar.events_by_day.get(day, [])|length - 2 }}</span>{% endif %}
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+<div class="card shadow-soft mb-3"><div class="card-body"><div class="row g-2"><div class="col-md-6"><input id="eventSearch" class="form-control" placeholder="Пошук подій..."></div><div class="col-md-6"><div class="btn-group w-100 flex-wrap"><button class="btn btn-outline-primary active" data-filter="all">Усі</button><button class="btn btn-outline-primary" data-filter="open">Відкриті</button><button class="btn btn-outline-primary" data-filter="registered">Зареєстровані</button><button class="btn btn-outline-primary" data-filter="full">Заповнені</button><button class="btn btn-outline-primary" data-filter="closed">Закриті</button></div></div></div></div></div>
+<div class="row g-3" id="eventsGrid">
+{% for e in events %}
+{% set current_regs = reg_counts.get(e.id, 0) %}{% set is_full = current_regs >= e.capacity %}{% set is_registered = ident and e.id in user_regs %}{% set deadline_passed = e.registration_deadline and e.registration_deadline < now %}{% if is_registered %}{% set status = "registered" %}{% elif is_full %}{% set status = "full" %}{% elif deadline_passed %}{% set status = "closed" %}{% else %}{% set status = "open" %}{% endif %}
+<div id="event-{{ e.id }}" class="col-12 col-lg-6 event-card" data-status="{{ status }}" data-text="{{ (e.title ~ ' ' ~ e.location ~ ' ' ~ e.description)|lower }}">
+  <div class="card shadow-soft hover-lift h-100 overflow-hidden">
+    <img class="event-image" src="{{ e.image_url or '/static/img/kpi-main.png' }}" alt="{{ e.title }}">
+    <div class="card-body">
+      <div class="kicker mb-2">{{ e.location }}</div>
+      <h4>{{ e.title }}</h4>
+      <div class="text-muted small mb-3">{{ e.start_time }}{% if e.end_time %} · до {{ e.end_time }}{% endif %}</div>
+      <p>{{ e.short_description or e.description }}</p>
+      <div class="d-flex gap-2 flex-wrap align-items-center mb-3">
+        <span class="badge text-bg-light border">Місця: {{ current_regs }}/{{ e.capacity }}</span>
+        <span class="badge {% if status == 'open' %}text-bg-success{% elif status == 'registered' %}text-bg-primary{% else %}text-bg-secondary{% endif %}">{{ status }}</span>
+        {% if ident and ident.role != "admin" %}
+          <form method="post" action="/events/{{ e.id }}/react" class="d-inline"><input type="hidden" name="reaction" value="like"><button class="reaction-icon-btn {% if user_reactions.get(e.id) == 'like' %}active{% endif %}" title="Лайк">👍 {{ like_counts.get(e.id, 0) }}</button></form>
+          <form method="post" action="/events/{{ e.id }}/react" class="d-inline"><input type="hidden" name="reaction" value="dislike"><button class="reaction-icon-btn {% if user_reactions.get(e.id) == 'dislike' %}active{% endif %}" title="Дизлайк">👎 {{ dislike_counts.get(e.id, 0) }}</button></form>
+        {% else %}
+          <span class="badge text-bg-light border">👍 {{ like_counts.get(e.id, 0) }}</span><span class="badge text-bg-light border">👎 {{ dislike_counts.get(e.id, 0) }}</span>
+        {% endif %}
+      </div>
+      {% if ident and ident.role != "admin" %}
+        <div class="d-flex gap-2 flex-wrap mb-3">
+          {% if is_registered %}<form method="post" action="/events/{{ e.id }}/unregister"><button class="btn btn-outline-danger">Скасувати реєстрацію</button></form>{% else %}<form method="post" action="/events/{{ e.id }}/register"><button class="btn btn-primary" {% if is_full or deadline_passed %}disabled{% endif %}>Зареєструватися</button></form>{% endif %}
+        </div>
+      {% elif ident and ident.role == "admin" %}<a class="btn btn-outline-primary" href="/admin/events/{{ e.id }}/edit">Редагувати</a>{% else %}<a class="btn btn-primary" href="/login">Увійти, щоб реагувати й коментувати</a>{% endif %}
+      <div class="event-comments mt-3">
+        <div class="fw-bold mb-2">Коментарі</div>
+        {% for c in comments_by_event.get(e.id, [])[-3:] %}<div class="comment-row"><div class="fw-semibold">{{ c.user.full_name if c.user else 'Користувач' }}</div><div>{{ c.body }}</div><div class="text-muted small">{{ c.created_at }}</div></div>{% else %}<div class="text-muted small">Коментарів ще немає.</div>{% endfor %}
+        {% if ident and ident.role != "admin" %}<form method="post" action="/events/{{ e.id }}/comments" class="mt-2"><textarea class="form-control" name="body" rows="2" maxlength="1000" placeholder="Ваш коментар до події" required></textarea><button class="btn btn-outline-primary btn-sm mt-2">Додати коментар</button></form>{% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% else %}<div class="col-12"><div class="alert alert-secondary">Подій поки немає.</div></div>{% endfor %}
+</div>
+<script>(()=>{const search=document.getElementById("eventSearch");const cards=[...document.querySelectorAll(".event-card")];const filters=[...document.querySelectorAll("[data-filter]")];let active="all";function apply(){const q=search.value.toLowerCase();cards.forEach(c=>{const okFilter=active==="all"||c.dataset.status===active;const okSearch=!q||c.dataset.text.includes(q);c.style.display=okFilter&&okSearch?"":"none";});}search.addEventListener("input",apply);filters.forEach(b=>{b.addEventListener("click",()=>{filters.forEach(x=>x.classList.remove("active"));b.classList.add("active");active=b.dataset.filter;apply();});});})();</script>
+{% endblock %}

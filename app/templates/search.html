@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="academic-band mb-3">
+  <div class="kicker">Глобальний пошук</div>
+  <h2 class="section-title mb-3">Результати для “{{ q }}”</h2>
+  <form class="row g-2" method="get" action="/search">
+    <div class="col-md-10"><input class="form-control" name="q" value="{{ q }}" placeholder="Тема події, назва новини або ім'я користувача"></div>
+    <div class="col-md-2"><button class="btn btn-primary w-100">Шукати</button></div>
+  </form>
+</section>
+
+<div class="row g-3">
+  <div class="col-12 col-xl-4">
+    <div class="card shadow-soft h-100">
+      <div class="card-body">
+        <h4>Події</h4>
+        {% for event in events_found %}
+          <a class="search-result-row" href="/events#event-{{ event.id }}">
+            <span class="fw-bold">{{ event.title }}</span>
+            <span class="text-muted small">{{ event.location }} · {{ event.start_time }}</span>
+            <span>{{ event.short_description or event.description }}</span>
+          </a>
+        {% else %}
+          <div class="text-muted">Подій за цим запитом не знайдено.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-xl-4">
+    <div class="card shadow-soft h-100">
+      <div class="card-body">
+        <h4>Новини</h4>
+        {% for item in news_found %}
+          <a class="search-result-row" href="/news/{{ item.id }}">
+            <span class="fw-bold">{{ item.title }}</span>
+            <span class="text-muted small">{{ item.created_at.date() }}</span>
+            <span>{{ item.short_description or item.content[:160] }}</span>
+          </a>
+        {% else %}
+          <div class="text-muted">Новин за цим запитом не знайдено.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-xl-4">
+    <div class="card shadow-soft h-100">
+      <div class="card-body">
+        <h4>Користувачі</h4>
+        {% for user in users_found %}
+          <a class="search-result-row" href="/alumni?q={{ user.full_name|urlencode }}">
+            <span class="fw-bold">{{ user.full_name }}</span>
+            <span class="text-muted small">{{ user.faculty or 'Факультет не вказано' }}{% if user.specialty %} · {{ user.specialty }}{% endif %}</span>
+            <span>{{ user.bio or 'Опис профілю ще не додано.' }}</span>
+          </a>
+        {% else %}
+          <div class="text-muted">Користувачів за цим запитом не знайдено.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
