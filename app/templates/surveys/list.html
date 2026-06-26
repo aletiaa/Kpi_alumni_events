@@ -1,0 +1,4 @@
+﻿{% extends "base.html" %}
+{% block content %}
+<section class="academic-band mb-3"><div class="kicker">Опитування</div><h2 class="section-title mb-1">Активні анкети для спільноти</h2><div class="text-muted">Відповіді допомагають адміністраторам планувати події та сервіси.</div></section><div class="row g-3">{% for survey in surveys %}<div class="col-12 col-lg-6"><div class="card shadow-soft h-100"><div class="card-body"><h4>{{ survey.title }}</h4><p>{{ survey.description or 'Опис відсутній.' }}</p><a class="btn btn-primary btn-sm" href="/surveys/{{ survey.id }}">Заповнити</a></div></div></div>{% else %}<div class="col-12"><div class="alert alert-secondary">Активних опитувань поки немає.</div></div>{% endfor %}</div>
+{% endblock %}

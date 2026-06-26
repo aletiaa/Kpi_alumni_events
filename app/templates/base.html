@@ -1,176 +1,595 @@
 <!doctype html>
-<html lang="en">
+<html lang="uk">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{{ app_name }}</title>
-
+  <title>AlumnixHub</title>
+  <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/static/styles.css">
 </head>
-
 <body>
-  <!-- All visible content must be above background -->
   <div class="page-content">
     <div class="app-page">
       <div class="app-shell">
-
-        <header class="mb-3">
-          <div class="app-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <div>
-              <div class="header-title">KPI Events Dashboard</div>
-              <div class="header-subtitle">KPI Students • Alumni • Guests</div>
-            </div>
-
-            <nav class="header-nav d-flex gap-2 flex-wrap">
-              <a class="header-btn" href="/">Home</a>
-
-              {% if ident and ident.role == "admin" %}
-                <a class="header-btn" href="/admin">Admin</a>
-                <a class="header-btn header-btn-primary" href="/admin/events">Manage events</a>
-              {% endif %}
-
-              {% if ident and ident.role != "admin" %}
-                <a class="header-btn header-btn-primary" href="/me/events">My events</a>
-              {% endif %}
-
-              {% if ident %}
-                <a class="header-btn header-btn-danger" href="/logout">Logout</a>
-              {% else %}
-                <a class="header-btn" href="/login">Login</a>
-                <a class="header-btn header-btn-primary" href="/register">Register</a>
-              {% endif %}
+        <header class="app-header epam-header">
+          <div class="topbar">
+            <a class="system-brand" href="/" aria-label="AlumnixHub"><span class="brand-mark">&lt;</span><span data-i18n="brand">AlumnixHub</span><span class="brand-mark">&gt;</span></a>
+            <nav class="main-nav">
+              <a href="/events" data-i18n="nav_events">Події</a>
+              <a href="/news" data-i18n="nav_news">Новини</a>
+              <a href="/alumni" data-i18n="nav_alumni">Випускники</a>
+              <a href="/mentors">Ментори</a>
+              <a href="/chats" data-i18n="nav_chats">Чати</a>
+              <a href="/surveys" data-i18n="nav_surveys">Опитування</a>
             </nav>
+            <div class="header-tools">
+              <label class="language-label" for="languageSwitch"><span data-i18n="language_label">Україна</span></label>
+              <select class="language-switch" id="languageSwitch" aria-label="Language">
+                <option value="uk">UA</option>
+                <option value="en">EN</option>
+              </select>
+              <form class="global-search" action="/search" method="get" title="Пошук">
+                <input name="q" placeholder="Пошук випускників, подій, новин" data-i18n-placeholder="search_placeholder" aria-label="Пошук">
+                <button class="search-icon" type="submit" aria-label="Пошук"></button>
+              </form>
+              <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-expanded="false" aria-controls="mobileNavPanel"><span>MENU</span><b>+</b></button>
+            </div>
+            {% if ident %}
+              <div class="dropdown user-menu">
+                <button class="user-menu-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Профіль користувача">
+                  {% if ident.avatar_url is defined and ident.avatar_url %}<img class="avatar-mini" src="{{ ident.avatar_url }}" alt="{{ ident.full_name }}">{% else %}<span class="avatar-circle">{{ ident.full_name[:1] }}</span>{% endif %}
+                  <span class="user-menu-name">{{ ident.full_name }}</span>
+                  <span class="user-menu-role">{{ ident.role }}</span>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end profile-dropdown shadow-soft">
+                  <div class="dropdown-header profile-mini-head">{% if ident.avatar_url is defined and ident.avatar_url %}<img class="avatar-menu-preview" src="{{ ident.avatar_url }}" alt="{{ ident.full_name }}">{% else %}<span class="avatar-menu-initial">{{ ident.full_name[:1] }}</span>{% endif %}<div><div class="fw-bold">{{ ident.full_name }}</div><div class="small text-muted">{{ ident.status if ident.status is defined and ident.status else ident.role }}</div></div></div>
+                  <a class="dropdown-item" href="/profile" data-i18n="nav_profile">Профіль</a>
+                  <a class="dropdown-item" href="/me/events" data-i18n="nav_my_events">Мої події</a>
+                  <a class="dropdown-item" href="/messages" data-i18n="nav_messages">Повідомлення</a>
+                  {% if ident.role != "admin" %}<a class="dropdown-item" href="/notifications">Сповіщення</a>{% endif %}
+                  {% if ident.role == "admin" %}<a class="dropdown-item" href="/admin" data-i18n="nav_admin">Адмін-панель</a>{% endif %}
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item text-danger" href="/logout" data-i18n="nav_logout">Вийти</a>
+                </div>
+              </div>
+            {% else %}
+              <div class="auth-actions"><a class="header-btn" href="/login" data-i18n="nav_login">Увійти</a><a class="btn btn-primary btn-sm" href="/register" data-i18n="nav_register">Реєстрація</a></div>
+            {% endif %}
+          </div>
+          <div class="mobile-nav-panel" id="mobileNavPanel" hidden>
+            <a href="/events" data-i18n="nav_events">Події</a>
+            <a href="/news" data-i18n="nav_news">Новини</a>
+            <a href="/alumni" data-i18n="nav_alumni">Випускники</a>
+            <a href="/mentors">Ментори</a>
+            <a href="/chats" data-i18n="nav_chats">Чати</a>
+            <a href="/surveys" data-i18n="nav_surveys">Опитування</a>
+            {% if ident %}
+              <a href="/profile" data-i18n="nav_profile">Профіль</a>
+              <a href="/me/events" data-i18n="nav_my_events">Мої події</a>
+              <a href="/messages" data-i18n="nav_messages">Повідомлення</a>
+              {% if ident.role != "admin" %}<a href="/notifications">Сповіщення</a>{% endif %}
+              {% if ident.role == "admin" %}<a href="/admin" data-i18n="nav_admin">Адмін-панель</a>{% endif %}
+              <a href="/logout" data-i18n="nav_logout">Вийти</a>
+            {% else %}
+              <a href="/login" data-i18n="nav_login">Увійти</a>
+              <a href="/register" data-i18n="nav_register">Реєстрація</a>
+            {% endif %}
+          </div>
+          <div class="breadcrumb-strip">
+            <div class="breadcrumb-inner">
+              <a href="/" data-i18n="breadcrumb_home">Головна</a>
+              <span class="breadcrumb-separator">›</span>
+              <span id="breadcrumbCurrent">AlumnixHub</span>
+            </div>
           </div>
         </header>
-
-        <main>
-          {% block content %}{% endblock %}
-        </main>
-
-        <footer class="mt-4 pt-3 border-top text-muted small">
-          KPI Events Dashboard • AI/NLP Recommendations
-        </footer>
-
+        <main>{% block content %}{% endblock %}</main>
+        <footer class="mt-4 pt-3 border-top small">AlumnixHub · <span data-i18n="footer_text">навчальний веб-проєкт для комунікації alumni-спільноти КПІ</span></footer>
       </div>
     </div>
-
-    <!-- Assistant button -->
-    <button class="assistant-btn position-fixed"
-            style="right:24px; bottom:24px; z-index:1050;"
-            data-bs-toggle="offcanvas"
-            data-bs-target="#aiAssistant"
-            aria-controls="aiAssistant">
-      <span class="assistant-label">AI Assistant</span>
-    </button>
-
-    <!-- Assistant offcanvas -->
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="aiAssistant" aria-labelledby="aiAssistantLabel">
-      <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="aiAssistantLabel">AI Helper</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
-      </div>
-
-      <div class="offcanvas-body d-flex flex-column" style="gap: 12px;">
-        <div id="assistantLog" class="border rounded p-2" style="height: 55vh; overflow:auto;">
-          <div class="text-muted small">Ask: “upcoming events”, “events in December”, “events this week”…</div>
-        </div>
-
-        <div class="input-group">
-          <input id="assistantInput" class="form-control" placeholder="Type your question…">
-          <button id="assistantSend" class="btn btn-primary" type="button">Send</button>
-        </div>
-      </div>
-    </div>
-
   </div>
 
-  <script>
-    const logEl = document.getElementById("assistantLog");
-    const inputEl = document.getElementById("assistantInput");
-    const sendBtn = document.getElementById("assistantSend");
+  <div class="ai-widget" id="aiWidget">
+    <button class="ai-toggle" id="aiToggle" type="button">AI</button>
+    <div class="ai-panel shadow-soft" id="aiPanel" hidden>
+      <div class="ai-panel-header"><div><b data-i18n="ai_title">ШІ-асистент</b><div class="small text-muted" data-i18n="ai_subtitle">Пошук подій природною мовою</div></div><button class="btn-close" id="aiClose" type="button"></button></div><div class="ai-greeting" data-i18n="ai_greeting">Вітаю, я асистент AlumnixHub та допоможу вам з навігацією цього сайту.</div>
+      <form id="floatingAssistantForm" class="ai-form"><input id="floatingAssistantQuery" class="form-control" placeholder="Наприклад: події цього тижня" data-i18n-placeholder="ai_placeholder" required><button class="btn btn-primary" data-i18n="ai_send">Знайти</button></form>
+      <div id="floatingAssistantMessage" class="small text-muted mt-2"></div>
+      <div id="floatingAssistantResults" class="list-group list-group-flush mt-2"></div>
+    </div>
+  </div>
 
-    function appendMsg(role, html) {
-      const wrap = document.createElement("div");
-      wrap.className = role === "user" ? "text-end mb-2" : "mb-2";
-      wrap.innerHTML = `
-        <div class="small ${role==='user'?'text-primary':'text-dark'}"><b>${role}</b></div>
-        <div>${html}</div>
-      `;
-      logEl.appendChild(wrap);
-      logEl.scrollTop = logEl.scrollHeight;
-    }
-
-    async function askAssistant() {
-      const q = (inputEl.value || "").trim();
-      if (!q) return;
-
-      appendMsg("user", q);
-      inputEl.value = "";
-      sendBtn.disabled = true;
-
-      // immediate feedback
-      appendMsg("assistant", `<span class="text-muted small">Thinking…</span>`);
-
-      try {
-        const res = await fetch("/assistant/query", {
-          method: "POST",
-          headers: {"Content-Type":"application/json"},
-          body: JSON.stringify({ query: q })
-        });
-
-        const contentType = res.headers.get("content-type") || "";
-        const raw = await res.text();
-
-        if (!res.ok) {
-          appendMsg("assistant",
-            `<div class="text-danger">HTTP ${res.status} ${res.statusText}</div>
-             <pre class="small mb-0">${raw.replaceAll("<","&lt;")}</pre>`
-          );
-          return;
-        }
-
-        if (!contentType.includes("application/json")) {
-          appendMsg("assistant",
-            `<div class="text-danger">Expected JSON but got: ${contentType}</div>
-             <pre class="small mb-0">${raw.replaceAll("<","&lt;")}</pre>`
-          );
-          return;
-        }
-
-        const data = JSON.parse(raw);
-
-        appendMsg("assistant", data.message || "Here you go.");
-
-        if (data.events && data.events.length) {
-          const items = data.events.map(e =>
-            `<li class="mb-1">
-               <b>${e.title}</b><br>
-               <span class="text-muted small">${e.start_time} • ${e.location}</span>
-             </li>`
-          ).join("");
-          appendMsg("assistant", `<ul class="mb-0">${items}</ul>`);
-        } else {
-          appendMsg("assistant", `<div class="text-muted small">No matching events found.</div>`);
-        }
-
-      } catch (e) {
-        appendMsg("assistant", `<div class="text-danger">JS error: ${String(e)}</div>`);
-      } finally {
-        sendBtn.disabled = false;
-      }
-    }
-
-    sendBtn.addEventListener("click", askAssistant);
-    inputEl.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") askAssistant();
-    });
-  </script>
+  <nav class="mobile-bottom-nav" aria-label="Mobile quick navigation">
+    <a href="/"><span>⌂</span><b>Home</b></a>
+    <a href="/events"><span>●</span><b>Events</b></a>
+    <a href="/search"><span>⌕</span><b>Search</b></a>
+    {% if ident and ident.role != "admin" %}
+      <a href="/notifications"><span>!</span><b>Alerts</b></a>
+      <a href="/profile"><span>{{ ident.full_name[:1] }}</span><b>Profile</b></a>
+    {% elif ident and ident.role == "admin" %}
+      <a href="/analytics"><span>▣</span><b>Stats</b></a>
+      <a href="/admin"><span>A</span><b>Admin</b></a>
+    {% else %}
+      <a href="/login"><span>↗</span><b>Login</b></a>
+      <a href="/register"><span>+</span><b>Join</b></a>
+    {% endif %}
+  </nav>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const I18N = {
+      uk: {
+        brand: "AlumnixHub", language_label: "Україна", breadcrumb_home: "Головна", search_placeholder: "Пошук випускників, подій, новин", nav_events: "Події", nav_news: "Новини", nav_alumni: "Випускники", nav_chats: "Чати", nav_surveys: "Опитування", nav_profile: "Профіль", nav_my_events: "Мої події", nav_messages: "Повідомлення", nav_admin: "Адмін-панель", nav_logout: "Вийти", nav_login: "Увійти", nav_register: "Реєстрація", footer_text: "навчальний веб-проєкт для комунікації alumni-спільноти КПІ", ai_title: "ШІ-асистент", ai_subtitle: "Пошук подій природною мовою", ai_placeholder: "Наприклад: події цього тижня", ai_send: "Знайти", ai_loading: "Шукаю...", ai_greeting:"Вітаю, я асистент AlumnixHub та допоможу вам з навігацією цього сайту.", home_kicker:"KPI alumni platform", home_title:"Зустрічайте новий простір для випускників, студентів і друзів КПІ — AlumnixHub", home_copy:"Події, новини, пошук випускників, повідомлення, опитування, аналітика та ШІ-помічник зібрані в одному зрозумілому середовищі для університетської спільноти.", home_mission:"Місія AlumnixHub", home_section_title:"Комунікація, події та знання в одному середовищі", home_section_copy:"AlumnixHub допомагає випускникам не втрачати зв'язок з університетом, студентам знаходити менторів і можливості, а адміністраторам бачити активність спільноти без ручного збору даних.", home_section_extra:"Платформа створена як практична система для alumni-комунікації: тут можна реєструватися на зустрічі, обговорювати події, читати новини, відповідати на опитування про кар'єру та підтримувати контакти зі своїм потоком.", home_demo_title:"Що вже є всередині", home_demo_copy:"Реєстрація на події, alumni-пошук, публікації, корисні чати, опитування, персональний кабінет, аналітика і floating ШІ-асистент.", home_events_title:"Події та рекомендації", home_events_copy:"Переглядайте майбутні зустрічі, реєструйтеся, реагуйте, коментуйте та отримуйте персональні рекомендації.", home_events_btn:"Відкрити події", home_news_title:"Новини та історії", home_news_copy:"Читайте університетські оголошення, alumni-ініціативи, історії випускників і оновлення з життя спільноти.", home_news_btn:"Читати новини", home_alumni_title:"Публічні профілі", home_alumni_copy:"Шукайте людей за факультетом, спеціальністю, групою, роком випуску або описом професійного досвіду.", home_alumni_btn:"Знайти випускників", home_primary_cta:"Перейти до подій", home_secondary_cta:"Знайти випускників", home_hero_stat_one:"Єдина платформа", home_hero_stat_one_copy:"для подій, новин, чатів і профілів", home_hero_stat_two:"Живі реакції", home_hero_stat_two_copy:"лайки, дизлайки та коментарі до подій", home_hero_stat_three:"AI навігація", home_hero_stat_three_copy:"підказки для швидкого пошуку потрібного розділу", home_metric_events:"типів взаємодії", home_metric_ai:"ШІ-помічник", home_metric_analytics:"автоматична аналітика", home_offer_kicker:"Що ми пропонуємо", home_offer_title:"Сервіси для всієї KPI alumni-спільноти", home_offer_copy:"Кожен розділ пов'язаний з реальними сценаріями: знайти людей, долучитися до події, прочитати новину, залишити реакцію або швидко написати учаснику зі свого потоку.", home_chats_title:"Чати між потоками", home_chats_copy:"Спілкуйтеся з користувачами зі свого потоку, підтримуйте професійні контакти та обмінюйтеся можливостями.", home_surveys_title:"Опитування кар'єрного шляху", home_surveys_copy:"Діліться даними про країну проживання, сферу роботи, посаду, кар'єрне зростання і потреби alumni-спільноти.", home_analytics_title:"Зрозуміла аналітика", home_analytics_copy:"Адміністратори бачать активність сторінок, сесій і тривалість взаємодії без додавання коду в кожен маршрут.", home_steps_kicker:"Як це працює", home_steps_title:"Шлях користувача від профілю до активної спільноти", home_step_one_title:"Створіть профіль", home_step_one_copy:"Додайте фото, статус, факультет, спеціальність, групу та короткий опис.", home_step_two_title:"Знайдіть людей", home_step_two_copy:"Використовуйте пошук за іменем, темою, факультетом, спеціальністю або роком.", home_step_three_title:"Долучайтесь до подій", home_step_three_copy:"Реєструйтеся, залишайте реакції, коментарі й отримуйте рекомендації.", home_step_four_title:"Підтримуйте зв'язок", home_step_four_copy:"Пишіть користувачам зі свого потоку, читайте новини та проходьте опитування.", home_roles_kicker:"Для кого платформа", home_roles_title:"Оберіть свою роль і подивіться можливості", home_tab_students:"Студентам", home_tab_alumni:"Випускникам", home_tab_admins:"Адміністраторам", home_panel_students_title:"Швидкий доступ до менторів, подій і можливостей", home_panel_students_copy:"Студенти можуть знайти випускників зі схожою спеціальністю, переглянути актуальні події, поставити питання в коментарях і отримати поради через чати.", home_panel_students_btn:"Почати пошук", home_panel_alumni_title:"Повернення до спільноти без зайвої формальності", home_panel_alumni_copy:"Випускники можуть оновити профіль, розповісти про кар'єрний шлях, долучитися до зустрічей, коментувати події та підтримувати контакти зі своїм потоком.", home_panel_alumni_btn:"Оновити профіль", home_panel_admins_title:"Менше ручної роботи, більше видимості процесів", home_panel_admins_copy:"Адміністратори можуть додавати новини з фото, керувати подіями, переглядати автоматичну аналітику й бачити, які розділи справді використовуються.", home_panel_admins_btn:"Переглянути аналітику", home_directions_kicker:"Напрями спільноти", home_directions_title:"Теми, навколо яких можна будувати зустрічі й новини", home_chip_career:"Кар'єрне зростання", home_chip_ai:"AI та Data Science", home_chip_cyber:"Кібербезпека", home_chip_product:"Product management", home_chip_mentorship:"Менторство", home_chip_startups:"Стартапи", home_chip_research:"Дослідження", home_chip_international:"Міжнародна alumni-мережа", home_final_kicker:"AlumnixHub", home_final_title:"Університетська спільнота стає ближчою, коли має спільний цифровий простір.", home_final_copy:"Почніть з подій, знайдіть людей зі свого факультету або відкрийте новини, щоб побачити, чим живе KPI alumni-спільнота сьогодні.", home_final_news:"Читати новини", home_final_surveys:"Пройти опитування"
+      },
+      en: {
+        brand: "AlumnixHub", language_label: "English", breadcrumb_home: "Home", search_placeholder: "Search alumni, events, news", nav_events: "Events", nav_news: "News", nav_alumni: "Alumni", nav_chats: "Chats", nav_surveys: "Surveys", nav_profile: "Profile", nav_my_events: "My events", nav_messages: "Messages", nav_admin: "Admin", nav_logout: "Log out", nav_login: "Log in", nav_register: "Register", footer_text: "educational web platform for KPI alumni communication", ai_title: "AI assistant", ai_subtitle: "Search events in natural language", ai_placeholder: "For example: events this week", ai_send: "Find", ai_loading: "Searching...", ai_greeting:"Hello, I am the AlumnixHub assistant and I can help you navigate this site.", home_kicker:"KPI alumni platform", home_title:"Meet the new space for KPI alumni, students, and friends — AlumnixHub", home_copy:"Events, news, alumni search, messages, surveys, analytics, and an AI helper are gathered in one clear environment for the university community.", home_mission:"AlumnixHub mission", home_section_title:"Communication, events, and knowledge in one environment", home_section_copy:"AlumnixHub helps alumni stay connected with the university, students find mentors and opportunities, and administrators understand community activity without manual data collection.", home_section_extra:"The platform is built as a practical alumni communication system: users can register for meetups, discuss events, read news, answer career surveys, and stay in touch with their cohort.", home_demo_title:"What is inside", home_demo_copy:"Event registration, alumni search, publications, useful chats, surveys, profile cabinet, analytics, and a floating AI assistant.", home_events_title:"Events and recommendations", home_events_copy:"Browse upcoming meetups, register, react, comment, and receive personalized recommendations.", home_events_btn:"Open events", home_news_title:"News and stories", home_news_copy:"Read university announcements, alumni initiatives, graduate stories, and community updates.", home_news_btn:"Read news", home_alumni_title:"Public profiles", home_alumni_copy:"Search people by faculty, specialty, group, graduation year, or professional experience description.", home_alumni_btn:"Find alumni", home_primary_cta:"Explore events", home_secondary_cta:"Find alumni", home_hero_stat_one:"One platform", home_hero_stat_one_copy:"for events, news, chats, and profiles", home_hero_stat_two:"Live reactions", home_hero_stat_two_copy:"likes, dislikes, and comments for events", home_hero_stat_three:"AI navigation", home_hero_stat_three_copy:"tips for quickly finding the right section", home_metric_events:"interaction types", home_metric_ai:"AI assistant", home_metric_analytics:"automatic analytics", home_offer_kicker:"What we offer", home_offer_title:"Services for the whole KPI alumni community", home_offer_copy:"Every section supports a real scenario: find people, join an event, read an announcement, leave a reaction, or message someone from your cohort.", home_chats_title:"Cohort chats", home_chats_copy:"Communicate with users from your cohort, keep professional contacts active, and exchange opportunities.", home_surveys_title:"Career journey surveys", home_surveys_copy:"Share data about country of residence, field of work, position, career growth, and alumni community needs.", home_analytics_title:"Clear analytics", home_analytics_copy:"Administrators can see page activity, sessions, and engagement duration without adding code to every route.", home_steps_kicker:"How it works", home_steps_title:"From profile setup to an active community", home_step_one_title:"Create a profile", home_step_one_copy:"Add a photo, status, faculty, specialty, group, and short description.", home_step_two_title:"Find people", home_step_two_copy:"Use search by name, topic, faculty, specialty, or year.", home_step_three_title:"Join events", home_step_three_copy:"Register, leave reactions and comments, and receive recommendations.", home_step_four_title:"Stay connected", home_step_four_copy:"Message users from your cohort, read news, and complete surveys.", home_roles_kicker:"Who it is for", home_roles_title:"Choose your role and see the possibilities", home_tab_students:"Students", home_tab_alumni:"Alumni", home_tab_admins:"Administrators", home_panel_students_title:"Fast access to mentors, events, and opportunities", home_panel_students_copy:"Students can find alumni with a similar specialty, browse relevant events, ask questions in comments, and get advice through chats.", home_panel_students_btn:"Start searching", home_panel_alumni_title:"Return to the community without extra formality", home_panel_alumni_copy:"Alumni can update their profile, share their career path, join meetings, comment on events, and keep in touch with their cohort.", home_panel_alumni_btn:"Update profile", home_panel_admins_title:"Less manual work and more process visibility", home_panel_admins_copy:"Administrators can add news with images, manage events, view automatic analytics, and understand which sections are actually used.", home_panel_admins_btn:"View analytics", home_directions_kicker:"Community directions", home_directions_title:"Topics for future meetups and publications", home_chip_career:"Career growth", home_chip_ai:"AI and Data Science", home_chip_cyber:"Cybersecurity", home_chip_product:"Product management", home_chip_mentorship:"Mentorship", home_chip_startups:"Startups", home_chip_research:"Research", home_chip_international:"International alumni network", home_final_kicker:"AlumnixHub", home_final_title:"A university community becomes closer when it has one shared digital space.", home_final_copy:"Start with events, find people from your faculty, or open the news to see what the KPI alumni community is doing today.", home_final_news:"Read news", home_final_surveys:"Take a survey"
+      }
+    };
+    const CONTENT_TRANSLATIONS = {
+      en: {
+        "Адміністрування": "Administration",
+        "Панель модерації": "Moderation dashboard",
+        "Керування подіями, новинами, користувачами, чатами, опитуваннями та IoT-статистикою.": "Manage events, news, users, chats, surveys, and IoT statistics.",
+        "Переглянути сайт": "View site",
+        "Аналітика": "Analytics",
+        "Автоматична активність користувачів": "Automatic user activity",
+        "Система сама збирає відвідування сторінок, сесії та час перегляду. Ці показники допомагають зрозуміти, які частини AlumnixHub справді використовують люди.": "The system automatically collects page visits, sessions, and time on page. These metrics help show which parts of AlumnixHub people actually use.",
+        "Перегляди сторінок": "Page views",
+        "усі відкриття сторінок": "all page openings",
+        "Сесії": "Sessions",
+        "окремі відвідування сайту": "separate site visits",
+        "Середній час сторінки": "Average page time",
+        "час, який браузер передав при виході": "time sent by the browser when leaving",
+        "Середня тривалість сесії": "Average session duration",
+        "від першої до останньої дії": "from the first to the last action",
+        "Найпопулярніші сторінки": "Most popular pages",
+        "Показано зрозумілі назви сторінок, а не технічні посилання з параметрами.": "Shows clear page names instead of technical links with parameters.",
+        "Середній час на сторінці": "Average time on page",
+        "Це не швидкість сервера, а приблизний час, який користувач тримав сторінку відкритою.": "This is not server speed, but the approximate time a user kept the page open.",
+        "Технічний шлях:": "Technical path:",
+        "Середній час відповіді сервера:": "Average server response time:",
+        "Кількість вимірів:": "Number of measurements:",
+        "Дані ще збираються.": "Data is still being collected.",
+        "Точний час з’явиться після переходів між сторінками.": "Accurate time will appear after users move between pages.",
+        "Головна сторінка": "Home page",
+        "Стартова сторінка AlumnixHub": "AlumnixHub start page",
+        "Події": "Events",
+        "Ментори": "Mentors",
+        "Перегляд подій, реакцій і коментарів": "Viewing events, reactions, and comments",
+        "Новини": "News",
+        "Оголошення, публікації та можливості": "Announcements, publications, and opportunities",
+        "Пошук випускників": "Alumni search",
+        "Публічні профілі alumni-спільноти": "Public alumni community profiles",
+        "Чати": "Chats",
+        "Тематичні обговорення спільноти": "Community topic discussions",
+        "ШІ-асистент": "AI assistant",
+        "Пошук подій природною мовою": "Search events in natural language",
+        "Профіль": "Profile",
+        "Особистий кабінет користувача": "User profile area",
+        "Повідомлення": "Messages",
+        "Особисте листування між користувачами": "Private messaging between users",
+        "Мої події": "My events",
+        "Події, на які користувач зареєструвався": "Events the user registered for",
+        "Опитування": "Surveys",
+        "Анкети та зворотний зв’язок": "Questionnaires and feedback",
+        "Адмін-панель": "Admin dashboard",
+        "Керування платформою та перегляд статистики": "Platform management and statistics",
+        "Адмін: події": "Admin: events",
+        "Керування подіями": "Event management",
+        "Адмін: новини": "Admin: news",
+        "Керування новинами": "News management",
+        "Адмін: користувачі": "Admin: users",
+        "Керування профілями": "Profile management",
+        "Адмін: чати": "Admin: chats",
+        "Модерація чатів": "Chat moderation",
+        "Адмін: опитування": "Admin: surveys",
+        "Керування анкетами": "Survey management",
+        "Сторінка події": "Event page",
+        "Деталі окремої події": "Details of a specific event",
+        "Сторінка новини": "News page",
+        "Повний текст новини або оголошення": "Full news or announcement text",
+        "Діалог повідомлень": "Message thread",
+        "Переписка з іншим користувачем": "Conversation with another user",
+        "Сторінка опитування": "Survey page",
+        "Заповнення анкети користувачем": "Survey completion by a user",
+        "Сторінка застосунку": "Application page",
+        "переглядів": "views",
+        "мс": "ms",
+        "с": "s",
+        "хв": "min",
+        "Події КПІ": "KPI events",
+        "Зустрічі, лекції та воркшопи alumni-спільноти": "Meetups, lectures, and workshops for the alumni community",
+        "Реєструйтесь на події, реагуйте, коментуйте і відкривайте рекомендації.": "Register for events, react, comment, and discover recommendations.",
+        "Пошук подій...": "Search events...",
+        "Усі": "All",
+        "Відкриті": "Open",
+        "Зареєстровані": "Registered",
+        "Заповнені": "Full",
+        "Закриті": "Closed",
+        "Місця:": "Seats:",
+        "Зареєструватися": "Register",
+        "Скасувати реєстрацію": "Cancel registration",
+        "Увійти, щоб реагувати й коментувати": "Log in to react and comment",
+        "Коментарі": "Comments",
+        "Коментарів ще немає.": "No comments yet.",
+        "Ваш коментар до події": "Your event comment",
+        "Додати коментар": "Add comment",
+        "Лайк": "Like",
+        "Дизлайк": "Dislike",
+        "Зустріч випускників КПІ": "KPI Alumni Meetup",
+        "Нетворкінг випускників, студентів і викладачів.": "Networking for alumni, students, and lecturers.",
+        "Вечір знайомств, історій успіху та пошуку менторів для студентських команд.": "An evening of introductions, success stories, and mentor search for student teams.",
+        "Майстерня AI та NLP": "AI and NLP Workshop",
+        "Практична сесія з рекомендацій, класифікації текстів і FastAPI.": "A practical session on recommendations, text classification, and FastAPI.",
+        "Випускники з IT-компаній покажуть, як будувати прості ML-сервіси для університетських платформ.": "Alumni from IT companies will show how to build simple ML services for university platforms.",
+        "Кар'єрна лекція: Data Analytics": "Career Lecture: Data Analytics",
+        "Портфоліо, співбесіди та перша аналітична роль.": "Portfolio, interviews, and the first analytics role.",
+        "Startup Pitch Evening": "Startup Pitch Evening",
+        "Студентські стартапи презентують ідеї перед менторами.": "Student startups present ideas to mentors.",
+        "Основи кібербезпеки": "Cybersecurity Basics",
+        "Фішинг, MFA, паролі та цифрова гігієна.": "Phishing, MFA, passwords, and digital hygiene.",
+        "IoT Demo Day": "IoT Demo Day",
+        "Демонстрація сенсорного підрахунку відвідувачів подій.": "A demo of sensor-based visitor counting for events.",
+        "Архітектура веб-сервісів": "Web Service Architecture",
+        "FastAPI, PostgreSQL, деплой і підтримка навчальних систем.": "FastAPI, PostgreSQL, deployment, and support for educational systems.",
+        "Ярмарок волонтерських проєктів": "Volunteer Project Fair",
+        "Студентські й alumni-ініціативи шукають волонтерів.": "Student and alumni initiatives are looking for volunteers.",
+        "Mentor Speed Dating": "Mentor Speed Dating",
+        "Короткі розмови студентів з менторами зі свого напряму.": "Short conversations between students and mentors from their field.",
+        "Alumni Product Night": "Alumni Product Night",
+        "Продуктові кейси від випускників КПІ.": "Product case studies from KPI alumni.",
+        "Python для автоматизації": "Python for Automation",
+        "Скрипти, API та маленькі інструменти для щоденної роботи.": "Scripts, APIs, and small tools for everyday work.",
+        "Фінанси для інженерів": "Finance for Engineers",
+        "Бюджет, податки, ФОП і фінансове планування.": "Budgeting, taxes, sole proprietorship, and financial planning.",
+        "Головний корпус КПІ": "KPI main building",
+        "КПІ, IT-центр": "KPI IT Center",
+        "Аудиторія 304": "Room 304",
+        "Корпус 18, ауд. 214": "Building 18, room 214",
+        "Лабораторія A1": "Laboratory A1",
+        "Онлайн": "Online",
+        "Площа знань КПІ": "KPI Knowledge Square",
+        "Бібліотека КПІ": "KPI Library",
+        "Корпус 12": "Building 12",
+        "Аудиторія 101": "Room 101",
+        "Платформа alumni-спільноти КПІ запущена в демо-режимі": "KPI alumni community platform launched in demo mode",
+        "Єдиний простір для новин, подій, контактів, чатів та опитувань.": "One space for news, events, contacts, chats, and surveys.",
+        "Система допомагає адміністраторам підтримувати зв'язок із випускниками, а студентам знаходити менторів, події та корисні спільноти.": "The system helps administrators stay connected with alumni, while students find mentors, events, and useful communities.",
+        "Випускники проведуть серію кар'єрних зустрічей": "Alumni will hold a series of career meetups",
+        "Стартує цикл лекцій про IT, менеджмент, кібербезпеку та аналітику.": "A lecture series on IT, management, cybersecurity, and analytics is starting.",
+        "Опитування щодо розвитку alumni-клубу": "Survey on alumni club development",
+        "Адміністрація збирає ідеї для нових форматів комунікації.": "The administration is collecting ideas for new communication formats.",
+        "Запущено внутрішні повідомлення між потоками": "Internal messaging between cohorts has launched",
+        "Користувачі одного потоку можуть писати одне одному просто на сайті.": "Users from the same cohort can message each other directly on the site.",
+        "Події отримали реакції та коментарі": "Events now have reactions and comments",
+        "Зареєстровані учасники можуть залишати фідбек до подій.": "Registered users can leave feedback on events.",
+        "Новини КПІ": "KPI news",
+        "Оголошення та історії спільноти": "Community announcements and stories",
+        "Публікації адміністрації, alumni-ініціативи та університетські оновлення.": "Administrative posts, alumni initiatives, and university updates.",
+        "Публікації, оголошення та можливості для alumni-спільноти.": "Publications, announcements, and opportunities for the alumni community.",
+        "Читати": "Read",
+        "Активні анкети для спільноти": "Active community surveys",
+        "Відповіді допомагають адміністраторам планувати події та сервіси.": "Responses help administrators plan events and services.",
+        "Потреби alumni-спільноти": "Alumni community needs",
+        "Допоможіть визначити, які сервіси та події потрібні випускникам і студентам.": "Help define which services and events alumni and students need.",
+        "Заповнити": "Fill in",
+        "У якій країні ви зараз проживаєте?": "Which country do you currently live in?",
+        "Який ваш поточний статус зайнятості?": "What is your current employment status?",
+        "У якій сфері ви зараз працюєте або плануєте працювати?": "Which field do you currently work in or plan to work in?",
+        "Який рівень вашого кар'єрного розвитку зараз?": "What is your current career growth level?",
+        "Що найбільше допоможе вашому кар'єрному росту?": "What would help your career growth the most?",
+        "Чи готові ви менторити студентів або молодших випускників?": "Are you ready to mentor students or younger alumni?",
+        "Які теми подій або сервісів варто додати до платформи?": "What event topics or services should be added to the platform?",
+        "Працюю повний день": "Working full time",
+        "Працюю частково": "Working part time",
+        "Навчаюся": "Studying",
+        "Шукаю роботу": "Looking for a job",
+        "Підприємець/підприємиця": "Entrepreneur",
+        "Інше": "Other",
+        "Кібербезпека": "Cybersecurity",
+        "Інженерія": "Engineering",
+        "Менеджмент / Бізнес": "Management / Business",
+        "Освіта / Наука": "Education / Science",
+        "Державний сектор": "Public sector",
+        "Студент/студентка": "Student",
+        "Змінюю сферу": "Changing field",
+        "Менторство": "Mentorship",
+        "Нетворкінг": "Networking",
+        "Вакансії та стажування": "Jobs and internships",
+        "Технічні воркшопи": "Technical workshops",
+        "Кар'єрні консультації": "Career consultations",
+        "Публічні виступи випускників": "Alumni talks",
+        "Так, регулярно": "Yes, regularly",
+        "Так, іноді": "Yes, sometimes",
+        "Можливо пізніше": "Maybe later",
+        "Ні": "No",
+        "Публічні профілі alumni-спільноти": "Public alumni community profiles",
+        "Ім'я або опис": "Name or description",
+        "Факультет": "Faculty",
+        "Спеціальність": "Specialty",
+        "Група": "Group",
+        "Рік": "Year",
+        "Шукати": "Search",
+        "Статус:": "Status:",
+        "Факультет не вказано": "Faculty not specified",
+        "Опис профілю ще не додано.": "Profile description has not been added yet.",
+        "Написати": "Message",
+        "Інший потік": "Different cohort",
+        "Олена Коваль": "Olena Koval",
+        "Андрій Мельник": "Andrii Melnyk",
+        "Марія Шевченко": "Mariia Shevchenko",
+        "Ігор Петренко": "Ihor Petrenko",
+        "Софія Литвин": "Sofiia Lytvyn",
+        "Дмитро Гончар": "Dmytro Honchar",
+        "Катерина Романюк": "Kateryna Romaniuk",
+        "Назар Бойко": "Nazar Boiko",
+        "Приватний Користувач": "Private User",
+        "Інженерія програмного забезпечення": "Software Engineering",
+        "Комп'ютерні науки": "Computer Science",
+        "Менеджмент": "Management",
+        "Backend-розробниця, допомагає студентам з FastAPI та базами даних.": "Backend developer helping students with FastAPI and databases.",
+        "Проводить відкриті лекції з кібербезпеки для студентів.": "Runs open cybersecurity lectures for students.",
+        "Координує студентські опитування та комунікацію з випускниками.": "Coordinates student surveys and communication with alumni.",
+        "Frontend engineer, відкритий до менторства для ІП-91.": "Frontend engineer, open to mentoring IP-91.",
+        "Шукає команду для pet-проєкту та стажування.": "Looking for a team for a pet project and internship.",
+        "Data engineer, допомагає з ETL і хмарними сервісами.": "Data engineer helping with ETL and cloud services.",
+        "Організовує career talks і менторські зустрічі.": "Organizes career talks and mentoring meetings.",
+        "Цікавиться SOC, CTF і захистом інфраструктури.": "Interested in SOC, CTF, and infrastructure protection.",
+        "Корисні посилання для спільноти": "Useful community links",
+        "Фільтр": "Filter",
+        "Загальна спільнота": "General community",
+        "Корисне посилання для студентів і випускників.": "Useful link for students and alumni.",
+        "Відкрити": "Open",
+        "Активних чатів за цими фільтрами немає.": "No active chats match these filters.",
+        "Загальний alumni-чат КПІ": "General KPI alumni chat",
+        "Новини, події та швидкі оголошення для всієї спільноти.": "News, events, and quick announcements for the whole community.",
+        "ФІОТ: випускники та студенти": "FIOT: alumni and students",
+        "Пошук менторів, стажувань і технічних консультацій.": "Search for mentors, internships, and technical consultations.",
+        "Кар'єрні можливості КПІ": "KPI career opportunities",
+        "Вакансії, стажування та анонси партнерських програм.": "Jobs, internships, and partner program announcements.",
+        "ІП-91 потік": "IP-91 cohort",
+        "Окремий чат для потоку ІП-91.": "A separate chat for the IP-91 cohort.",
+        "Кібербезпека КПІ": "KPI Cybersecurity",
+        "CTF, SOC, безпека застосунків і навчальні матеріали.": "CTF, SOC, application security, and learning materials.",
+        "Ласкаво просимо": "Welcome",
+        "Увійдіть, щоб реєструватися на події та редагувати профіль.": "Log in to register for events and edit your profile.",
+        "Забули пароль?": "Forgot password?",
+        "Вхід": "Login",
+        "Реєстрація": "Registration",
+        "Створити акаунт": "Create account",
+        "Повне ім'я": "Full name",
+        "Ваше ім'я": "Your name",
+        "Пароль": "Password",
+        "Мінімум 8 символів": "At least 8 characters",
+        "Створити акаунт": "Create account",
+        "Особистий кабінет": "Profile",
+        "URL фото профілю": "Profile photo URL",
+        "Статус користувача": "User status",
+        "Мова інтерфейсу": "Interface language",
+        "Сповіщення": "Notifications",
+        "Отримувати email-сповіщення": "Receive email notifications",
+        "Зберегти": "Save",
+        "Ваші реєстрації": "Your registrations",
+        "Події, на які ви вже зареєструвалися.": "Events you have already registered for.",
+        "Переглянути події": "View events",
+        "Пошук": "Search",
+        "Назва або локація...": "Title or location...",
+        "Ви ще не зареєстровані на жодну подію.": "You are not registered for any event yet.",
+        "Усі повідомлення": "All messages",
+        "Нове повідомлення": "New message",
+        "Надіслати": "Send",
+        "Надіслати відповіді": "Submit answers",
+        "Назад до опитувань": "Back to surveys",
+        "Дякуємо. Ваші відповіді збережено.": "Thank you. Your answers have been saved.",
+        "Увійдіть, щоб надіслати відповіді.": "Log in to submit answers.",
+        "Опис відсутній.": "No description.",
+        "Активних опитувань поки немає.": "There are no active surveys yet.",
+        "У цьому опитуванні ще немає питань.": "This survey has no questions yet.",
+        "Глобальний пошук": "Global search",
+        "Результати для": "Results for",
+        "Тема події, назва новини або ім'я користувача": "Event topic, news title, or user name",
+        "Подій за цим запитом не знайдено.": "No events found for this query.",
+        "Новин за цим запитом не знайдено.": "No news found for this query.",
+        "Користувачів за цим запитом не знайдено.": "No users found for this query.",
+        "Редагувати": "Edit",
+        "Створити новину": "Create news",
+        "Редагувати новину": "Edit news",
+        "Назва": "Title",
+        "Короткий опис": "Short description",
+        "Зображення з комп'ютера": "Image from computer",
+        "Оберіть файл JPG, PNG, WEBP або GIF. Система сама збереже його для новини.": "Choose a JPG, PNG, WEBP, or GIF file. The system will save it for the news item.",
+        "Поточне зображення": "Current image",
+        "URL зображення, якщо файл не завантажується": "Image URL if a file is not uploaded",
+        "Джерело/ліцензія зображення": "Image source/license",
+        "Текст новини": "News text",
+        "Опубліковано": "Published",
+        "Скасувати": "Cancel",
+        "Читати далі": "Read more",
+        "далі": "more",
+        "Спеціальність": "Specialty",
+        "Оберіть спеціальність": "Choose specialty",
+        "AI/NLP рекомендації": "AI/NLP recommendations",
+        "Персональні поради на основі ваших реєстрацій, популярності та свіжості подій.": "Personal recommendations based on your registrations, event popularity, and freshness.",
+        "ML увімкнено": "ML enabled",
+        "Зареєструйтесь хоча б на одну подію, щоб отримати персональні рекомендації.": "Register for at least one event to receive personal recommendations.",
+        "Деталі": "Details",
+        "Чому:": "Why:",
+        "Чому рекомендовано": "Why this is recommended",
+        "Ключові слова:": "Keywords:",
+        "Зареєстровано": "Registered",
+        "Заповнено": "Full",
+        "Відкрито": "Open",
+        "Дедлайн реєстрації:": "Registration deadline:",
+        "Закрити": "Close",
+        "Аліна створила новину": "Alina created a news post",
+        "Це пробна новина": "This is a test news post",
+        "Я створила новину": "I created a news post",
+        "Пробна новина": "Test news post",
+        "Дуже чекаю на цю зустріч, особливо на Q&A з випускниками.": "I am really looking forward to this meetup, especially the Q&A with alumni.",
+        "Було б цікаво почути більше про реальні кейси з індустрії.": "It would be interesting to hear more real industry cases.",
+        "Планую долучитися і запросити одногрупників.": "I plan to join and invite classmates.",
+        "Тема корисна для студентів, які шукають перший досвід.": "The topic is useful for students looking for their first experience.",
+        "Хочу поставити питання про менторство та кар'єрний перехід.": "I want to ask about mentorship and career transition.",
+        "Класний формат, такі події добре об'єднують спільноту.": "Great format, these events bring the community together."
+      }
+    };
+    const ORIGINAL_TEXT_NODES = new WeakMap();
+    const BREADCRUMB_LABELS = {
+      uk: {
+        "/": "AlumnixHub",
+        "/events": "Події",
+        "/news": "Новини",
+        "/alumni": "Випускники",
+        "/chats": "Чати",
+        "/surveys": "Опитування",
+        "/messages": "Повідомлення",
+        "/profile": "Профіль",
+        "/me/events": "Мої події",
+        "/admin": "Адмін-панель",
+        "/search": "Пошук"
+      },
+      en: {
+        "/": "AlumnixHub",
+        "/events": "Events",
+        "/news": "News",
+        "/alumni": "Alumni",
+        "/chats": "Chats",
+        "/surveys": "Surveys",
+        "/messages": "Messages",
+        "/profile": "Profile",
+        "/me/events": "My events",
+        "/admin": "Admin",
+        "/search": "Search"
+      }
+    };
+    function translatedText(original, lang) {
+      if (lang === "uk") return original;
+      const map = CONTENT_TRANSLATIONS[lang] || {};
+      const leading = original.match(/^\s*/)?.[0] || "";
+      const trailing = original.match(/\s*$/)?.[0] || "";
+      const trimmed = original.trim();
+      if (!trimmed) return original;
+      if (map[trimmed]) return `${leading}${map[trimmed]}${trailing}`;
+      let output = trimmed;
+      Object.entries(map).forEach(([source, target]) => {
+        if (source.length > 2 && output.includes(source)) output = output.split(source).join(target);
+      });
+      return `${leading}${output}${trailing}`;
+    }
+
+    function translateDynamicContent(lang) {
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+        acceptNode(node) {
+          const parent = node.parentElement;
+          if (!parent || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+          if (parent.closest("script, style, noscript, textarea, input, option, [data-i18n], [data-no-translate]")) return NodeFilter.FILTER_REJECT;
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      });
+      const nodes = [];
+      while (walker.nextNode()) nodes.push(walker.currentNode);
+      nodes.forEach(node => {
+        if (!ORIGINAL_TEXT_NODES.has(node)) ORIGINAL_TEXT_NODES.set(node, node.nodeValue);
+        node.nodeValue = translatedText(ORIGINAL_TEXT_NODES.get(node), lang);
+      });
+      document.querySelectorAll("[placeholder]:not([data-i18n-placeholder])").forEach(el => {
+        if (!el.dataset.originalPlaceholder) el.dataset.originalPlaceholder = el.placeholder;
+        el.placeholder = translatedText(el.dataset.originalPlaceholder, lang);
+      });
+      document.querySelectorAll("[title]").forEach(el => {
+        if (!el.dataset.originalTitle) el.dataset.originalTitle = el.title;
+        el.title = translatedText(el.dataset.originalTitle, lang);
+      });
+    }
+
+    function updateBreadcrumb(lang) {
+      const current = document.getElementById("breadcrumbCurrent");
+      if (!current) return;
+      const path = window.location.pathname;
+      const labels = BREADCRUMB_LABELS[lang] || BREADCRUMB_LABELS.uk;
+      if (path.startsWith("/admin")) current.textContent = labels["/admin"];
+      else if (path.startsWith("/news/")) current.textContent = labels["/news"];
+      else if (path.startsWith("/messages/")) current.textContent = labels["/messages"];
+      else if (path.startsWith("/surveys/")) current.textContent = labels["/surveys"];
+      else current.textContent = labels[path] || "AlumnixHub";
+    }
+
+    function applyLanguage(lang) {
+      const dict = I18N[lang] || I18N.uk;
+      document.documentElement.lang = lang;
+      document.querySelectorAll("[data-i18n]").forEach(el => { if (dict[el.dataset.i18n]) el.textContent = dict[el.dataset.i18n]; });
+      document.querySelectorAll("[data-i18n-placeholder]").forEach(el => { if (dict[el.dataset.i18nPlaceholder]) el.placeholder = dict[el.dataset.i18nPlaceholder]; });
+      translateDynamicContent(lang);
+      updateBreadcrumb(lang);
+      localStorage.setItem("ui_language", lang);
+      const select = document.getElementById("languageSwitch");
+      if (select) select.value = lang;
+    }
+    applyLanguage(localStorage.getItem("ui_language") || "uk");
+    document.getElementById("languageSwitch")?.addEventListener("change", e => applyLanguage(e.target.value));
+
+    (() => {
+      const toggle = document.getElementById("mobileMenuToggle");
+      const panel = document.getElementById("mobileNavPanel");
+      if (!toggle || !panel) return;
+      const symbol = toggle.querySelector("b");
+      toggle.addEventListener("click", () => {
+        const isOpen = !panel.hidden;
+        panel.hidden = isOpen;
+        toggle.setAttribute("aria-expanded", String(!isOpen));
+        if (symbol) symbol.textContent = isOpen ? "+" : "×";
+      });
+      panel.querySelectorAll("a").forEach(link => {
+        link.addEventListener("click", () => {
+          panel.hidden = true;
+          toggle.setAttribute("aria-expanded", "false");
+          if (symbol) symbol.textContent = "+";
+        });
+      });
+    })();
+
+    (() => {
+      const panel = document.getElementById("aiPanel");
+      document.getElementById("aiToggle")?.addEventListener("click", () => panel.hidden = !panel.hidden);
+      document.getElementById("aiClose")?.addEventListener("click", () => panel.hidden = true);
+      const form = document.getElementById("floatingAssistantForm");
+      const input = document.getElementById("floatingAssistantQuery");
+      const message = document.getElementById("floatingAssistantMessage");
+      const results = document.getElementById("floatingAssistantResults");
+      form?.addEventListener("submit", async e => {
+        e.preventDefault();
+        const query = input.value.trim();
+        if (!query) return;
+        const lang = localStorage.getItem("ui_language") || "uk";
+        message.textContent = (I18N[lang] || I18N.uk).ai_loading;
+        results.innerHTML = "";
+        const response = await fetch("/assistant/query", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ query }) });
+        const data = await response.json();
+        message.textContent = data.message;
+        const eventItems = (data.events || []).map(ev => `<a class="list-group-item list-group-item-action" href="/events#event-${ev.id}"><b>${ev.title}</b><div class="small text-muted">${ev.start_time} · ${ev.location}</div></a>`);
+        const linkItems = (data.links || []).map(link => `<a class="list-group-item list-group-item-action" href="${link.url}"><b>${link.title}</b><div class="small text-muted">${link.description || ""}</div></a>`);
+        results.innerHTML = [...eventItems, ...linkItems].join("");
+      });
+    })();
+
+    (() => {
+      const openedAt = new Date();
+      let sent = false;
+      function sendDuration() {
+        if (sent) return;
+        sent = true;
+        const payload = JSON.stringify({ page: window.location.pathname + window.location.search, opened_at: openedAt.toISOString(), duration_seconds: Math.max(0, Math.round((Date.now() - openedAt.getTime()) / 1000)) });
+        const blob = new Blob([payload], { type: "application/json" });
+        if (navigator.sendBeacon) navigator.sendBeacon("/analytics/page-duration", blob);
+        else fetch("/analytics/page-duration", { method: "POST", body: payload, headers: { "Content-Type": "application/json" }, keepalive: true });
+      }
+      window.addEventListener("pagehide", sendDuration);
+      document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") sendDuration(); });
+    })();
+  </script>
 </body>
 </html>

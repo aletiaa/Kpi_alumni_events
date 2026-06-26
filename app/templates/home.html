@@ -1,190 +1,256 @@
 {% extends "base.html" %}
 {% block content %}
+<section class="campus-hero mb-4">
+  <div class="campus-hero-content">
+    <div class="kicker campus-hero-kicker" data-i18n="home_kicker">KPI alumni platform</div>
+    <h1 data-i18n="home_title">Зустрічайте новий простір для випускників, студентів і друзів КПІ — AlumnixHub</h1>
+    <p data-i18n="home_copy">
+      Події, новини, пошук випускників, повідомлення, опитування, аналітика та ШІ-помічник зібрані в одному зрозумілому середовищі для університетської спільноти.
+    </p>
+    <div class="campus-cta-row">
+      <a href="/events" class="btn btn-primary btn-lg" data-i18n="home_primary_cta">Перейти до подій</a>
+      <a href="/alumni" class="btn btn-light btn-lg" data-i18n="home_secondary_cta">Знайти випускників</a>
+    </div>
+  </div>
+  <div class="campus-hero-aside" aria-label="AlumnixHub overview">
+    <div>
+      <strong data-i18n="home_hero_stat_one">Єдина платформа</strong>
+      <span data-i18n="home_hero_stat_one_copy">для подій, новин, чатів і профілів</span>
+    </div>
+    <div>
+      <strong data-i18n="home_hero_stat_two">Живі реакції</strong>
+      <span data-i18n="home_hero_stat_two_copy">лайки, дизлайки та коментарі до подій</span>
+    </div>
+    <div>
+      <strong data-i18n="home_hero_stat_three">AI навігація</strong>
+      <span data-i18n="home_hero_stat_three_copy">підказки для швидкого пошуку потрібного розділу</span>
+    </div>
+  </div>
+</section>
 
-{# ================= FLASH ================= #}
-{% if flash %}
-<div class="alert shadow-soft
-  {% if flash == 'registered' %}alert-success
-  {% elif flash == 'already_registered' %}alert-info
-  {% elif flash == 'unregistered' %}alert-warning
-  {% elif flash in ['verify_email_first','event_not_found','deadline_passed','full'] %}alert-danger
-  {% else %}alert-secondary{% endif %}">
-  {{ flash.replace("_"," ").capitalize() }}
-</div>
+{% if ident and ident.role != "admin" %}
+<section class="personal-dashboard mb-4">
+  <div class="personal-welcome">
+    <div class="kicker">Персональна стрічка</div>
+    <h2>Вітаємо, {{ ident.full_name }}</h2>
+    <p>Тут зібрані ваші найближчі події, повідомлення та швидкі переходи до розділів, які найчастіше потрібні після входу.</p>
+  </div>
+  <div class="personal-grid">
+    <a href="/me/events" class="personal-tile">
+      <span>{{ personal_events|length }}</span>
+      <strong>Мої події</strong>
+      <small>зареєстровані зустрічі</small>
+    </a>
+    <a href="/messages" class="personal-tile">
+      <span>{{ unread_messages }}</span>
+      <strong>Повідомлення</strong>
+      <small>непрочитані діалоги</small>
+    </a>
+    <a href="/mentors" class="personal-tile">
+      <span>{{ stats.mentors }}</span>
+      <strong>Ментори</strong>
+      <small>готові допомогти</small>
+    </a>
+  </div>
+  <div class="personal-list">
+    {% for event in personal_events %}
+      <a href="/events#event-{{ event.id }}"><b>{{ event.title }}</b><span>{{ event.start_time.strftime("%Y-%m-%d %H:%M") }} · {{ event.location }}</span></a>
+    {% else %}
+      <a href="/events"><b>Зареєструйтесь на першу подію</b><span>Після реєстрації вона з'явиться тут автоматично.</span></a>
+    {% endfor %}
+  </div>
+</section>
 {% endif %}
 
-{# ================= IDENTITY ================= #}
-<div class="card shadow-soft mb-3">
-  <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
-    {% if ident %}
-      <div>
-        <div class="fw-bold fs-5">
-          Signed in as {{ ident.full_name }}
-          <span class="badge bg-secondary ms-2">{{ ident.role }}</span>
-        </div>
-        <div class="text-muted small">Personalized events & AI recommendations enabled</div>
-      </div>
-      {% if ident.role != "admin" %}
-        <a class="btn btn-outline-primary btn-sm" href="/me/events">My events</a>
-      {% endif %}
-    {% else %}
-      <div>
-        <div class="fw-bold fs-5">Browsing as guest</div>
-        <div class="text-muted small">Login to register and unlock AI recommendations</div>
-      </div>
-      <div class="d-flex gap-2">
-        <a class="btn btn-primary btn-sm" href="/login">Login</a>
-        <a class="btn btn-outline-primary btn-sm" href="/register">Register</a>
-      </div>
-    {% endif %}
+<section class="campus-section campus-intro mb-4">
+  <div class="campus-intro-copy">
+    <div class="kicker" data-i18n="home_mission">Місія AlumnixHub</div>
+    <h2 class="section-title" data-i18n="home_section_title">Комунікація, події та знання в одному середовищі</h2>
+    <p data-i18n="home_section_copy">
+      AlumnixHub допомагає випускникам не втрачати зв'язок з університетом, студентам знаходити менторів і можливості, а адміністраторам бачити активність спільноти без ручного збору даних.
+    </p>
+    <p data-i18n="home_section_extra">
+      Платформа створена як практична система для alumni-комунікації: тут можна реєструватися на зустрічі, обговорювати події, читати новини, відповідати на опитування про кар'єру та підтримувати контакти зі своїм потоком.
+    </p>
   </div>
-</div>
+  <div class="campus-metrics" aria-label="Platform highlights">
+    <div><strong>{{ stats.events }}</strong><span data-i18n="home_metric_events">подій у системі</span></div>
+    <div><strong>{{ stats.users }}</strong><span>публічних профілів</span></div>
+    <div><strong>{{ stats.mentors }}</strong><span>менторів</span></div>
+  </div>
+</section>
 
+<section class="campus-section mb-4">
+  <div class="campus-section-head">
+    <div>
+      <div class="kicker" data-i18n="home_offer_kicker">Що ми пропонуємо</div>
+      <h2 class="section-title" data-i18n="home_offer_title">Сервіси для всієї KPI alumni-спільноти</h2>
+    </div>
+    <p data-i18n="home_offer_copy">
+      Кожен розділ пов'язаний з реальними сценаріями: знайти людей, долучитися до події, прочитати новину, залишити реакцію або швидко написати учаснику зі свого потоку.
+    </p>
+  </div>
+  <div class="campus-offer-grid">
+    <a href="/events" class="campus-offer-card">
+      <span class="campus-card-number">01</span>
+      <h3 data-i18n="home_events_title">Події та рекомендації</h3>
+      <p data-i18n="home_events_copy">Переглядайте майбутні зустрічі, реєструйтеся, реагуйте, коментуйте та отримуйте персональні рекомендації.</p>
+    </a>
+    <a href="/news" class="campus-offer-card campus-card-blue">
+      <span class="campus-card-number">02</span>
+      <h3 data-i18n="home_news_title">Новини та історії</h3>
+      <p data-i18n="home_news_copy">Читайте університетські оголошення, alumni-ініціативи, історії випускників і оновлення з життя спільноти.</p>
+    </a>
+    <a href="/alumni" class="campus-offer-card">
+      <span class="campus-card-number">03</span>
+      <h3 data-i18n="home_alumni_title">Публічні профілі</h3>
+      <p data-i18n="home_alumni_copy">Шукайте людей за факультетом, спеціальністю, групою, роком випуску або описом професійного досвіду.</p>
+    </a>
+    <a href="/mentors" class="campus-offer-card campus-card-gold">
+      <span class="campus-card-number">04</span>
+      <h3>Менторський пошук</h3>
+      <p>Знаходьте випускників, які готові допомогти з кар'єрою, портфоліо, технічними питаннями або вибором напряму.</p>
+    </a>
+    <a href="/chats" class="campus-offer-card campus-card-cyan">
+      <span class="campus-card-number">05</span>
+      <h3 data-i18n="home_chats_title">Чати між потоками</h3>
+      <p data-i18n="home_chats_copy">Спілкуйтеся з користувачами зі свого потоку, підтримуйте професійні контакти та обмінюйтеся можливостями.</p>
+    </a>
+    <a href="/surveys" class="campus-offer-card">
+      <span class="campus-card-number">06</span>
+      <h3 data-i18n="home_surveys_title">Опитування кар'єрного шляху</h3>
+      <p data-i18n="home_surveys_copy">Діліться даними про країну проживання, сферу роботи, посаду, кар'єрне зростання і потреби alumni-спільноти.</p>
+    </a>
+    <a href="/analytics" class="campus-offer-card campus-card-gold">
+      <span class="campus-card-number">07</span>
+      <h3 data-i18n="home_analytics_title">Зрозуміла аналітика</h3>
+      <p data-i18n="home_analytics_copy">Адміністратори бачать активність сторінок, сесій і тривалість взаємодії без додавання коду в кожен маршрут.</p>
+    </a>
+  </div>
+</section>
 
-{# ================= HERO ================= #}
-{% set featured = events[:3] %}
-{% if featured %}
-<div class="card shadow-soft mb-3 overflow-hidden">
-  <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
-    <div class="carousel-inner">
-      {% for f in featured %}
-      <div class="carousel-item {% if loop.first %}active{% endif %}">
-        <div class="position-relative">
-          <img src="https://picsum.photos/seed/hero{{ f.id }}/1600/500" class="w-100">
-          <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-50"></div>
-          <div class="position-absolute top-50 start-50 translate-middle text-center text-white px-3">
-            <div class="text-uppercase small opacity-75 mb-2">Top pick • AI ranked</div>
-            <h2 class="fw-bold mb-2">{{ f.title }}</h2>
-            <div class="mb-3 small">
-              🕒 {{ f.start_time }} • 📍 {{ f.location }}
-            </div>
-            <a href="#eventsGrid" class="header-btn header-btn-primary btn-lg me-2">Browse events</a>
-            {% if ident and ident.role != "admin" %}
-            <form method="post" action="/events/{{ f.id }}/register" class="d-inline">
-              <button class="header-btn header-btn-primary btn-lg">Register</button>
-            </form>
-            {% endif %}
-          </div>
-        </div>
-      </div>
+<section class="campus-section mb-4">
+  <div class="campus-section-head">
+    <div>
+      <div class="kicker">Жива стрічка</div>
+      <h2 class="section-title">Найближчі події, новини та ментори</h2>
+    </div>
+    <p>Цей блок підтягує реальні записи з бази даних, тому головна сторінка змінюється разом із платформою.</p>
+  </div>
+  <div class="live-home-grid">
+    <div class="live-home-column">
+      <h3>Події</h3>
+      {% for event in upcoming_events %}
+        <a href="/events#event-{{ event.id }}" class="live-home-item"><b>{{ event.title }}</b><span>{{ event.start_time.strftime("%Y-%m-%d %H:%M") }} · {{ event.location }}</span></a>
+      {% else %}
+        <div class="text-muted">Майбутніх подій поки немає.</div>
+      {% endfor %}
+    </div>
+    <div class="live-home-column">
+      <h3>Новини</h3>
+      {% for item in latest_news %}
+        <a href="/news/{{ item.id }}" class="live-home-item"><b>{{ item.title }}</b><span>{{ item.short_description or item.content[:120] }}</span></a>
+      {% else %}
+        <div class="text-muted">Новин поки немає.</div>
+      {% endfor %}
+    </div>
+    <div class="live-home-column">
+      <h3>Ментори</h3>
+      {% for mentor in mentors %}
+        <a href="/mentors?q={{ mentor.full_name|urlencode }}" class="live-home-item"><b>{{ mentor.full_name }}</b><span>{{ mentor.current_position or mentor.status or mentor.role }}{% if mentor.company %} · {{ mentor.company }}{% endif %}</span></a>
+      {% else %}
+        <div class="text-muted">Ментори з'являться після оновлення профілів.</div>
       {% endfor %}
     </div>
   </div>
-</div>
-{% endif %}
+</section>
 
-{# ================= AI / NLP ================= #}
-{% include "partials/_recommendations.html" %}
-
-{# ================= CONTROLS ================= #}
-<div class="card shadow-soft mb-3">
-  <div class="card-body">
-    <div class="fw-bold fs-5">Upcoming events</div>
-    <div class="text-muted small mb-3">Search and filter events instantly</div>
-
-    <div class="row g-2">
-      <div class="col-md-6">
-        <input id="eventSearch" class="form-control" placeholder="Search events…">
-      </div>
-      <div class="col-md-6">
-        <div class="btn-group w-100">
-          <button class="btn btn-outline-primary active" data-filter="all">All</button>
-          <button class="btn btn-outline-primary" data-filter="open">Open</button>
-          <button class="btn btn-outline-primary" data-filter="registered">Registered</button>
-          <button class="btn btn-outline-primary" data-filter="full">Full</button>
-          <button class="btn btn-outline-primary" data-filter="closed">Closed</button>
-        </div>
-      </div>
+<section class="campus-section campus-steps mb-4">
+  <div class="campus-section-head">
+    <div>
+      <div class="kicker" data-i18n="home_steps_kicker">Як це працює</div>
+      <h2 class="section-title" data-i18n="home_steps_title">Шлях користувача від профілю до активної спільноти</h2>
     </div>
   </div>
-</div>
+  <div class="campus-step-grid">
+    <div class="campus-step"><b>1</b><h3 data-i18n="home_step_one_title">Створіть профіль</h3><p data-i18n="home_step_one_copy">Додайте фото, статус, факультет, спеціальність, групу та короткий опис.</p></div>
+    <div class="campus-step"><b>2</b><h3 data-i18n="home_step_two_title">Знайдіть людей</h3><p data-i18n="home_step_two_copy">Використовуйте пошук за іменем, темою, факультетом, спеціальністю або роком.</p></div>
+    <div class="campus-step"><b>3</b><h3 data-i18n="home_step_three_title">Долучайтесь до подій</h3><p data-i18n="home_step_three_copy">Реєструйтеся, залишайте реакції, коментарі й отримуйте рекомендації.</p></div>
+    <div class="campus-step"><b>4</b><h3 data-i18n="home_step_four_title">Підтримуйте зв'язок</h3><p data-i18n="home_step_four_copy">Пишіть користувачам зі свого потоку, читайте новини та проходьте опитування.</p></div>
+  </div>
+</section>
 
-{# ================= EVENTS ================= #}
-<div class="row g-3" id="eventsGrid">
-{% for e in events %}
-  {% set current_regs = reg_counts.get(e.id, 0) %}
-  {% set is_full = current_regs >= e.capacity %}
-  {% set is_registered = ident and e.id in user_regs %}
-  {% set deadline_passed = e.registration_deadline and e.registration_deadline < now %}
-
-  {% if is_registered %}
-    {% set status = "registered" %}
-  {% elif is_full %}
-    {% set status = "full" %}
-  {% elif deadline_passed %}
-    {% set status = "closed" %}
-  {% else %}
-    {% set status = "open" %}
-  {% endif %}
-
-  <div class="col-12 event-card"
-       data-status="{{ status }}"
-       data-text="{{ (e.title ~ ' ' ~ e.location ~ ' ' ~ e.description)|lower }}">
-
-    <div class="card shadow-soft hover-lift overflow-hidden">
-      <img src="https://picsum.photos/seed/event{{ e.id }}/1400/400" class="w-100">
-
-      <div class="card-body">
-        <h5 class="fw-bold">{{ e.title }}</h5>
-        <div class="text-muted small mb-2">
-          🕒 {{ e.start_time }} • 📍 {{ e.location }}
-        </div>
-
-        <p>{{ e.description }}</p>
-
-        <span class="badge bg-info">Seats: {{ current_regs }}/{{ e.capacity }}</span>
-
-        <div class="mt-3">
-          {% if ident and ident.role != "admin" %}
-            {% if is_registered %}
-              <form method="post" action="/events/{{ e.id }}/unregister">
-                <button class="btn btn-outline-danger">Cancel</button>
-              </form>
-            {% else %}
-              <form method="post" action="/events/{{ e.id }}/register">
-                <button class="btn btn-primary"
-                        {% if is_full or deadline_passed %}disabled{% endif %}>
-                  Register
-                </button>
-              </form>
-            {% endif %}
-          {% else %}
-            <a class="btn btn-primary" href="/login">Login to register</a>
-          {% endif %}
-        </div>
-      </div>
+<section class="campus-section campus-interactive mb-4">
+  <div class="campus-section-head">
+    <div>
+      <div class="kicker" data-i18n="home_roles_kicker">Для кого платформа</div>
+      <h2 class="section-title" data-i18n="home_roles_title">Оберіть свою роль і подивіться можливості</h2>
     </div>
   </div>
-{% endfor %}
-</div>
+  <div class="campus-tabs" role="tablist" aria-label="AlumnixHub roles">
+    <button class="campus-tab active" type="button" data-feature-tab="students" data-i18n="home_tab_students">Студентам</button>
+    <button class="campus-tab" type="button" data-feature-tab="alumni" data-i18n="home_tab_alumni">Випускникам</button>
+    <button class="campus-tab" type="button" data-feature-tab="admins" data-i18n="home_tab_admins">Адміністраторам</button>
+  </div>
+  <div class="campus-panel active" data-feature-panel="students">
+    <h3 data-i18n="home_panel_students_title">Швидкий доступ до менторів, подій і можливостей</h3>
+    <p data-i18n="home_panel_students_copy">Студенти можуть знайти випускників зі схожою спеціальністю, переглянути актуальні події, поставити питання в коментарях і отримати поради через чати.</p>
+    <a href="/alumni" class="btn btn-outline-primary" data-i18n="home_panel_students_btn">Почати пошук</a>
+  </div>
+  <div class="campus-panel" data-feature-panel="alumni" hidden>
+    <h3 data-i18n="home_panel_alumni_title">Повернення до спільноти без зайвої формальності</h3>
+    <p data-i18n="home_panel_alumni_copy">Випускники можуть оновити профіль, розповісти про кар'єрний шлях, долучитися до зустрічей, коментувати події та підтримувати контакти зі своїм потоком.</p>
+    <a href="/profile" class="btn btn-outline-primary" data-i18n="home_panel_alumni_btn">Оновити профіль</a>
+  </div>
+  <div class="campus-panel" data-feature-panel="admins" hidden>
+    <h3 data-i18n="home_panel_admins_title">Менше ручної роботи, більше видимості процесів</h3>
+    <p data-i18n="home_panel_admins_copy">Адміністратори можуть додавати новини з фото, керувати подіями, переглядати автоматичну аналітику й бачити, які розділи справді використовуються.</p>
+    <a href="/analytics" class="btn btn-outline-primary" data-i18n="home_panel_admins_btn">Переглянути аналітику</a>
+  </div>
+</section>
 
-{# ================= JS ================= #}
+<section class="campus-section campus-directions mb-4">
+  <div class="campus-section-head">
+    <div>
+      <div class="kicker" data-i18n="home_directions_kicker">Напрями спільноти</div>
+      <h2 class="section-title" data-i18n="home_directions_title">Теми, навколо яких можна будувати зустрічі й новини</h2>
+    </div>
+  </div>
+  <div class="campus-chip-grid">
+    <span data-i18n="home_chip_career">Кар'єрне зростання</span>
+    <span data-i18n="home_chip_ai">AI та Data Science</span>
+    <span data-i18n="home_chip_cyber">Кібербезпека</span>
+    <span data-i18n="home_chip_product">Product management</span>
+    <span data-i18n="home_chip_mentorship">Менторство</span>
+    <span data-i18n="home_chip_startups">Стартапи</span>
+    <span data-i18n="home_chip_research">Дослідження</span>
+    <span data-i18n="home_chip_international">Міжнародна alumni-мережа</span>
+  </div>
+</section>
+
+<section class="campus-cta-band">
+  <div>
+    <div class="kicker" data-i18n="home_final_kicker">AlumnixHub</div>
+    <h2 data-i18n="home_final_title">Університетська спільнота стає ближчою, коли має спільний цифровий простір.</h2>
+    <p data-i18n="home_final_copy">Почніть з подій, знайдіть людей зі свого факультету або відкрийте новини, щоб побачити, чим живе KPI alumni-спільнота сьогодні.</p>
+  </div>
+  <div class="campus-cta-row">
+    <a href="/news" class="btn btn-light" data-i18n="home_final_news">Читати новини</a>
+    <a href="/surveys" class="btn btn-outline-light" data-i18n="home_final_surveys">Пройти опитування</a>
+  </div>
+</section>
+
 <script>
-(() => {
-  const search = document.getElementById("eventSearch");
-  const cards = [...document.querySelectorAll(".event-card")];
-  const filters = [...document.querySelectorAll("[data-filter]")];
-  let active = "all";
-
-  function apply(){
-    const q = search.value.toLowerCase();
-    cards.forEach(c=>{
-      const okFilter = active==="all" || c.dataset.status===active;
-      const okSearch = !q || c.dataset.text.includes(q);
-      c.style.display = okFilter && okSearch ? "" : "none";
-    });
-  }
-
-  search.addEventListener("input", apply);
-  filters.forEach(b=>{
-    b.addEventListener("click",()=>{
-      filters.forEach(x=>x.classList.remove("active"));
-      b.classList.add("active");
-      active = b.dataset.filter;
-      apply();
+  document.querySelectorAll("[data-feature-tab]").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const target = tab.dataset.featureTab;
+      document.querySelectorAll("[data-feature-tab]").forEach((item) => item.classList.toggle("active", item === tab));
+      document.querySelectorAll("[data-feature-panel]").forEach((panel) => {
+        const isActive = panel.dataset.featurePanel === target;
+        panel.classList.toggle("active", isActive);
+        panel.hidden = !isActive;
+      });
     });
   });
-})();
 </script>
-
 {% endblock %}

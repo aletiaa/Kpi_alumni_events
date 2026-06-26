@@ -1,3 +1,5 @@
+import re
+
 from fastapi import APIRouter, Request, Depends, Form
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
@@ -17,15 +19,13 @@ from app.security import (
 )
 
 router = APIRouter()
+EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
-# -------------------------
-# Helpers
-# -------------------------
 def render(request: Request, template: str, context: dict, status_code: int = 200):
     payload = {"request": request, "app_name": APP_NAME}
     payload.update(context)
-    return request.app.state.templates.TemplateResponse(template, payload, status_code=status_code)
+    return request.app.state.templates.TemplateResponse(request, template, payload, status_code=status_code)
 
 
 def redirect(url: str, session_token: str | None = None, clear_session: bool = False):
@@ -41,9 +41,6 @@ def normalize_role(role: str) -> str:
     return role if role in {"student", "alumni", "guest"} else "guest"
 
 
-# -------------------------
-# Register
-# -------------------------
 @router.get("/register")
 def register_form(request: Request):
     return render(request, "register.html", {})
@@ -61,20 +58,24 @@ def register(
     email_n = (email or "").strip().lower()
     name_n = (full_name or "").strip()
     role_n = normalize_role(role)
+    form_data = {"full_name": name_n, "email": email_n, "role": role_n}
 
-    if not email_n or not name_n:
-        return render(request, "register.html", {"error": "Name and email are required."}, status_code=400)
+    if not name_n or not email_n:
+        return render(request, "register.html", {"error": "Ім'я та email обов'язкові.", **form_data}, status_code=400)
+    if len(name_n) < 2:
+        return render(request, "register.html", {"error": "Ім'я має містити щонайменше 2 символи.", **form_data}, status_code=400)
+    if not EMAIL_RE.match(email_n):
+        return render(request, "register.html", {"error": "Вкажіть коректний email.", **form_data}, status_code=400)
+    if len(password or "") < 8:
+        return render(request, "register.html", {"error": "Пароль має містити щонайменше 8 символів.", **form_data}, status_code=400)
 
-    # Admin emails cannot be used for user registration
     if find_admin_by_email(email_n):
-        return render(request, "register.html", {"error": "This email is reserved for admins."}, status_code=400)
+        return render(request, "register.html", {"error": "Цей email зарезервовано для адміністратора.", **form_data}, status_code=400)
 
-    # Duplicate email check (case-insensitive)
     existing = db.query(User).filter(func.lower(User.email) == email_n).first()
     if existing:
-        return render(request, "register.html", {"error": "Email already registered."}, status_code=400)
+        return render(request, "register.html", {"error": "Цей email вже зареєстровано.", **form_data}, status_code=400)
 
-    # Create user as unverified
     user = User(
         full_name=name_n,
         email=email_n,
@@ -82,31 +83,26 @@ def register(
         role=role_n,
         is_email_verified=False,
         is_active=True,
+        is_profile_public=True,
     )
     db.add(user)
     db.commit()
     db.refresh(user)
 
-    # Build verification link (deployment-ready)
     token = create_email_verify_token(user.email)
     verify_link = f"{APP_BASE_URL}/verify?token={token}"
 
-    # Send email if enabled; otherwise show link in UI
     if EMAIL_ENABLED:
         try:
             send_verification_email(user.email, verify_link)
-            return render(request, "register_success.html", {
-                "email_sent": True,
-                "email": user.email,
-            })
-        except Exception as e:
-            print("EMAIL SEND FAILED:", repr(e))
-            return render(request, "register_success.html", {
-                "email_sent": False,
-                "email": user.email,
-                "verify_link": verify_link,
-                "email_error": str(e),
-        })
+            return render(request, "register_success.html", {"email_sent": True, "email": user.email})
+        except Exception as exc:
+            print("EMAIL SEND FAILED:", repr(exc))
+            return render(
+                request,
+                "register_success.html",
+                {"email_sent": False, "email": user.email, "verify_link": verify_link, "email_error": str(exc)},
+            )
 
     return render(
         request,
@@ -115,9 +111,6 @@ def register(
     )
 
 
-# -------------------------
-# Verify email (THIS is where token gets validated)
-# -------------------------
 @router.get("/verify")
 def verify_email(request: Request, token: str, db: Session = Depends(get_db)):
     email = read_email_verify_token(token)
@@ -125,38 +118,22 @@ def verify_email(request: Request, token: str, db: Session = Depends(get_db)):
         return render(
             request,
             "verify_result.html",
-            {"ok": False, "error": "Invalid or expired verification link"},
+            {"ok": False, "error": "Посилання підтвердження недійсне або прострочене"},
             status_code=400,
         )
 
     user = db.query(User).filter(User.email == email).first()
     if not user:
-        return render(
-            request,
-            "verify_result.html",
-            {"ok": False, "error": "User not found"},
-            status_code=404,
-        )
+        return render(request, "verify_result.html", {"ok": False, "error": "Користувача не знайдено"}, status_code=404)
 
     if user.is_email_verified:
-        return render(
-            request,
-            "verify_result.html",
-            {"ok": True, "already": True},
-        )
+        return render(request, "verify_result.html", {"ok": True, "already": True})
 
     user.is_email_verified = True
     db.commit()
+    return render(request, "verify_result.html", {"ok": True})
 
-    return render(
-        request,
-        "verify_result.html",
-        {"ok": True},
-    )
 
-# -------------------------
-# Login / Logout
-# -------------------------
 @router.get("/login")
 def login_form(request: Request):
     return render(request, "login.html", {})
@@ -171,27 +148,25 @@ def login(
 ):
     email_n = (email or "").strip().lower()
 
-    # 1) Admin login (CSV)
     admin = find_admin_by_email(email_n)
     if admin:
         if password != admin.password:
-            return render(request, "login.html", {"error": "Invalid credentials."}, status_code=400)
-
+            return render(request, "login.html", {"error": "Неправильний email або пароль."}, status_code=400)
         token = create_session_token(None, "admin", admin.email, admin.full_name)
         return redirect("/admin", session_token=token)
 
-    # 2) User login (DB)
     user = db.query(User).filter(func.lower(User.email) == email_n).first()
     if not user or not verify_password(password, user.password_hash):
-        return render(request, "login.html", {"error": "Invalid credentials."}, status_code=400)
+        return render(request, "login.html", {"error": "Неправильний email або пароль."}, status_code=400)
 
+    if getattr(user, "is_blocked", False):
+        return render(request, "login.html", {"error": "Обліковий запис заблоковано."}, status_code=403)
     if not user.is_active:
-        return render(request, "login.html", {"error": "Account is disabled."}, status_code=403)
-
+        return render(request, "login.html", {"error": "Обліковий запис вимкнено."}, status_code=403)
     if not user.is_email_verified:
-        return render(request, "login.html", {"error": "Please verify your email before logging in."}, status_code=403)
+        return render(request, "login.html", {"error": "Підтвердьте email перед входом."}, status_code=403)
 
-    token = create_session_token(user.id, user.role, user.email, user.full_name)
+    token = create_session_token(user.id, user.role, user.email, user.full_name, getattr(user, "avatar_url", None), getattr(user, "status", None))
     return redirect("/", session_token=token)
 
 

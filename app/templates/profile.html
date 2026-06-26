@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card shadow-soft"><div class="card-body p-4">
+  <div class="profile-head mb-4">
+    <img class="profile-avatar-lg" src="{{ user.avatar_url or 'https://ui-avatars.com/api/?name=' ~ user.full_name|urlencode ~ '&background=0b5f8a&color=fff&size=160' }}" alt="{{ user.full_name }}">
+    <div><div class="kicker">Особистий кабінет</div><h2 class="section-title mb-1">{{ user.full_name }}</h2><div class="text-muted">Статус: {{ user.status or user.role }}</div></div>
+  </div>
+  {% if request.query_params.get('saved') == '1' %}<div class="alert alert-success">Профіль оновлено.</div>{% endif %}{% if error is defined %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+  <form method="post" class="row g-3">
+    <div class="col-md-6"><label class="form-label">Повне ім'я</label><input class="form-control" name="full_name" value="{{ user.full_name }}" required></div>
+    <div class="col-md-6"><label class="form-label">Email</label><input class="form-control" value="{{ user.email }}" disabled></div>
+    <div class="col-md-8"><label class="form-label">URL фото профілю</label><input class="form-control" name="avatar_url" value="{{ user.avatar_url or '' }}" placeholder="https://..."></div>
+    <div class="col-md-4"><label class="form-label">Статус користувача</label><input class="form-control" name="status" value="{{ user.status or '' }}" placeholder="Product Manager, Mentor, Student"></div>
+    <div class="col-md-4"><label class="form-label">Група</label><input class="form-control" name="group_name" value="{{ user.group_name or '' }}"></div>
+    <div class="col-md-4"><label class="form-label">Дата народження</label><input class="form-control" type="date" name="birth_date" value="{{ user.birth_date or '' }}"></div>
+    <div class="col-md-4"><label class="form-label">Рік випуску</label><input class="form-control" type="number" name="graduation_year" value="{{ user.graduation_year or '' }}"></div>
+    <div class="col-md-6"><label class="form-label">Факультет</label><input class="form-control" name="faculty" value="{{ user.faculty or '' }}"></div>
+    <div class="col-md-6"><label class="form-label">Спеціальність</label><select class="form-select" name="specialty"><option value="">Оберіть спеціальність</option>{% for item in specialties %}<option value="{{ item.name }}" {% if user.specialty == item.name %}selected{% endif %}>{{ item.code }} - {{ item.name }}</option>{% endfor %}</select></div>
+    <div class="col-md-6"><label class="form-label">Telegram</label><input class="form-control" name="telegram_username" value="{{ user.telegram_username or '' }}"></div>
+    <div class="col-md-6"><label class="form-label">LinkedIn URL</label><input class="form-control" name="linkedin_url" value="{{ user.linkedin_url or '' }}"></div>
+    <div class="col-md-4"><label class="form-label">Країна / місто</label><input class="form-control" name="city_country" value="{{ user.city_country or '' }}" placeholder="Україна, Київ"></div>
+    <div class="col-md-4"><label class="form-label">Поточна посада</label><input class="form-control" name="current_position" value="{{ user.current_position or '' }}" placeholder="Backend Engineer"></div>
+    <div class="col-md-4"><label class="form-label">Компанія / організація</label><input class="form-control" name="company" value="{{ user.company or '' }}" placeholder="EPAM, SoftServe, KPI..."></div>
+    <div class="col-md-6"><label class="form-label">Навички</label><textarea class="form-control" name="skills" rows="3" placeholder="Python, FastAPI, Data Analytics, Product...">{{ user.skills or '' }}</textarea></div>
+    <div class="col-md-6"><label class="form-label">Можу допомогти з</label><textarea class="form-control" name="help_topics" rows="3" placeholder="CV, портфоліо, співбесіди, вибір напряму...">{{ user.help_topics or '' }}</textarea></div>
+    <div class="col-md-4 d-flex align-items-end"><div class="form-check"><input class="form-check-input" type="checkbox" name="is_mentor" value="1" id="mentor" {% if user.is_mentor %}checked{% endif %}><label class="form-check-label" for="mentor">Готовий/готова менторити</label></div></div>
+    <div class="col-md-8"><label class="form-label">Теми менторства</label><input class="form-control" name="mentorship_topics" value="{{ user.mentorship_topics or '' }}" placeholder="Кар'єра, AI, кібербезпека, продукт, стартапи"></div>
+    <div class="col-md-6"><label class="form-label">Мова інтерфейсу</label><select class="form-select" name="preferred_language"><option value="uk" {% if user.preferred_language != 'en' %}selected{% endif %}>Українська</option><option value="en" {% if user.preferred_language == 'en' %}selected{% endif %}>English</option></select></div>
+    <div class="col-md-6 d-flex align-items-end"><div class="form-check"><input class="form-check-input" type="checkbox" name="notifications_enabled" value="1" id="notify" {% if user.notifications_enabled %}checked{% endif %}><label class="form-check-label" for="notify">Отримувати сповіщення</label></div></div>
+    <div class="col-12"><label class="form-label">Коротка біографія</label><textarea class="form-control" name="bio" rows="4">{{ user.bio or '' }}</textarea></div>
+    <div class="col-12"><div class="form-check"><input class="form-check-input" type="checkbox" name="is_profile_public" value="1" id="public" {% if user.is_profile_public %}checked{% endif %}><label class="form-check-label" for="public">Показувати профіль у пошуку випускників</label></div></div>
+    <div class="col-12"><button class="btn btn-primary">Зберегти</button></div>
+  </form>
+</div></div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="academic-band mb-3">
+  <div class="kicker">Менторство</div>
+  <h2 class="section-title mb-3">Випускники, які готові допомогти</h2>
+  <p class="text-muted">Знайдіть ментора за напрямом, факультетом, спеціальністю, навичками або темами, з якими потрібна підтримка.</p>
+  <form class="row g-2" method="get">
+    <div class="col-md-4"><input class="form-control" name="q" value="{{ q or '' }}" placeholder="AI, кар'єра, Python, CV..."></div>
+    <div class="col-md-3"><input class="form-control" name="faculty" value="{{ faculty or '' }}" placeholder="Факультет"></div>
+    <div class="col-md-3"><select class="form-select" name="specialty"><option value="">Спеціальність</option>{% for item in specialties %}<option value="{{ item.name }}" {% if specialty == item.name %}selected{% endif %}>{{ item.code }} - {{ item.name }}</option>{% endfor %}</select></div>
+    <div class="col-md-2"><button class="btn btn-primary w-100">Знайти</button></div>
+  </form>
+</section>
+
+<div class="mentor-grid">
+  {% for user in mentors %}
+    <div class="card shadow-soft mentor-card">
+      <div class="card-body">
+        <div class="alumni-card-head mb-3">
+          <img class="profile-avatar-md" src="{{ user.avatar_url or 'https://ui-avatars.com/api/?name=' ~ user.full_name|urlencode ~ '&background=0b5f8a&color=fff&size=96' }}" alt="{{ user.full_name }}">
+          <div>
+            <div class="kicker">mentor</div>
+            <h4 class="mb-1">{{ user.full_name }}</h4>
+            <div class="text-muted small">{{ user.current_position or user.status or user.role }}{% if user.company %} · {{ user.company }}{% endif %}</div>
+          </div>
+        </div>
+        <div class="text-muted small mb-2">{{ user.faculty or 'Факультет не вказано' }}{% if user.specialty %} · {{ user.specialty }}{% endif %}{% if user.city_country %} · {{ user.city_country }}{% endif %}</div>
+        <p>{{ user.bio or 'Опис профілю ще не додано.' }}</p>
+        {% if user.mentorship_topics %}<div class="mentor-chip-row"><span>{{ user.mentorship_topics }}</span></div>{% endif %}
+        {% if user.skills %}<div class="small text-muted mt-2"><b>Навички:</b> {{ user.skills }}</div>{% endif %}
+        {% if user.help_topics %}<div class="small text-muted mt-1"><b>Можу допомогти:</b> {{ user.help_topics }}</div>{% endif %}
+        <div class="d-flex gap-2 flex-wrap align-items-center mt-3">
+          {% if user.telegram_username %}<span class="badge text-bg-light border">Telegram: {{ user.telegram_username }}</span>{% endif %}
+          {% if user.linkedin_url %}<a class="badge text-bg-light border text-decoration-none" href="{{ user.linkedin_url }}" target="_blank">LinkedIn</a>{% endif %}
+          {% if ident and ident.user_id and user.id in can_message_ids %}<a class="btn btn-sm btn-primary" href="/messages/{{ user.id }}">Написати</a>{% elif ident and ident.user_id and ident.role != 'admin' and ident.user_id != user.id %}<span class="badge text-bg-light border">Інший потік</span>{% endif %}
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-secondary">Менторів за цим запитом не знайдено. Можна позначити себе ментором у профілі.</div>
+  {% endfor %}
+</div>
+{% endblock %}

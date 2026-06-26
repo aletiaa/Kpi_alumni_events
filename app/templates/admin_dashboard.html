@@ -1,77 +1,74 @@
-{# app/templates/admin_dashboard.html #}
 {% extends "base.html" %}
 {% block content %}
-
+<div class="card shadow-soft mb-3"><div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2"><div><div class="kicker">Адміністрування</div><h2 class="section-title mb-1">Панель модерації</h2><div class="text-muted small">Керування подіями, новинами, користувачами, чатами, опитуваннями та IoT-статистикою.</div></div><a class="btn btn-outline-primary btn-sm" href="/">Переглянути сайт</a></div></div>
+<div class="row g-3 mb-3"><div class="col-md-3"><div class="card stat-tile shadow-soft h-100"><div class="card-body"><div class="text-muted small">Події</div><div class="fw-bold fs-2">{{ total_events }}</div><a href="/admin/events" class="btn btn-sm btn-outline-primary">Керувати</a></div></div></div><div class="col-md-3"><div class="card stat-tile shadow-soft h-100"><div class="card-body"><div class="text-muted small">Реєстрації</div><div class="fw-bold fs-2">{{ total_registrations }}</div><span class="badge text-bg-light border">{{ upcoming_events }} майбутніх</span></div></div></div><div class="col-md-3"><div class="card stat-tile shadow-soft h-100"><div class="card-body"><div class="text-muted small">Новини</div><div class="fw-bold fs-2">{{ total_news }}</div><a href="/admin/news" class="btn btn-sm btn-outline-primary">Керувати</a></div></div></div><div class="col-md-3"><div class="card stat-tile shadow-soft h-100"><div class="card-body"><div class="text-muted small">Користувачі</div><div class="fw-bold fs-2">{{ total_users }}</div><a href="/admin/users" class="btn btn-sm btn-outline-primary">Керувати</a></div></div></div><div class="col-md-3"><div class="card stat-tile shadow-soft h-100"><div class="card-body"><div class="text-muted small">Ментори</div><div class="fw-bold fs-2">{{ total_mentors }}</div><a href="/mentors" class="btn btn-sm btn-outline-primary">Переглянути</a></div></div></div><div class="col-md-3"><div class="card stat-tile shadow-soft h-100"><div class="card-body"><div class="text-muted small">Реакції</div><div class="fw-bold fs-2">{{ total_reactions }}</div><span class="badge text-bg-light border">лайки та дизлайки</span></div></div></div><div class="col-md-3"><div class="card stat-tile shadow-soft h-100"><div class="card-body"><div class="text-muted small">Коментарі</div><div class="fw-bold fs-2">{{ total_comments }}</div><span class="badge text-bg-light border">до подій</span></div></div></div><div class="col-md-3"><div class="card stat-tile shadow-soft h-100"><div class="card-body"><div class="text-muted small">Опитування</div><div class="fw-bold fs-2">{{ total_surveys }}</div><a href="/admin/surveys" class="btn btn-sm btn-outline-primary">Керувати</a></div></div></div><div class="col-md-6"><div class="card stat-tile shadow-soft h-100"><div class="card-body"><div class="text-muted small">Популярні події</div>{% if popular_events %}<ul class="mb-0">{% for event, registrations in popular_events %}<li><b>{{ event.title }}</b>: {{ registrations }} реєстрацій</li>{% endfor %}</ul>{% else %}<div class="text-muted">Дані ще збираються.</div>{% endif %}</div></div></div><div class="col-md-6"><div class="card stat-tile shadow-soft h-100"><div class="card-body"><div class="text-muted small">IoT-відвідуваність</div>{% if iot_rows %}<ul class="mb-0">{% for row in iot_rows %}<li>Подія {{ row.event_id }}: баланс {{ row.net }}{% if row.last_ts %}, останній запис {{ row.last_ts }}{% endif %}</li>{% endfor %}</ul>{% else %}<div class="text-muted">Записів IoT поки немає.</div>{% endif %}</div></div></div></div>
 <div class="card shadow-soft mb-3">
-  <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
-    <div>
-      <div class="fw-bold fs-5">Admin dashboard</div>
-      <div class="text-muted small">Quick overview of events and registrations.</div>
-    </div>
-    <div class="d-flex gap-2">
-      <a class="btn btn-primary btn-sm" href="/admin/events">Manage events</a>
-      <a class="btn btn-outline-primary btn-sm" href="/">View site</a>
-    </div>
-  </div>
-</div>
-
-<div class="row g-3 mb-3">
-  <div class="col-12 col-lg-4">
-    <div class="card shadow-soft h-100">
-      <div class="card-body">
-        <div class="text-muted small">Total events</div>
-        <div class="fw-bold" style="font-size: 2rem;">{{ total_events }}</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-12 col-lg-4">
-    <div class="card shadow-soft h-100">
-      <div class="card-body">
-        <div class="text-muted small">Upcoming</div>
-        <div class="fw-bold" style="font-size: 2rem;">{{ upcoming_events }}</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-12 col-lg-4">
-    <div class="card shadow-soft h-100">
-      <div class="card-body">
-        <div class="text-muted small">Total registrations</div>
-        <div class="fw-bold" style="font-size: 2rem;">{{ total_registrations }}</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="card shadow-soft">
   <div class="card-body">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-      <div>
-        <div class="fw-bold">Recent events</div>
-        <div class="text-muted small">Last 5 events by start time.</div>
-      </div>
-      <span class="badge text-bg-light border">Now: {{ now }}</span>
+    <div class="kicker">Аналітика</div>
+    <h3 class="section-title mb-2">Автоматична активність користувачів</h3>
+    <p class="text-muted mb-3">Система сама збирає відвідування сторінок, сесії та час перегляду. Ці показники допомагають зрозуміти, які частини AlumnixHub справді використовують люди.</p>
+    <div class="row g-3">
+      <div class="col-md-3"><div class="stat-tile h-100"><div class="text-muted small">Перегляди сторінок</div><div class="fw-bold fs-3">{{ analytics_summary.total_page_views }}</div><div class="small text-muted">усі відкриття сторінок</div></div></div>
+      <div class="col-md-3"><div class="stat-tile h-100"><div class="text-muted small">Сесії</div><div class="fw-bold fs-3">{{ analytics_summary.unique_sessions }}</div><div class="small text-muted">окремі відвідування сайту</div></div></div>
+      <div class="col-md-3"><div class="stat-tile h-100"><div class="text-muted small">Середній час сторінки</div><div class="fw-bold fs-3">{{ analytics_summary.avg_page_duration_seconds }} с</div><div class="small text-muted">час, який браузер передав при виході</div></div></div>
+      <div class="col-md-3"><div class="stat-tile h-100"><div class="text-muted small">Середня тривалість сесії</div><div class="fw-bold fs-3">{{ analytics_summary.avg_session_duration_seconds }} с</div><div class="small text-muted">від першої до останньої дії</div></div></div>
     </div>
-
-    <hr>
-
-    {% if recent_events %}
-      <div class="list-group">
-        {% for e in recent_events %}
-          <div class="list-group-item d-flex justify-content-between align-items-start gap-3">
-            <div>
-              <div class="fw-bold">{{ e.title }}</div>
-              <div class="text-muted small">🕒 {{ e.start_time }} • 📍 {{ e.location }}</div>
-            </div>
-            <a class="btn btn-outline-primary btn-sm" href="/admin/events/{{ e.id }}/edit">Edit</a>
-          </div>
-        {% endfor %}
-      </div>
-    {% else %}
-      <div class="alert alert-secondary mb-0">No events yet.</div>
-    {% endif %}
   </div>
 </div>
-
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card shadow-soft h-100">
+      <div class="card-body">
+        <h5>Найпопулярніші сторінки</h5>
+        <div class="text-muted small mb-3">Показано зрозумілі назви сторінок, а не технічні посилання з параметрами.</div>
+        {% if analytics_top_pages %}
+          <div class="vstack gap-2">
+            {% for row in analytics_top_pages %}
+              <div class="border rounded-2 p-2">
+                <div class="d-flex justify-content-between gap-2 align-items-start">
+                  <div>
+                    <div class="fw-bold">{{ row.title }}</div>
+                    <div class="small text-muted">{{ row.description }}</div>
+                    <div class="small text-muted">Технічний шлях: {{ row.page }}</div>
+                  </div>
+                  <span class="badge text-bg-light border">{{ row.views }} переглядів</span>
+                </div>
+                <div class="small text-muted mt-1">Середній час відповіді сервера: {{ row.avg_request_ms }} мс</div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-muted">Дані ще збираються.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card shadow-soft h-100">
+      <div class="card-body">
+        <h5>Середній час на сторінці</h5>
+        <div class="text-muted small mb-3">Це не швидкість сервера, а приблизний час, який користувач тримав сторінку відкритою.</div>
+        {% if analytics_page_durations %}
+          <div class="vstack gap-2">
+            {% for row in analytics_page_durations %}
+              <div class="border rounded-2 p-2">
+                <div class="d-flex justify-content-between gap-2 align-items-start">
+                  <div>
+                    <div class="fw-bold">{{ row.title }}</div>
+                    <div class="small text-muted">{{ row.description }}</div>
+                    <div class="small text-muted">Технічний шлях: {{ row.page }}</div>
+                  </div>
+                  <span class="badge text-bg-light border">{{ row.avg_label }}</span>
+                </div>
+                <div class="small text-muted mt-1">Кількість вимірів: {{ row.samples }}</div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-muted">Точний час з’явиться після переходів між сторінками.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

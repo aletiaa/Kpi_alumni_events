@@ -1,21 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
-
-<div class="alert alert-success">Account created.</div>
-
+<div class="alert alert-success shadow-soft">Акаунт створено.</div>
 {% if email_sent %}
-  <div class="alert alert-info">
-    Verification email sent to <b>{{ email }}</b>. Please check your inbox (and spam).
-  </div>
+  <div class="alert alert-info shadow-soft">Ми надіслали лист підтвердження на {{ email }}.</div>
 {% else %}
-  <div class="alert alert-warning">
-    Email sending is not configured. Demo verification link:
-  </div>
-  <div class="border rounded p-3 bg-light">
-    <a href="{{ verify_link }}">{{ verify_link }}</a>
-  </div>
+  <div class="alert alert-warning shadow-soft">Надсилання email не налаштовано. Демо-посилання для підтвердження:</div>
+  {% if verify_link %}<div class="card shadow-soft mb-3"><div class="card-body"><a class="text-break" href="{{ verify_link }}">{{ verify_link }}</a></div></div>{% endif %}
+  {% if email_error %}<div class="alert alert-danger shadow-soft">SMTP помилка: {{ email_error }}</div>{% endif %}
 {% endif %}
-
-<a class="btn btn-primary mt-3" href="/login">Go to login</a>
-
+<a class="btn btn-primary" href="/login">До входу</a>
 {% endblock %}

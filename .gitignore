@@ -60,6 +60,8 @@ cover/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+dev.db
+dev.db-journal
 
 # Flask stuff:
 instance/
@@ -211,6 +213,11 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# User-uploaded files should live on the server/storage, not in Git.
+app/static/uploads/*
+!app/static/uploads/.gitkeep
+work_utf8_test.txt
 
 # Streamlit
 .streamlit/secrets.toml
