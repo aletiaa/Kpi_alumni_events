@@ -66,6 +66,19 @@ def test_profile_update_and_public_alumni_search(client, db):
     assert "Ada KPI" in response.text
 
 
+def test_profile_page_shows_completeness_hint(client, db):
+    user = _user(db)
+
+    def ident():
+        return SimpleNamespace(user_id=user.id, role="alumni", email=user.email, full_name=user.full_name)
+
+    client.app.dependency_overrides[require_identity] = ident
+    response = client.get("/profile")
+    assert response.status_code == 200
+    assert "Заповненість профілю" in response.text
+    assert "Фото профілю" in response.text
+
+
 def test_admin_can_create_news_chat_survey_and_question(admin_client, db):
     response = admin_client.post("/admin/news/create", data={"title": "Update", "short_description": "Short", "content": "Full", "is_published": "1"}, follow_redirects=False)
     assert response.status_code == 303
@@ -83,6 +96,22 @@ def test_admin_can_create_news_chat_survey_and_question(admin_client, db):
     response = admin_client.post(f"/admin/surveys/{survey.id}/questions/create", data={"question_text": "Choose one", "question_type": "single_choice", "options_text": "Yes\nNo"}, follow_redirects=False)
     assert response.status_code == 303
     assert db.query(SurveyQuestion).count() == 1
+
+
+def test_admin_news_moderation_filter(admin_client, db):
+    db.add_all(
+        [
+            News(title="Published item", short_description="Visible", content="Full", is_published=True),
+            News(title="Draft item", short_description="Needs review", content="Draft", is_published=False),
+        ]
+    )
+    db.commit()
+
+    response = admin_client.get("/admin/news?status=draft")
+    assert response.status_code == 200
+    assert "На модерації: <b>1</b>" in response.text
+    assert "Draft item" in response.text
+    assert "Published item" not in response.text
 
 
 def test_admin_can_upload_news_image_file(admin_client, db):
@@ -368,6 +397,27 @@ def test_admin_event_creation_notifies_users(admin_client, db):
     )
     assert response.status_code == 303
     assert db.query(Notification).filter_by(user_id=user.id, kind="event").count() == 1
+
+
+def test_admin_can_send_event_reminders(admin_client, db):
+    user = _user(db, public=True)
+    user.notifications_enabled = True
+    event = Event(
+        title="Reminder event",
+        description="Registered users should be notified",
+        location="KPI",
+        start_time=datetime.utcnow() + timedelta(days=1),
+        capacity=50,
+    )
+    db.add(event)
+    db.commit()
+    db.refresh(event)
+    db.add(Registration(user_id=user.id, event_id=event.id))
+    db.commit()
+
+    response = admin_client.post(f"/admin/events/{event.id}/send_reminders", follow_redirects=False)
+    assert response.status_code == 303
+    assert db.query(Notification).filter_by(user_id=user.id, kind="event_reminder").count() == 1
 
 
 def test_user_can_view_and_mark_notifications_read(client, db):

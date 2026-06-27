@@ -97,6 +97,27 @@ def template_context(request: Request, ident, **context):
     return context
 
 
+def profile_completeness(user: User) -> dict[str, object]:
+    fields = [
+        ("Фото профілю", user.avatar_url),
+        ("Статус", user.status),
+        ("Факультет", user.faculty),
+        ("Спеціальність", user.specialty),
+        ("Група", user.group_name),
+        ("Рік випуску", user.graduation_year),
+        ("Країна / місто", user.city_country),
+        ("Поточна посада", user.current_position),
+        ("Навички", user.skills),
+        ("Коротка біографія", user.bio),
+        ("Telegram або LinkedIn", user.telegram_username or user.linkedin_url),
+    ]
+    total = len(fields)
+    missing = [label for label, value in fields if not value]
+    completed = total - len(missing)
+    percent = int(round(completed / total * 100)) if total else 100
+    return {"completed": completed, "total": total, "missing": missing, "percent": percent}
+
+
 @router.get("/")
 def home(request: Request, db: Session = Depends(get_db), ident=Depends(get_current_identity)):
     now = datetime.utcnow()
@@ -244,7 +265,7 @@ def profile_form(request: Request, db: Session = Depends(get_db), ident=Depends(
     user = db.get(User, ident.user_id)
     if not user:
         raise HTTPException(status_code=404, detail="Користувача не знайдено")
-    return render(request, "profile.html", template_context(request, ident, user=user))
+    return render(request, "profile.html", template_context(request, ident, user=user, completeness=profile_completeness(user)))
 
 
 @router.post("/profile")
@@ -283,9 +304,9 @@ def profile_save(
     linkedin = clean(linkedin_url)
     avatar = clean(avatar_url)
     if avatar and not is_http_url(avatar):
-        return render(request, "profile.html", template_context(request, ident, user=user, error="URL фото має починатися з http:// або https://"), status_code=400)
+        return render(request, "profile.html", template_context(request, ident, user=user, completeness=profile_completeness(user), error="URL фото має починатися з http:// або https://"), status_code=400)
     if linkedin and not is_http_url(linkedin):
-        return render(request, "profile.html", template_context(request, ident, user=user, error="LinkedIn URL має починатися з http:// або https://"), status_code=400)
+        return render(request, "profile.html", template_context(request, ident, user=user, completeness=profile_completeness(user), error="LinkedIn URL має починатися з http:// або https://"), status_code=400)
 
     user.full_name = full_name.strip() or user.full_name
     user.group_name = clean(group_name)

@@ -9,6 +9,44 @@
   <a href="/admin" class="btn btn-light">Назад до адмін-панелі</a>
 </section>
 
+<div class="card shadow-soft mb-3">
+  <div class="card-body">
+    <form class="row g-2 align-items-end" method="get" action="/analytics">
+      <div class="col-md-2">
+        <label class="form-label">Від</label>
+        <input class="form-control" type="date" name="start" value="{{ filters.start_value }}">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">До</label>
+        <input class="form-control" type="date" name="end" value="{{ filters.end_value }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Роль</label>
+        <select class="form-select" name="role">
+          <option value="">Усі ролі</option>
+          <option value="student" {% if filters.role == 'student' %}selected{% endif %}>Студенти</option>
+          <option value="alumni" {% if filters.role == 'alumni' %}selected{% endif %}>Випускники</option>
+          <option value="guest" {% if filters.role == 'guest' %}selected{% endif %}>Гості-акаунти</option>
+          <option value="anonymous" {% if filters.role == 'anonymous' %}selected{% endif %}>Анонімні відвідувачі</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Розділ</label>
+        <select class="form-select" name="page">
+          <option value="">Усі розділи</option>
+          {% for option in page_options %}
+            <option value="{{ option.path }}" {% if filters.page == option.path %}selected{% endif %}>{{ option.title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2 d-flex gap-2">
+        <button class="btn btn-primary flex-fill">Фільтрувати</button>
+        <a class="btn btn-outline-primary" href="/analytics/export.csv?start={{ filters.start_value }}&end={{ filters.end_value }}&role={{ filters.role }}&page={{ filters.page }}">CSV</a>
+      </div>
+    </form>
+  </div>
+</div>
+
 <div class="analytics-metric-grid mb-3">
   <div><span>Перегляди</span><strong>{{ analytics.overview.total_page_views }}</strong><small>усі змістовні перегляди сторінок</small></div>
   <div><span>Сесії</span><strong>{{ analytics.overview.unique_sessions }}</strong><small>окремі відвідування</small></div>

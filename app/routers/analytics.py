@@ -1,9 +1,12 @@
 from __future__ import annotations
 
-from datetime import datetime
+import csv
+from datetime import date, datetime, timedelta
+from io import StringIO
 
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, Field
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.config import APP_NAME
@@ -11,13 +14,40 @@ from app.db import get_db
 from app.deps import require_admin
 from app.middleware.analytics import ANALYTICS_COOKIE
 from app.security import read_session_token
-from app.services.analytics import analytics_dashboard_data, record_page_duration
+from app.services.analytics import analytics_dashboard_data, analytics_page_options, record_page_duration
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
 
+def _parse_date(value: str | None) -> date | None:
+    value = (value or "").strip()
+    if not value:
+        return None
+    try:
+        return date.fromisoformat(value)
+    except ValueError:
+        return None
+
+
+def _analytics_filters(request: Request) -> dict[str, object]:
+    start_date = _parse_date(request.query_params.get("start"))
+    end_date = _parse_date(request.query_params.get("end"))
+    role = (request.query_params.get("role") or "").strip()
+    page = (request.query_params.get("page") or "").strip()
+    filters: dict[str, object] = {
+        "start": datetime.combine(start_date, datetime.min.time()) if start_date else None,
+        "end": datetime.combine(end_date + timedelta(days=1), datetime.min.time()) if end_date else None,
+        "role": role if role in {"student", "alumni", "guest", "anonymous"} else "",
+        "page": page if page.startswith("/") else "",
+        "start_value": start_date.isoformat() if start_date else "",
+        "end_value": end_date.isoformat() if end_date else "",
+    }
+    return filters
+
+
 @router.get("")
 def analytics_dashboard(request: Request, db: Session = Depends(get_db), ident=Depends(require_admin)):
+    filters = _analytics_filters(request)
     return request.app.state.templates.TemplateResponse(
         request,
         "analytics/dashboard.html",
@@ -25,8 +55,31 @@ def analytics_dashboard(request: Request, db: Session = Depends(get_db), ident=D
             "request": request,
             "app_name": APP_NAME,
             "ident": ident,
-            "analytics": analytics_dashboard_data(db),
+            "analytics": analytics_dashboard_data(db, filters=filters),
+            "filters": filters,
+            "page_options": analytics_page_options(),
         },
+    )
+
+
+@router.get("/export.csv")
+def analytics_export_csv(request: Request, db: Session = Depends(get_db), ident=Depends(require_admin)):
+    filters = _analytics_filters(request)
+    analytics = analytics_dashboard_data(db, filters=filters)
+    buffer = StringIO()
+    writer = csv.writer(buffer)
+    writer.writerow(["section", "metric", "value", "description"])
+    for key, value in analytics["overview"].items():
+        writer.writerow(["overview", key, value, ""])
+    for row in analytics["top_pages"]:
+        writer.writerow(["top_pages", row["title"], row["views"], row["description"]])
+    for row in analytics["page_durations"]:
+        writer.writerow(["page_duration", row["title"], row["avg_label"], f"{row['samples']} вимірів"])
+    buffer.seek(0)
+    return StreamingResponse(
+        iter([buffer.getvalue()]),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": "attachment; filename=alumnixhub-analytics.csv"},
     )
 
 

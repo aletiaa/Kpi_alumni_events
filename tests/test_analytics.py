@@ -212,3 +212,59 @@ def test_admin_dashboard_hides_technical_analytics_paths(admin_client, db):
     assert "Події" in response.text
     assert "Технічний шлях" not in response.text
     assert "/events?msg=like_saved" not in response.text
+
+
+def test_analytics_dashboard_filters_by_role(admin_client, db):
+    now = datetime.utcnow()
+    user = User(
+        full_name="Student Visitor",
+        email="student-visitor@example.com",
+        password_hash="x",
+        role="student",
+        is_active=True,
+        is_email_verified=True,
+        is_blocked=False,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    db.add_all(
+        [
+            PageView(
+                user_id=user.id,
+                session_id="student-session",
+                page="/events",
+                route="events",
+                http_method="GET",
+                viewed_at=now,
+                request_duration_ms=20,
+            ),
+            PageView(
+                user_id=None,
+                session_id="anon-session",
+                page="/news",
+                route="news",
+                http_method="GET",
+                viewed_at=now,
+                request_duration_ms=30,
+            ),
+        ]
+    )
+    db.commit()
+
+    response = admin_client.get("/analytics?role=student")
+    assert response.status_code == 200
+    assert 'option value="student" selected' in response.text
+    assert "Події" in response.text
+    assert "Гості 0" in response.text
+
+
+def test_analytics_export_csv(admin_client, db):
+    now = datetime.utcnow()
+    db.add(PageView(session_id="s1", page="/events", route="events", http_method="GET", viewed_at=now, request_duration_ms=20))
+    db.commit()
+
+    response = admin_client.get("/analytics/export.csv?page=/events")
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/csv")
+    assert "top_pages,Події,1" in response.text
