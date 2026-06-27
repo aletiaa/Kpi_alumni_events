@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from sqlalchemy.orm import Session
 
-from app.models import Event, Notification, User
+from app.models import Event, Notification, Registration, User
 from app.services.email_service import send_email
 
 
@@ -58,6 +58,32 @@ def notify_new_event(db: Session, event: Event) -> int:
             body=body,
             url=f"/events#event-{event.id}",
             kind="event",
+            email_to=user.email if user.notifications_enabled else None,
+        )
+    return len(users)
+
+
+def notify_event_reminder(db: Session, event: Event) -> int:
+    users = (
+        db.query(User)
+        .join(Registration, Registration.user_id == User.id)
+        .filter(
+            Registration.event_id == event.id,
+            User.is_active == True,
+            User.is_blocked == False,
+            User.notifications_enabled == True,
+        )
+        .all()
+    )
+    body = f"Нагадування: ви зареєстровані на подію «{event.title}». Початок: {event.start_time}. Локація: {event.location}."
+    for user in users:
+        create_notification(
+            db,
+            user_id=user.id,
+            title="Нагадування про подію",
+            body=body,
+            url=f"/events#event-{event.id}",
+            kind="event_reminder",
             email_to=user.email if user.notifications_enabled else None,
         )
     return len(users)

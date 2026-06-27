@@ -65,9 +65,19 @@ def save_news_image(image_file: UploadFile | None) -> str | None:
 
 
 @router.get("/news")
-def admin_news(request: Request, db: Session = Depends(get_db), admin=Depends(require_admin)):
-    items = db.query(News).order_by(News.created_at.desc()).all()
-    return render(request, "admin/news.html", {"ident": admin, "news_items": items})
+def admin_news(request: Request, status: str = "", db: Session = Depends(get_db), admin=Depends(require_admin)):
+    query = db.query(News)
+    if status == "published":
+        query = query.filter(News.is_published == True)
+    elif status == "draft":
+        query = query.filter(News.is_published == False)
+    items = query.order_by(News.created_at.desc()).all()
+    moderation_count = db.query(func.count(News.id)).filter(News.is_published == False).scalar() or 0
+    return render(
+        request,
+        "admin/news.html",
+        {"ident": admin, "news_items": items, "status": status, "moderation_count": moderation_count},
+    )
 
 
 @router.get("/news/create")

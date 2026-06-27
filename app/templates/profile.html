@@ -5,6 +5,23 @@
     <img class="profile-avatar-lg" src="{{ user.avatar_url or 'https://ui-avatars.com/api/?name=' ~ user.full_name|urlencode ~ '&background=0b5f8a&color=fff&size=160' }}" alt="{{ user.full_name }}">
     <div><div class="kicker">Особистий кабінет</div><h2 class="section-title mb-1">{{ user.full_name }}</h2><div class="text-muted">Статус: {{ user.status or user.role }}</div></div>
   </div>
+  <div class="border rounded-2 p-3 mb-4">
+    <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+      <div>
+        <div class="fw-bold">Заповненість профілю</div>
+        <div class="text-muted small">Повний профіль краще знаходять у пошуку випускників і менторів.</div>
+      </div>
+      <span class="badge text-bg-primary">{{ completeness.percent }}%</span>
+    </div>
+    <div class="progress mb-2" role="progressbar" aria-valuenow="{{ completeness.percent }}" aria-valuemin="0" aria-valuemax="100">
+      <div class="progress-bar" style="width: {{ completeness.percent }}%"></div>
+    </div>
+    {% if completeness.missing %}
+      <div class="small text-muted">Ще можна додати: {{ completeness.missing|join(', ') }}.</div>
+    {% else %}
+      <div class="small text-success">Профіль виглядає повністю готовим.</div>
+    {% endif %}
+  </div>
   {% if request.query_params.get('saved') == '1' %}<div class="alert alert-success">Профіль оновлено.</div>{% endif %}{% if error is defined %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
   <form method="post" class="row g-3">
     <div class="col-md-6"><label class="form-label">Повне ім'я</label><input class="form-control" name="full_name" value="{{ user.full_name }}" required></div>

@@ -7,7 +7,7 @@ from urllib.parse import urlsplit
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.models import PageDuration, PageView, UserActivity
+from app.models import PageDuration, PageView, User, UserActivity
 
 PAGE_LABELS: dict[str, tuple[str, str]] = {
     "/": ("Головна сторінка", "Стартова сторінка AlumnixHub"),
@@ -71,6 +71,55 @@ def _as_naive_utc(value: datetime) -> datetime:
     return value.astimezone(timezone.utc).replace(tzinfo=None)
 
 
+def _filter_bounds(filters: dict[str, object] | None) -> tuple[datetime | None, datetime | None]:
+    filters = filters or {}
+    start = filters.get("start")
+    end = filters.get("end")
+    return (
+        start if isinstance(start, datetime) else None,
+        end if isinstance(end, datetime) else None,
+    )
+
+
+def _clean_filter_value(filters: dict[str, object] | None, key: str) -> str:
+    value = (filters or {}).get(key)
+    return str(value or "").strip()
+
+
+def _apply_page_view_filters(query, filters: dict[str, object] | None):
+    start, end = _filter_bounds(filters)
+    role = _clean_filter_value(filters, "role")
+    page = _clean_filter_value(filters, "page")
+    if start:
+        query = query.filter(PageView.viewed_at >= start)
+    if end:
+        query = query.filter(PageView.viewed_at < end)
+    if page:
+        query = query.filter(PageView.page.like(f"{page}%"))
+    if role == "anonymous":
+        query = query.filter(PageView.user_id.is_(None))
+    elif role:
+        query = query.join(User, User.id == PageView.user_id).filter(User.role == role)
+    return query
+
+
+def _apply_duration_filters(query, filters: dict[str, object] | None):
+    start, end = _filter_bounds(filters)
+    role = _clean_filter_value(filters, "role")
+    page = _clean_filter_value(filters, "page")
+    if start:
+        query = query.filter(PageDuration.opened_at >= start)
+    if end:
+        query = query.filter(PageDuration.opened_at < end)
+    if page:
+        query = query.filter(PageDuration.page.like(f"{page}%"))
+    if role == "anonymous":
+        query = query.filter(PageDuration.user_id.is_(None))
+    elif role:
+        query = query.join(User, User.id == PageDuration.user_id).filter(User.role == role)
+    return query
+
+
 def record_page_duration(
     db: Session,
     *,
@@ -101,12 +150,14 @@ def record_page_duration(
     return row
 
 
-def analytics_overview(db: Session) -> dict[str, float | int]:
-    total_page_views = db.query(func.count(PageView.id)).scalar() or 0
-    unique_sessions = db.query(func.count(func.distinct(PageView.session_id))).scalar() or 0
-    authenticated_views = db.query(func.count(PageView.id)).filter(PageView.user_id.isnot(None)).scalar() or 0
-    avg_request_duration = db.query(func.avg(PageView.request_duration_ms)).scalar() or 0
-    avg_page_duration = db.query(func.avg(PageDuration.duration_seconds)).scalar() or 0
+def analytics_overview(db: Session, filters: dict[str, object] | None = None) -> dict[str, float | int]:
+    page_view_query = _apply_page_view_filters(db.query(PageView), filters)
+    duration_query = _apply_duration_filters(db.query(PageDuration), filters)
+    total_page_views = page_view_query.with_entities(func.count(PageView.id)).scalar() or 0
+    unique_sessions = page_view_query.with_entities(func.count(func.distinct(PageView.session_id))).scalar() or 0
+    authenticated_views = page_view_query.filter(PageView.user_id.isnot(None)).with_entities(func.count(PageView.id)).scalar() or 0
+    avg_request_duration = page_view_query.with_entities(func.avg(PageView.request_duration_ms)).scalar() or 0
+    avg_page_duration = duration_query.with_entities(func.avg(PageDuration.duration_seconds)).scalar() or 0
     avg_session_duration = db.query(func.avg(UserActivity.duration_seconds)).scalar() or 0
     return {
         "total_page_views": total_page_views,
@@ -119,13 +170,13 @@ def analytics_overview(db: Session) -> dict[str, float | int]:
     }
 
 
-def top_pages(db: Session, limit: int = 10) -> list[dict[str, object]]:
+def top_pages(db: Session, limit: int = 10, filters: dict[str, object] | None = None) -> list[dict[str, object]]:
     rows = (
-        db.query(
+        _apply_page_view_filters(db.query(
             PageView.page.label("page"),
             func.count(PageView.id).label("views"),
             func.avg(PageView.request_duration_ms).label("avg_request_ms"),
-        )
+        ), filters)
         .group_by(PageView.page)
         .order_by(func.count(PageView.id).desc())
         .all()
@@ -156,13 +207,13 @@ def top_pages(db: Session, limit: int = 10) -> list[dict[str, object]]:
     return sorted(merged.values(), key=lambda item: int(item["views"]), reverse=True)[:limit]
 
 
-def average_page_duration_by_page(db: Session, limit: int = 10) -> list[dict[str, object]]:
+def average_page_duration_by_page(db: Session, limit: int = 10, filters: dict[str, object] | None = None) -> list[dict[str, object]]:
     rows = (
-        db.query(
+        _apply_duration_filters(db.query(
             PageDuration.page.label("page"),
             func.count(PageDuration.id).label("samples"),
             func.avg(PageDuration.duration_seconds).label("avg_seconds"),
-        )
+        ), filters)
         .group_by(PageDuration.page)
         .order_by(func.avg(PageDuration.duration_seconds).desc())
         .all()
@@ -196,12 +247,12 @@ def average_page_duration_by_page(db: Session, limit: int = 10) -> list[dict[str
     return sorted(merged.values(), key=lambda item: float(item["avg_seconds"]), reverse=True)[:limit]
 
 
-def daily_page_views(db: Session, limit: int = 14) -> list[dict[str, object]]:
+def daily_page_views(db: Session, limit: int = 14, filters: dict[str, object] | None = None) -> list[dict[str, object]]:
     rows = (
-        db.query(
+        _apply_page_view_filters(db.query(
             func.date(PageView.viewed_at).label("day"),
             func.count(PageView.id).label("views"),
-        )
+        ), filters)
         .group_by(func.date(PageView.viewed_at))
         .order_by(func.date(PageView.viewed_at).desc())
         .limit(limit)
@@ -213,11 +264,11 @@ def daily_page_views(db: Session, limit: int = 14) -> list[dict[str, object]]:
     ]
 
 
-def analytics_dashboard_data(db: Session) -> dict[str, object]:
-    overview = analytics_overview(db)
-    pages = top_pages(db, limit=8)
-    durations = average_page_duration_by_page(db, limit=8)
-    daily = daily_page_views(db, limit=14)
+def analytics_dashboard_data(db: Session, filters: dict[str, object] | None = None) -> dict[str, object]:
+    overview = analytics_overview(db, filters=filters)
+    pages = top_pages(db, limit=8, filters=filters)
+    durations = average_page_duration_by_page(db, limit=8, filters=filters)
+    daily = daily_page_views(db, limit=14, filters=filters)
     max_views = max([int(row["views"]) for row in pages] + [1])
     max_duration = max([float(row["avg_seconds"]) for row in durations] + [1.0])
     max_daily = max([int(row["views"]) for row in daily] + [1])
@@ -230,3 +281,10 @@ def analytics_dashboard_data(db: Session) -> dict[str, object]:
         "max_duration": max_duration,
         "max_daily": max_daily,
     }
+
+
+def analytics_page_options() -> list[dict[str, str]]:
+    return [
+        {"path": path, "title": title}
+        for path, (title, _description) in sorted(PAGE_LABELS.items(), key=lambda item: item[1][0])
+    ]

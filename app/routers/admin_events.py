@@ -12,7 +12,7 @@ from app.deps import require_admin
 from app.ml.qr import generate_event_qr_png
 from app.ml.summarizer import generate_short_description
 from app.models import Event
-from app.services.notifications import notify_new_event
+from app.services.notifications import notify_event_reminder, notify_new_event
 
 router = APIRouter(prefix="/admin", tags=["admin-events"])
 
@@ -130,6 +130,16 @@ def admin_delete_event(event_id: int, db: Session = Depends(get_db), admin=Depen
     db.delete(event)
     db.commit()
     return RedirectResponse("/admin/events?deleted=1", status_code=303)
+
+
+@router.post("/events/{event_id}/send_reminders")
+def admin_send_event_reminders(event_id: int, db: Session = Depends(get_db), admin=Depends(require_admin)):
+    event = db.get(Event, event_id)
+    if not event:
+        raise HTTPException(status_code=404, detail="Подію не знайдено")
+    sent = notify_event_reminder(db, event)
+    db.commit()
+    return RedirectResponse(f"/admin/events?reminders={sent}", status_code=303)
 
 
 @router.post("/events/{event_id}/generate_summary")
