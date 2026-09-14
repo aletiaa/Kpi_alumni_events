@@ -4,9 +4,8 @@
 {% if email_sent %}
   <div class="alert alert-info shadow-soft">Ми надіслали лист підтвердження на {{ email }}.</div>
 {% else %}
-  <div class="alert alert-info shadow-soft">Підтвердіть акаунт за посиланням нижче, щоб увійти на платформу.</div>
-  {% if verify_link %}<div class="card shadow-soft mb-3"><div class="card-body"><a class="text-break" href="{{ verify_link }}">Підтвердити акаунт</a></div></div>{% endif %}
-  {% if email_error %}<div class="alert alert-warning shadow-soft">Лист не вдалося надіслати автоматично, тому посилання доступне на цій сторінці.</div>{% endif %}
+  <div class="alert alert-warning shadow-soft">Акаунт створено, але лист підтвердження не вдалося надіслати автоматично. Спробуйте пізніше або зверніться до адміністратора платформи.</div>
+  {% if email_unavailable %}<div class="text-muted mb-3">Вхід буде доступний після підтвердження email.</div>{% endif %}
 {% endif %}
 <a class="btn btn-primary" href="/login">До входу</a>
 {% endblock %}

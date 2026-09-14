@@ -101,13 +101,13 @@ def register(
             return render(
                 request,
                 "register_success.html",
-                {"email_sent": False, "email": user.email, "verify_link": verify_link, "email_error": str(exc)},
+                {"email_sent": False, "email": user.email, "email_error": True},
             )
 
     return render(
         request,
         "register_success.html",
-        {"email_sent": False, "verify_link": verify_link, "email": user.email},
+        {"email_sent": False, "email": user.email, "email_unavailable": True},
     )
 
 

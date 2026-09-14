@@ -73,7 +73,7 @@ Use an email in this file when logging in as admin.
 
 ## 5. Email
 
-Email is optional. If `EMAIL_ENABLED=false`, the platform still works and shows demo links for verification/password flows.
+Email is required for production account verification. If `EMAIL_ENABLED=false`, newly registered users will not receive a verification link and will not be able to log in until email delivery is configured or an administrator verifies them directly in the database.
 
 To enable real email, configure SMTP:
 
