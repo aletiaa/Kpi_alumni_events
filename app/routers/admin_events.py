@@ -48,6 +48,7 @@ def admin_events_list(request: Request, db: Session = Depends(get_db), admin=Dep
 def admin_create_event(
     title: str = Form(...),
     description: str = Form(""),
+    short_description: str = Form("", max_length=500),
     location: str = Form("KPI"),
     start_time: str = Form(...),
     end_time: str = Form(""),
@@ -62,6 +63,7 @@ def admin_create_event(
     ev = Event(
         title=title.strip(),
         description=description.strip(),
+        short_description=short_description.strip(),
         location=location.strip() or "КПІ",
         start_time=parse_dt(start_time),
         end_time=parse_dt(end_time),
@@ -94,6 +96,7 @@ def admin_edit_event_save(
     event_id: int,
     title: str = Form(...),
     description: str = Form(""),
+    short_description: str = Form("", max_length=500),
     location: str = Form("KPI"),
     start_time: str = Form(...),
     end_time: str = Form(""),
@@ -111,6 +114,7 @@ def admin_edit_event_save(
 
     event.title = title.strip()
     event.description = description.strip()
+    event.short_description = short_description.strip()
     event.location = location.strip() or "КПІ"
     event.capacity = max(int(capacity), 1)
     event.image_url = clean_image_url(image_url)

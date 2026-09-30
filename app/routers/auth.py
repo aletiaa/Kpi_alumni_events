@@ -144,13 +144,14 @@ def login(
     request: Request,
     email: str = Form(...),
     password: str = Form(...),
+    next: str = Form(''),
     db: Session = Depends(get_db),
 ):
     email_n = (email or "").strip().lower()
 
     admin = find_admin_by_email(email_n)
     if admin:
-        if password != admin.password:
+        if not verify_password(password, admin.password_hash):
             return render(request, "login.html", {"error": "Неправильний email або пароль."}, status_code=400)
         token = create_session_token(None, "admin", admin.email, admin.full_name)
         return redirect("/admin", session_token=token)
@@ -167,7 +168,9 @@ def login(
         return render(request, "login.html", {"error": "Підтвердьте email перед входом."}, status_code=403)
 
     token = create_session_token(user.id, user.role, user.email, user.full_name, getattr(user, "avatar_url", None), getattr(user, "status", None))
-    return redirect("/", session_token=token)
+    import re
+    destination = next if re.fullmatch(r'/events/\d+(?:#register-area)?', next) else '/'
+    return redirect(destination, session_token=token)
 
 
 @router.get("/logout")

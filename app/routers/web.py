@@ -12,6 +12,7 @@ from app.deps import get_current_identity, require_identity
 from app.ml.hybrid import hybrid_recommend
 from app.models import DirectMessage, Event, EventComment, EventReaction, Registration, User
 from app.services.notifications import notify_direct_message
+from app.services.event_registration import register
 
 router = APIRouter()
 
@@ -145,25 +146,9 @@ def rsvp(event_id: int, db: Session = Depends(get_db), ident=Depends(require_ide
     if hasattr(user, "is_email_verified") and not user.is_email_verified:
         return RedirectResponse("/events?msg=verify_email_first", status_code=303)
 
-    event = db.get(Event, event_id)
-    if not event:
-        return RedirectResponse("/events?msg=event_not_found", status_code=303)
-
-    now = _now_naive_utc()
-    if event.registration_deadline and now > event.registration_deadline:
-        return RedirectResponse("/events?msg=deadline_passed", status_code=303)
-
-    exists = db.query(Registration).filter(Registration.user_id == ident.user_id, Registration.event_id == event_id).first()
-    if exists:
-        return RedirectResponse("/events?msg=already_registered", status_code=303)
-
-    current_count = db.query(func.count(Registration.id)).filter(Registration.event_id == event_id).scalar() or 0
-    if current_count >= event.capacity:
-        return RedirectResponse("/events?msg=full", status_code=303)
-
-    db.add(Registration(user_id=ident.user_id, event_id=event_id))
+    result = register(db, user, event_id)
     db.commit()
-    return RedirectResponse("/events?msg=registered", status_code=303)
+    return RedirectResponse(f"/events?msg={result}", status_code=303)
 
 
 @router.post("/events/{event_id}/unregister")
@@ -228,65 +213,3 @@ def my_events(request: Request, db: Session = Depends(get_db), ident=Depends(req
         "my_events.html",
         {"request": request, "app_name": "Платформа випускників КПІ", "ident": ident, "events": rows},
     )
-
-
-@router.get("/messages")
-def messages_index(request: Request, db: Session = Depends(get_db), ident=Depends(require_identity)):
-    if ident.role == "admin" or not ident.user_id:
-        return RedirectResponse("/", status_code=303)
-    messages = (
-        db.query(DirectMessage)
-        .options(joinedload(DirectMessage.sender), joinedload(DirectMessage.receiver))
-        .filter(or_(DirectMessage.sender_id == ident.user_id, DirectMessage.receiver_id == ident.user_id))
-        .order_by(DirectMessage.created_at.desc())
-        .limit(100)
-        .all()
-    )
-    return request.app.state.templates.TemplateResponse(
-        request,
-        "messages/list.html",
-        {"request": request, "app_name": "Платформа випускників КПІ", "ident": ident, "messages": messages},
-    )
-
-
-@router.get("/messages/{user_id}")
-def message_thread(user_id: int, request: Request, db: Session = Depends(get_db), ident=Depends(require_identity)):
-    if ident.role == "admin" or not ident.user_id:
-        return RedirectResponse("/", status_code=303)
-    current = db.get(User, ident.user_id)
-    recipient = db.get(User, user_id)
-    if not current or not recipient or not _same_stream(current, recipient):
-        return RedirectResponse("/alumni?msg=not_same_stream", status_code=303)
-    thread = (
-        db.query(DirectMessage)
-        .options(joinedload(DirectMessage.sender), joinedload(DirectMessage.receiver))
-        .filter(or_(
-            and_(DirectMessage.sender_id == ident.user_id, DirectMessage.receiver_id == user_id),
-            and_(DirectMessage.sender_id == user_id, DirectMessage.receiver_id == ident.user_id),
-        ))
-        .order_by(DirectMessage.created_at.asc())
-        .all()
-    )
-    db.query(DirectMessage).filter(DirectMessage.sender_id == user_id, DirectMessage.receiver_id == ident.user_id).update({"is_read": True})
-    db.commit()
-    return request.app.state.templates.TemplateResponse(
-        request,
-        "messages/thread.html",
-        {"request": request, "app_name": "Платформа випускників КПІ", "ident": ident, "recipient": recipient, "thread": thread},
-    )
-
-
-@router.post("/messages/{user_id}")
-def send_message(user_id: int, body: str = Form(...), db: Session = Depends(get_db), ident=Depends(require_identity)):
-    if ident.role == "admin" or not ident.user_id:
-        return RedirectResponse("/", status_code=303)
-    current = db.get(User, ident.user_id)
-    recipient = db.get(User, user_id)
-    if not current or not recipient or not _same_stream(current, recipient):
-        return RedirectResponse("/alumni?msg=not_same_stream", status_code=303)
-    text = (body or "").strip()
-    if text:
-        db.add(DirectMessage(sender_id=ident.user_id, receiver_id=user_id, body=text[:1000]))
-        notify_direct_message(db, sender=current, receiver=recipient, message_preview=text[:500])
-        db.commit()
-    return RedirectResponse(f"/messages/{user_id}", status_code=303)

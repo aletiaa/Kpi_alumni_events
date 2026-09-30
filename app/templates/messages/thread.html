@@ -1,6 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="academic-band mb-3"><div class="d-flex justify-content-between align-items-center flex-wrap gap-2"><div><div class="kicker">Повідомлення</div><h2 class="section-title mb-1">{{ recipient.full_name }}</h2><div class="text-muted">{{ recipient.faculty }}{% if recipient.group_name %} · {{ recipient.group_name }}{% endif %}{% if recipient.graduation_year %} · {{ recipient.graduation_year }}{% endif %}</div></div><a class="btn btn-outline-primary" href="/messages">Усі повідомлення</a></div></section>
-<div class="card shadow-soft mb-3"><div class="card-body message-thread">{% for m in thread %}<div class="message-bubble {% if m.sender_id == ident.user_id %}message-own{% endif %}"><div class="fw-semibold small">{{ m.sender.full_name }}</div><div>{{ m.body }}</div><div class="text-muted small">{{ m.created_at }}</div></div>{% else %}<div class="text-muted">Почніть розмову першим повідомленням.</div>{% endfor %}</div></div>
-<div class="card shadow-soft"><div class="card-body"><form method="post" action="/messages/{{ recipient.id }}"><label class="form-label fw-bold">Нове повідомлення</label><textarea class="form-control" name="body" rows="3" maxlength="1000" required></textarea><button class="btn btn-primary mt-2">Надіслати</button></form></div></div>
+<section class="academic-band mb-3"><div class="d-flex justify-content-between align-items-center flex-wrap gap-2"><h1 class="h3 mb-0">{{ display_name(recipient) }}</h1><div class="d-flex flex-wrap gap-2"><a class="btn btn-outline-primary" href="/messages">Усі повідомлення</a><a class="btn btn-outline-primary" href="/messages/{{ recipient.id }}">Оновити</a></div></div></section>
+{% if older %}<a href="/messages/{{ recipient.id }}?before={{ older }}">Попередні повідомлення</a>{% endif %}
+<div class="message-thread border-bottom mb-3 p-2">
+{% for m in thread %}<div class="message-bubble {% if m.sender_id == ident.user_id %}message-own{% endif %}"><div class="fw-semibold small">{{ display_name(m.sender) }}</div><div data-no-translate style="white-space:pre-wrap;overflow-wrap:anywhere">{{ m.body }}</div><div class="text-muted small">{{ display_datetime(m.created_at) }}</div></div>{% else %}<p class="text-muted">Почніть розмову першим повідомленням.</p>{% endfor %}
+</div>
+<form method="post" action="/messages/{{ recipient.id }}">
+<input type="hidden" name="csrf" value="{{ csrf }}">
+<label class="form-label fw-bold" for="message-body">Нове повідомлення</label>
+<textarea id="message-body" class="form-control" name="body" rows="3" maxlength="1000" required></textarea>
+<button class="btn btn-primary mt-2">Надіслати</button>
+</form>
 {% endblock %}

@@ -14,6 +14,10 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+# Never send real mail using a developer's local credentials during tests.
+os.environ['EMAIL_ENABLED'] = 'false'
+os.environ['TELEGRAM_ENABLED'] = 'false'
+
 from app.main import app
 from app.db import get_db
 
@@ -186,6 +190,8 @@ def _ensure_schema():
             "ALTER TABLE news ADD COLUMN image_url TEXT",
             "ALTER TABLE news ADD COLUMN image_source_url TEXT",
             "ALTER TABLE users ADD COLUMN avatar_url TEXT",
+            "ALTER TABLE users ADD COLUMN full_name_en VARCHAR(120)",
+            "ALTER TABLE users ADD COLUMN interests TEXT",
             "ALTER TABLE users ADD COLUMN status TEXT",
             "ALTER TABLE users ADD COLUMN preferred_language TEXT DEFAULT 'uk'",
             "ALTER TABLE users ADD COLUMN notifications_enabled BOOLEAN DEFAULT TRUE",
@@ -263,12 +269,35 @@ def _ensure_schema():
 @pytest.fixture(scope="session", autouse=True)
 def _create_schema_once():
     _ensure_schema()
+    from app.models import BotCampaign
+    BotCampaign.__table__.create(engine_test, checkfirst=True)
+    from app.models import TelegramLink, TelegramState, TelegramDelivery, TelegramSubscription, TelegramBroadcast, TelegramRecipientDelivery
+    for model in (TelegramLink, TelegramState, TelegramDelivery, TelegramSubscription, TelegramBroadcast, TelegramRecipientDelivery):
+        model.__table__.create(engine_test, checkfirst=True)
+    from app.models import TelegramBotReply, TelegramUpload, TelegramAutomationPreference
+    for model in (TelegramBotReply, TelegramUpload, TelegramAutomationPreference):
+        model.__table__.create(engine_test, checkfirst=True)
+    from app.models import KpiImportItem, KpiImportState
+    KpiImportState.__table__.create(engine_test, checkfirst=True)
+    KpiImportItem.__table__.create(engine_test, checkfirst=True)
+    from app.models import ContentTranslation
+    ContentTranslation.__table__.create(engine_test, checkfirst=True)
 
 
 @pytest.fixture(scope="function")
 def db():
     session = TestingSessionLocal()
     try:
+        for table in ('telegram_bot_replies', 'telegram_uploads', 'telegram_automation_preferences'):
+            session.execute(text(f"DELETE FROM {table}"))
+        for table in ('telegram_recipient_deliveries', 'telegram_broadcasts', 'telegram_subscriptions'):
+            session.execute(text(f"DELETE FROM {table}"))
+        session.execute(text("DELETE FROM bot_campaigns"))
+        for table in ("telegram_links", "telegram_state", "telegram_deliveries"):
+            session.execute(text(f"DELETE FROM {table}"))
+        session.execute(text("DELETE FROM kpi_import_items"))
+        session.execute(text("DELETE FROM kpi_import_state"))
+        session.execute(text("DELETE FROM content_translations"))
         for table in ["page_duration", "user_activity", "page_views", "notifications", "direct_messages", "event_comments", "event_reactions", "survey_answers", "survey_questions", "surveys", "chat_links", "news", "iot_visits", "registrations", "events", "users"]:
             session.execute(text(f"DELETE FROM {table}"))
         session.commit()
@@ -278,7 +307,10 @@ def db():
 
 
 @pytest.fixture(scope="function")
-def client(db):
+def client(db, monkeypatch):
+    monkeypatch.setattr(app.state, "disable_kpi_import", True, raising=False)
+    # Lifespan startup must not seed or migrate the configured live database.
+    monkeypatch.setattr("app.main.bootstrap_database", lambda: None)
     def override_get_db():
         yield db
 

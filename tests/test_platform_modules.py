@@ -406,7 +406,8 @@ def test_user_can_message_same_stream_user(client, db):
         return SimpleNamespace(user_id=sender.id, role="alumni", email=sender.email, full_name=sender.full_name)
 
     client.app.dependency_overrides[require_identity] = ident
-    response = client.post(f"/messages/{receiver.id}", data={"body": "Hello from the same stream"}, follow_redirects=False)
+    from app.services.messaging import message_token
+    response = client.post(f"/messages/{receiver.id}", data={"body": "Hello from the same stream", "csrf": message_token(sender.id, receiver.id)}, follow_redirects=False)
     assert response.status_code == 303
     assert db.query(DirectMessage).filter_by(sender_id=sender.id, receiver_id=receiver.id).count() == 1
     assert db.query(Notification).filter_by(user_id=receiver.id, kind="message").count() == 1

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block content %}
+<a href="/admin">Адміністрування</a>
+<header class="py-3 border-bottom">
+  <h1 class="h2">Керування ботом</h1>
+  <p class="mb-2">Diploma · Telegram</p>
+  {% if telegram_enabled %}
+  <div data-telegram-status="/admin/bots/status" class="d-flex flex-wrap gap-3">
+    <span class="badge text-bg-primary" data-bot-status>{{ 'Бот працює' if bot_health.online else 'Бот підключається' }}</span>
+    <span data-link-status>{{ 'Ваш акаунт підключено' if telegram_link and telegram_link.chat_id else 'Ваш акаунт ще не підключено' }}</span>
+  </div>
+  {% else %}<span class="badge text-bg-warning">Демонстраційний режим</span>{% endif %}
+</header>
+{% if telegram_enabled %}
+<details class="py-3 border-bottom" {% if not telegram_link or not telegram_link.chat_id or link_code %}open{% endif %}>
+  <summary>Мій акаунт для перевірки надсилання</summary>
+  {% if telegram_link and telegram_link.chat_id %}
+    <p><span>Підключено:</span> @{{ telegram_link.username }}</p>
+  {% endif %}
+  <form method="post" action="/admin/bots/link">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <button class="btn btn-outline-primary" type="submit">Підключити мій Telegram</button>
+  </form>
+  {% if link_code and telegram_state and telegram_state.bot_username %}
+    <p class="mt-3" data-telegram-link><a href="https://t.me/{{ telegram_state.bot_username }}?start={{ link_code }}" target="_blank" rel="noopener noreferrer">Відкрити бота та натиснути Start</a></p>
+    <p>Посилання дійсне 10 хвилин. Після Start оновіть цю сторінку.</p>
+  {% endif %}
+  <p class="small mt-2">Команда /stop відключає акаунт. Розсилки випускникам доступні нижче.</p>
+</details>
+<p class="mt-3"><a href="/admin/bots/files">Файли з Telegram</a></p>
+{% endif %}
+{% if not telegram_enabled %}
+<details class="mt-3"><summary>Демонстраційні аудиторії</summary>
+<p class="alert alert-info mt-3">Лише симуляція. Повідомлення не надсилаються в Telegram. Отримувачі — вигадані тестові профілі.</p>
+</details>
+{% endif %}
+<div class="row g-4 py-3">
+  <section class="col-lg-7">
+    <h2 class="h4">Нове оголошення</h2>
+    <form method="post" action="/admin/bots/campaigns">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <label for="bot-audience" class="form-label">Аудиторія</label>
+      <select id="bot-audience" class="form-select mb-3" name="audience">
+        {% if telegram_enabled %}
+        <option value="telegram_alumni">Випускники з підпискою</option>
+        <option value="telegram_student">Студенти з підпискою</option>
+        <option value="telegram_all">Усі підписники</option>
+        {% endif %}
+        {% if telegram_enabled and telegram_link and telegram_link.chat_id %}<option value="telegram_self">Мій Telegram — реальне надсилання</option>{% endif %}
+        {% if not telegram_enabled %}<option value="all">Усі тестові профілі</option>
+        <option value="alumni">Тестові випускники</option>
+        <option value="student">Тестові студенти</option>{% endif %}
+      </select>
+      <label class="form-label" for="bot-topic">Тема розсилки</label>
+      <select id="bot-topic" name="topic" class="form-select mb-3"><option value="news">Новини</option><option value="events">Події</option></select>
+      <label for="bot-body" class="form-label">Текст повідомлення</label>
+      <textarea id="bot-body" class="form-control mb-3" name="body" rows="7" maxlength="4000" required>{{ preview }}</textarea>
+      <button class="btn btn-primary" type="submit">Зберегти чернетку</button>
+    </form>
+  </section>
+  <section class="col-lg-5">
+    <h2 class="h4">Матеріали сайту</h2>
+    <details class="border-bottom py-2"><summary>Події</summary>
+      <ul class="mt-2">{% for event in events %}<li class="mb-2"><a href="/admin/bots?source=event&amp;source_id={{ event.id }}">{{ content_text('event', event.id, 'title', event.title) }}</a></li>{% else %}<li>Дані відсутні</li>{% endfor %}</ul>
+    </details>
+    <details class="border-bottom py-2"><summary>Новини</summary>
+      <ul class="mt-2">{% for item in news %}<li class="mb-2"><a href="/admin/bots?source=news&amp;source_id={{ item.id }}">{{ content_text('news', item.id, 'title', item.title) }}</a></li>{% else %}<li>Дані відсутні</li>{% endfor %}</ul>
+    </details>
+    <p class="mt-3"><a href="/admin/bots/events.json" download>Експорт подій для бота</a></p>
+    <a href="https://github.com/aletiaa/Diploma" target="_blank" rel="noopener noreferrer">GitHub · Diploma</a>
+  </section>
+</div>
+<section id="campaigns" class="border-top py-4">
+  <h2 class="h4">Журнал оголошень</h2>
+  {% for campaign in campaigns %}
+  <article class="border-bottom py-3">
+    <div class="d-flex justify-content-between flex-wrap gap-2">
+      <strong>#{{ campaign.id }}</strong><span>{{ display_datetime(campaign.created_at) }}</span>
+    </div>
+    <p style="white-space:pre-wrap;overflow-wrap:anywhere" data-no-translate>{{ campaign.body }}</p>
+    {% if campaign.audience in ['telegram_all', 'telegram_alumni', 'telegram_student'] %}
+    <a class="btn btn-outline-primary" href="/admin/bots/campaigns/{{ campaign.id }}">Аудиторія та доставка</a>
+    {% elif campaign.audience == 'telegram_self' %}
+      {% set delivery = deliveries.get(campaign.id) %}
+      {% if delivery %}<p>Telegram: <strong>{{ delivery.status }}</strong>{% if delivery.message_id %} · message_id: {{ delivery.message_id }}{% endif %}</p>
+      {% else %}
+      <form method="post" action="/admin/bots/campaigns/{{ campaign.id }}/send">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <button class="btn btn-primary" type="submit" {% if not telegram_link or not telegram_link.chat_id %}disabled{% endif %}>Надіслати в мій Telegram</button>
+      </form>
+      {% endif %}
+    {% elif campaign.simulated_at %}
+      <p><span class="badge text-bg-info">Симуляцію завершено</span> {{ display_datetime(campaign.simulated_at) }}</p>
+      <ul>{% for recipient in demo_recipients(campaign.audience) %}<li><code>{{ recipient }}</code> · <span>Змодельовано, не доставлено</span></li>{% endfor %}</ul>
+    {% else %}
+      <p><span>Чернетка</span> · <span>Тестові отримувачі:</span> {{ demo_recipients(campaign.audience)|length }}</p>
+      <form method="post" action="/admin/bots/campaigns/{{ campaign.id }}/simulate">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <button class="btn btn-outline-primary" type="submit">Симулювати надсилання</button>
+      </form>
+    {% endif %}
+  </article>
+  {% else %}<p class="text-muted">Оголошень ще немає</p>{% endfor %}
+</section>
+<script src="/static/telegram-status.js" defer></script>
+{% endblock %}

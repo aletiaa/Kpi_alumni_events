@@ -20,19 +20,19 @@
           <img class="profile-avatar-md" src="{{ user.avatar_url or 'https://ui-avatars.com/api/?name=' ~ user.full_name|urlencode ~ '&background=0b5f8a&color=fff&size=96' }}" alt="{{ user.full_name }}">
           <div>
             <div class="kicker">mentor</div>
-            <h4 class="mb-1">{{ user.full_name }}</h4>
-            <div class="text-muted small">{{ user.current_position or user.status or user.role }}{% if user.company %} · {{ user.company }}{% endif %}</div>
+            <h4 class="mb-1"><span data-no-translate>{{ display_name(user) }}</span></h4>
+            <div class="text-muted small">{{ content_text('profile', user.id, 'position', user.current_position or user.status or user.role) }}{% if user.company %} · {{ content_text('profile', user.id, 'company', user.company) }}{% endif %}</div>
           </div>
         </div>
-        <div class="text-muted small mb-2">{{ user.faculty or 'Факультет не вказано' }}{% if user.specialty %} · {{ user.specialty }}{% endif %}{% if user.city_country %} · {{ user.city_country }}{% endif %}</div>
-        <p>{{ user.bio or 'Опис профілю ще не додано.' }}</p>
-        {% if user.mentorship_topics %}<div class="mentor-chip-row"><span>{{ user.mentorship_topics }}</span></div>{% endif %}
-        {% if user.skills %}<div class="small text-muted mt-2"><b>Навички:</b> {{ user.skills }}</div>{% endif %}
-        {% if user.help_topics %}<div class="small text-muted mt-1"><b>Можу допомогти:</b> {{ user.help_topics }}</div>{% endif %}
+        <div class="text-muted small mb-2">{% if user.faculty %}{{ content_text('profile', user.id, 'faculty', user.faculty) }}{% else %}<span>Факультет не вказано</span>{% endif %}{% if user.specialty %} · {{ content_text('profile', user.id, 'specialty', user.specialty) }}{% endif %}{% if user.city_country %} · {{ content_text('profile', user.id, 'city_country', user.city_country) }}{% endif %}</div>
+        <p>{{ content_text('profile', user.id, 'bio', user.bio or 'Опис профілю ще не додано.') }}</p>
+        {% if user.mentorship_topics %}<div class="mentor-chip-row"><span>{{ content_text('profile', user.id, 'mentorship_topics', user.mentorship_topics) }}</span></div>{% endif %}
+        {% if user.skills %}<div class="small text-muted mt-2"><b>Навички:</b> {{ content_text('profile', user.id, 'skills', user.skills) }}</div>{% endif %}
+        {% if user.help_topics %}<div class="small text-muted mt-1"><b>Можу допомогти:</b> {{ content_text('profile', user.id, 'help_topics', user.help_topics) }}</div>{% endif %}
         <div class="d-flex gap-2 flex-wrap align-items-center mt-3">
           {% if user.telegram_username %}<span class="badge text-bg-light border">Telegram: {{ user.telegram_username }}</span>{% endif %}
           {% if user.linkedin_url %}<a class="badge text-bg-light border text-decoration-none" href="{{ user.linkedin_url }}" target="_blank">LinkedIn</a>{% endif %}
-          {% if ident and ident.user_id and user.id in can_message_ids %}<a class="btn btn-sm btn-primary" href="/messages/{{ user.id }}">Написати</a>{% elif ident and ident.user_id and ident.role != 'admin' and ident.user_id != user.id %}<span class="badge text-bg-light border">Інший потік</span>{% endif %}
+          {% if ident and ident.user_id and user.id in can_message_ids %}<a class="btn btn-sm btn-primary" href="/messages/{{ user.id }}">Написати</a>{% elif ident and ident.user_id and ident.role != 'admin' and ident.user_id != user.id %}<span class="badge text-bg-light border">Листування недоступне</span>{% endif %}
         </div>
       </div>
     </div>

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="academic-band mb-4">
+  <a href="/admin/news">Новини</a>
+  <h1 class="section-title">Імпорт КПІ</h1>
+  <p><a href="https://kpi.ua/rss.xml" target="_blank" rel="noopener">kpi.ua RSS</a></p>
+  <p>Нові матеріали надходять на перевірку. Публікацією керує адміністратор.</p>
+  <p><span>Останнє успішне оновлення</span>: <span data-no-translate>{{ state.last_success.strftime('%d.%m.%Y %H:%M') ~ ' UTC' if state.last_success else '—' }}</span></p>
+  <p><span>Додано за останній імпорт</span>: {{ state.added }}</p>
+  {% if state.enabled %}<p><span>Наступна перевірка</span>: <span data-no-translate>{{ state.next_run.strftime('%d.%m.%Y %H:%M') }} UTC</span></p>{% endif %}
+  {% if state.last_error %}<div class="alert alert-warning" role="alert">{{ state.last_error }}</div>{% endif %}
+  <form method="post" action="/admin/kpi-import/settings" class="d-flex flex-wrap align-items-center gap-3 mb-3">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label class="form-check form-switch"><input class="form-check-input" type="checkbox" name="enabled" value="1" {% if state.enabled %}checked{% endif %}> <span>Щоденний імпорт</span></label>
+    <button class="btn btn-outline-primary" type="submit">Зберегти</button>
+  </form>
+  <form method="post" action="/admin/kpi-import/run"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn btn-primary" type="submit">Оновити зараз</button></form>
+  <p class="text-muted small mt-3">Автоімпорт працює, поки сервер увімкнений. Після перерви пропущена перевірка запускається автоматично.</p>
+</section>
+{% set result = request.query_params.get('result') %}
+{% if result %}
+<div class="alert {{ 'alert-warning' if result in ['failed', 'invalid_event', 'skipped'] else 'alert-success' }}" role="status">
+{% if result == 'failed' %}Не вдалося отримати стрічку КПІ. Наступна спроба через годину.
+{% elif result == 'invalid_event' %}Вкажіть дату, час, місце та кількість місць для події.
+{% elif result == 'skipped' %}Оновлення вже виконується.
+{% elif result == 'already_reviewed' %}Цей матеріал уже опрацьовано.
+{% else %}Зміни збережено.{% endif %}
+</div>
+{% endif %}
+{% for item in items %}
+<article class="py-4 border-bottom">
+  {% if item.image_url %}<img src="{{ item.image_url }}" alt="" loading="lazy" style="max-width:100%;width:360px;height:200px;object-fit:cover" referrerpolicy="no-referrer">{% endif %}
+  <h2 class="fs-4">{{ content_text('kpi', item.id, 'title', item.title) }}</h2>
+  <p class="small text-muted"><span>Дата публікації джерела</span>: <span data-no-translate>{{ item.source_published.strftime('%d.%m.%Y') if item.source_published else '—' }}</span></p>
+  <p style="overflow-wrap:anywhere">{{ content_text('kpi', item.id, 'excerpt', item.excerpt) }}</p>
+  <a href="{{ item.source_url }}" target="_blank" rel="noopener">Читати на сайті КПІ</a>
+  {% if item.status == 'pending' %}
+  <div class="d-flex flex-wrap gap-2 mt-3">
+    <form method="post" action="/admin/kpi-import/{{ item.id }}/review"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn btn-primary" name="action" value="publish">Опублікувати новину</button></form>
+    <form method="post" action="/admin/kpi-import/{{ item.id }}/review"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn btn-primary" name="action" value="news">Створити чернетку новини</button></form>
+    <form method="post" action="/admin/kpi-import/{{ item.id }}/review"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn btn-outline-secondary" name="action" value="dismiss">Пропустити</button></form>
+  </div>
+  <details class="mt-3"><summary>Створити подію з анонсу</summary>
+    <form method="post" action="/admin/kpi-import/{{ item.id }}/review" class="row g-3 mt-1">
+      <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="action" value="event">
+      <div class="col-12 col-md-4"><label class="form-label" for="start-{{ item.id }}">Дата й час події (Київ)</label><input id="start-{{ item.id }}" class="form-control" type="datetime-local" name="start_time" required></div>
+      <div class="col-12 col-md-5"><label class="form-label" for="location-{{ item.id }}">Місце проведення</label><input id="location-{{ item.id }}" class="form-control" name="location" maxlength="200" required></div>
+      <div class="col-12 col-md-3"><label class="form-label" for="capacity-{{ item.id }}">Кількість місць</label><input id="capacity-{{ item.id }}" class="form-control" type="number" name="capacity" value="100" min="1" max="100000" required></div>
+      <div class="col-12"><button class="btn btn-primary">Створити й опублікувати подію</button></div>
+    </form>
+  </details>
+  {% elif item.news_id %}<p class="mt-3"><a href="/admin/news/{{ item.news_id }}/edit">Редагувати новину</a></p>
+  {% elif item.event_id %}<p class="mt-3"><a href="/admin/events/{{ item.event_id }}/edit">Редагувати подію</a></p>
+  {% else %}<p class="text-muted mt-3">Пропущено</p>{% endif %}
+</article>
+{% else %}<p>Матеріалів поки немає.</p>{% endfor %}
+<nav class="d-flex gap-3 my-4" aria-label="Pagination">
+{% if page > 1 %}<a href="?page={{ page - 1 }}">Назад</a>{% endif %}
+{% if has_next %}<a href="?page={{ page + 1 }}">Далі</a>{% endif %}
+</nav>
+{% endblock %}

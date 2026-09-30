@@ -9,7 +9,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="/static/styles.css?v=20260928-error-pages">
+  <script defer src="/static/content-translation.js?v=20260928-profile-2"></script>
 </head>
 <body>
   <div class="page-content">
@@ -24,6 +25,7 @@
               <a href="/alumni" data-i18n="nav_alumni">Випускники</a>
               <a href="/mentors">Ментори</a>
               <a href="/chats" data-i18n="nav_chats">Чати</a>
+              {% if ident %}<a href="/messages" data-i18n="nav_messages">Повідомлення</a>{% endif %}
               <a href="/surveys" data-i18n="nav_surveys">Опитування</a>
             </nav>
             <div class="header-tools">
@@ -120,6 +122,7 @@
   </nav>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/static/ui-en.js?v=20260930-bot-menu"></script>
   <script>
     const I18N = {
       uk: {
@@ -470,44 +473,164 @@
         "/search": "Search"
       }
     };
+    Object.assign(CONTENT_TRANSLATIONS.en, {
+  "Результати": "Results",
+  "Результати опитування": "Survey results",
+  "Учасників": "Participants",
+  "Відповідей": "Answers",
+  "Відповідей поки немає.": "No responses yet.",
+  "Керувати опитуваннями": "Manage surveys",
+  "Керувати питаннями": "Manage questions",
+  "Адміністратор керує опитуваннями. Для участі увійдіть як учасник.": "Administrators manage surveys. Sign in with a member account to participate.",
+  "Повторне надсилання оновить ваші попередні відповіді.": "Submitting again will update your previous answers.",
+  "Текстові відповіді доступні лише адміністраторам.": "Written responses are visible only to administrators.",
+  "Заповніть усі питання. Оберіть запропонований варіант або введіть текст до 4000 символів.": "Answer every question. Choose a listed option or enter up to 4,000 characters.",
+  "Події для спільноти": "Community events",
+  "Допоможіть обрати формат, час і теми наступних зустрічей.": "Help choose the format, timing, and topics of upcoming meetups.",
+  "Який формат зустрічей вам підходить?": "Which meetup format suits you?",
+  "Онлайн": "Online",
+  "На кампусі КПІ": "On the KPI campus",
+  "Гібридний формат": "Hybrid format",
+  "Коли вам зручно долучатися?": "When can you attend?",
+  "Будні ввечері": "Weekday evenings",
+  "Вихідні вранці": "Weekend mornings",
+  "Вихідні вдень": "Weekend afternoons",
+  "Яка тема для вас найцікавіша?": "Which topic interests you most?",
+  "Кар'єра та стажування": "Careers and internships",
+  "Штучний інтелект": "Artificial intelligence",
+  "Підприємництво": "Entrepreneurship",
+  "Наука та дослідження": "Science and research",
+  "Менторство та розвиток": "Mentorship and growth",
+  "Розкажіть про ваші очікування від менторської програми.": "Tell us what you expect from a mentoring programme.",
+  "Як ви хочете долучитися до менторства?": "How would you like to take part in mentoring?",
+  "Шукаю ментора": "I am looking for a mentor",
+  "Хочу бути ментором": "I would like to be a mentor",
+  "Обидві ролі": "Both roles",
+  "Яка підтримка вам потрібна?": "What support would help you?",
+  "Підготовка до співбесіди": "Interview preparation",
+  "Розвиток технічних навичок": "Technical skills development",
+  "Планування кар'єри": "Career planning",
+  "Розвиток власного проєкту": "Developing my own project",
+  "Як часто ви готові зустрічатися?": "How often could you meet?",
+  "Щотижня": "Weekly",
+  "Двічі на місяць": "Twice a month",
+  "Щомісяця": "Monthly",
+  "Ваш досвід з AlumnixHub": "Your AlumnixHub experience",
+  "Допоможіть зробити платформу зручнішою для спільноти.": "Help make the platform easier to use for the community.",
+  "Наскільки легко знайти потрібний розділ?": "How easy is it to find the section you need?",
+  "Дуже легко": "Very easy",
+  "Переважно легко": "Mostly easy",
+  "Складно": "Difficult",
+  "Дуже складно": "Very difficult",
+  "Який розділ ви використовуєте найчастіше?": "Which section do you use most often?",
+  "Події": "Events",
+  "Новини": "News",
+  "Випускники": "Alumni",
+  "Чати": "Chats",
+  "Опитування": "Surveys",
+  "Що варто покращити насамперед?": "What should we improve first?",
+  "Пошук на сайті": "Site search",
+  "Мобільну версію": "Mobile experience",
+  "Сповіщення": "Notifications",
+  "Профілі учасників": "Member profiles"
+});
+
+    Object.assign(CONTENT_TRANSLATIONS.en, {
+  "Імпорт КПІ": "KPI import",
+  "Нові матеріали надходять на перевірку. Публікацією керує адміністратор.": "New items are queued for review. Administrators control publication.",
+  "Останнє успішне оновлення": "Last successful update",
+  "Додано за останній імпорт": "Added in the last import",
+  "Наступна перевірка": "Next check",
+  "Щоденний імпорт": "Daily import",
+  "Оновити зараз": "Update now",
+  "Автоімпорт працює, поки сервер увімкнений. Після перерви пропущена перевірка запускається автоматично.": "Automatic imports run while the server is online. Overdue checks run automatically when it restarts.",
+  "Не вдалося отримати стрічку КПІ. Наступна спроба через годину.": "Could not fetch the KPI feed. The next attempt is in one hour.",
+  "Вкажіть дату, час, місце та кількість місць для події.": "Enter the event date, time, location, and capacity.",
+  "Оновлення вже виконується.": "An update is already running.",
+  "Цей матеріал уже опрацьовано.": "This item has already been reviewed.",
+  "Зміни збережено.": "Changes saved.",
+  "Дата публікації джерела": "Source publication date",
+  "Читати на сайті КПІ": "Read on the KPI website",
+  "Створити чернетку новини": "Create news draft",
+  "Пропустити": "Dismiss",
+  "Створити подію з анонсу": "Create an event from this announcement",
+  "Дата й час події (Київ)": "Event date and time (Kyiv)",
+  "Місце проведення": "Location",
+  "Кількість місць": "Capacity",
+  "Створити й опублікувати подію": "Create and publish event",
+  "Редагувати новину": "Edit news",
+  "Редагувати подію": "Edit event",
+  "Пропущено": "Dismissed",
+  "Матеріалів поки немає.": "No items yet."
+});
+
     function translatedText(original, lang) {
       if (lang === "uk") return original;
       const map = CONTENT_TRANSLATIONS[lang] || {};
       const leading = original.match(/^\s*/)?.[0] || "";
       const trailing = original.match(/\s*$/)?.[0] || "";
-      const trimmed = original.trim();
+      const trimmed = original.trim().replace(/\s+/g, " ");
       if (!trimmed) return original;
       if (map[trimmed]) return `${leading}${map[trimmed]}${trailing}`;
-      let output = trimmed;
-      Object.entries(map).forEach(([source, target]) => {
-        if (source.length > 2 && output.includes(source)) output = output.split(source).join(target);
-      });
-      return `${leading}${output}${trailing}`;
+      const dynamicPatterns = [
+        [/^(\d+) майбутніх$/, '$1 upcoming'],
+        [/^(\d+) переглядів$/, '$1 views'],
+        [/^(\d+) реєстрацій$/, '$1 registrations'],
+        [/^Місця:\s*(\d+)\/(\d+)$/, 'Seats: $1/$2'],
+        [/^Середній час відповіді сервера: ([\d.]+) мс$/, 'Average server response time: $1 ms'],
+        [/^Подія (\d+): баланс (-?\d+)(?:, останній запис (.+))?$/, (_, id, net, date) => `Event ${id}: balance ${net}${date ? ', last recorded ' + date : ''}`]
+      ];
+      for (const [pattern, replacement] of dynamicPatterns) {
+        if (pattern.test(trimmed)) return leading + trimmed.replace(pattern, replacement) + trailing;
+      }
+      const duration = trimmed.match(/^(\d+(?:\.\d+)?)\s*(с|хв|год|мс)$/);
+      const units = {'с':'s','хв':'min','год':'h','мс':'ms'};
+      if (duration) return `${leading}${duration[1]} ${units[duration[2]]}${trailing}`;
+      const count = trimmed.match(/^(.+?)\s+(\d+)$/);
+      if (count && map[count[1]]) return `${leading}${map[count[1]]} ${count[2]}${trailing}`;
+      const specialty = trimmed.match(/^(\d{3}\s*[—–-]\s*)(.+)$/);
+      if (specialty && map[specialty[2]]) return `${leading}${specialty[1]}${map[specialty[2]]}${trailing}`;
+      return original;
     }
 
     function translateDynamicContent(lang) {
+      document.querySelectorAll('[data-name-uk]').forEach(el => {
+        el.textContent = lang === 'en' ? translatedText(el.dataset.nameEn, 'en') : el.dataset.nameUk;
+      });
+      document.querySelectorAll('[data-local-date]').forEach(el => {
+        const date = new Date(el.dataset.localDate);
+        if (!Number.isNaN(date.getTime())) el.textContent = new Intl.DateTimeFormat(lang === 'en' ? 'en-GB' : 'uk-UA', {
+          day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false
+        }).format(date);
+      });
       const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
         acceptNode(node) {
           const parent = node.parentElement;
           if (!parent || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
-          if (parent.closest("script, style, noscript, textarea, input, option, [data-i18n], [data-no-translate]")) return NodeFilter.FILTER_REJECT;
+          if (parent.closest("script, style, noscript, textarea, input, [contenteditable], [data-i18n], [data-no-translate], [data-content-field]")) return NodeFilter.FILTER_REJECT;
           return NodeFilter.FILTER_ACCEPT;
         }
       });
       const nodes = [];
       while (walker.nextNode()) nodes.push(walker.currentNode);
       nodes.forEach(node => {
-        if (!ORIGINAL_TEXT_NODES.has(node)) ORIGINAL_TEXT_NODES.set(node, node.nodeValue);
-        node.nodeValue = translatedText(ORIGINAL_TEXT_NODES.get(node), lang);
+        const previous = ORIGINAL_TEXT_NODES.get(node);
+        const original = previous && node.nodeValue === previous.last ? previous.original : node.nodeValue;
+        const translated = translatedText(original, lang);
+        const option = node.parentElement.closest('option');
+        if (option && !option.hasAttribute('value')) option.setAttribute('value', option.value);
+        ORIGINAL_TEXT_NODES.set(node, {original, last: translated});
+        if (node.nodeValue !== translated) node.nodeValue = translated;
       });
-      document.querySelectorAll("[placeholder]:not([data-i18n-placeholder])").forEach(el => {
-        if (!el.dataset.originalPlaceholder) el.dataset.originalPlaceholder = el.placeholder;
-        el.placeholder = translatedText(el.dataset.originalPlaceholder, lang);
-      });
-      document.querySelectorAll("[title]").forEach(el => {
-        if (!el.dataset.originalTitle) el.dataset.originalTitle = el.title;
-        el.title = translatedText(el.dataset.originalTitle, lang);
-      });
+      for (const attribute of ['placeholder', 'title', 'aria-label', 'alt']) {
+        document.querySelectorAll(`[${attribute}]`).forEach(el => {
+          if (el.closest('[data-no-translate]') || (attribute === 'placeholder' && el.hasAttribute('data-i18n-placeholder'))) return;
+          const key = 'original-' + attribute;
+          if (!el.hasAttribute('data-' + key)) el.setAttribute('data-' + key, el.getAttribute(attribute));
+          const value = translatedText(el.getAttribute('data-' + key), lang);
+          if (el.getAttribute(attribute) !== value) el.setAttribute(attribute, value);
+        });
+      }
     }
 
     function updateBreadcrumb(lang) {
@@ -522,19 +645,56 @@
       else current.textContent = labels[path] || "AlumnixHub";
     }
 
+    Object.assign(I18N.uk, {
+      registration_created: "Акаунт створено.",
+      registration_email_sent: "Ми надіслали лист підтвердження на",
+      registration_email_failed: "Акаунт створено, але лист підтвердження не вдалося надіслати автоматично. Зверніться до адміністратора платформи.",
+      registration_verify_required: "Вхід буде доступний після підтвердження email.",
+      registration_login: "До входу"
+    });
+    Object.assign(I18N.en, {
+      registration_created: "Account created.",
+      registration_email_sent: "We sent a verification email to",
+      registration_email_failed: "Your account was created, but we could not send the verification email. Please contact the platform administrator.",
+      registration_verify_required: "You can sign in once you have verified your email address.",
+      registration_login: "Go to sign in"
+    });
+
+    Object.assign(I18N.uk, {"error_home":"На головну","error_400_title":"Не вдалося виконати запит","error_400_message":"Перевірте введені дані та спробуйте ще раз.","error_401_title":"Увійдіть до свого акаунта","error_401_message":"Щоб відкрити цю сторінку, потрібно увійти. Можливо, термін вашого сеансу завершився.","error_403_title":"Доступ обмежено","error_403_message":"Ваш обліковий запис не має доступу до цієї дії. Адміністративні розділи доступні лише адміністраторам.","error_404_title":"Сторінку не знайдено","error_404_message":"Можливо, адресу змінено або матеріал уже видалено.","error_405_title":"Ця дія недоступна","error_405_message":"Відкрийте потрібний розділ сайту та повторіть дію звідти.","error_422_title":"Перевірте введені дані","error_422_message":"Деякі обов’язкові поля не заповнені або мають неправильний формат.","error_429_title":"Забагато запитів","error_429_message":"Зачекайте трохи й спробуйте ще раз.","error_500_title":"Щось пішло не так","error_500_message":"Не вдалося завантажити сторінку. Спробуйте пізніше."});
+    Object.assign(I18N.en, {"error_home":"Go to homepage","error_400_title":"Unable to process the request","error_400_message":"Check the information you entered and try again.","error_401_title":"Sign in to your account","error_401_message":"Sign in to open this page. Your session may have expired.","error_403_title":"Access restricted","error_403_message":"Your account does not have access to this action. Administration pages are available only to administrators.","error_404_title":"Page not found","error_404_message":"The address may have changed or the content may have been removed.","error_405_title":"This action is unavailable","error_405_message":"Open the relevant section of the site and try the action there.","error_422_title":"Check your information","error_422_message":"Some required fields are missing or have an invalid format.","error_429_title":"Too many requests","error_429_message":"Please wait a little and try again.","error_500_title":"Something went wrong","error_500_message":"We could not load this page. Please try again later."});
+
     function applyLanguage(lang) {
+      lang = lang === 'en' ? 'en' : 'uk';
       const dict = I18N[lang] || I18N.uk;
       document.documentElement.lang = lang;
       document.querySelectorAll("[data-i18n]").forEach(el => { if (dict[el.dataset.i18n]) el.textContent = dict[el.dataset.i18n]; });
       document.querySelectorAll("[data-i18n-placeholder]").forEach(el => { if (dict[el.dataset.i18nPlaceholder]) el.placeholder = dict[el.dataset.i18nPlaceholder]; });
       translateDynamicContent(lang);
       updateBreadcrumb(lang);
-      localStorage.setItem("ui_language", lang);
+      try { localStorage.setItem("ui_language", lang); } catch (_) {}
       const select = document.getElementById("languageSwitch");
       if (select) select.value = lang;
+      document.dispatchEvent(new CustomEvent('alumnix:language', {detail: lang}));
     }
-    applyLanguage(localStorage.getItem("ui_language") || "uk");
+    Object.assign(CONTENT_TRANSLATIONS.en, window.ALUMNIX_UI_EN || {});
+    Object.entries(I18N.uk).forEach(([key, value]) => {
+      if (I18N.en[key]) CONTENT_TRANSLATIONS.en[value] = I18N.en[key];
+    });
+    let initialLanguage = 'uk';
+    try { initialLanguage = localStorage.getItem('ui_language') || 'uk'; } catch (_) {}
+    applyLanguage(initialLanguage);
     document.getElementById("languageSwitch")?.addEventListener("change", e => applyLanguage(e.target.value));
+    let translationScheduled = false;
+    new MutationObserver(() => {
+      if (translationScheduled) return;
+      translationScheduled = true;
+      requestAnimationFrame(() => {
+        translationScheduled = false;
+        translateDynamicContent(document.documentElement.lang);
+      });
+    }).observe(document.body, {childList: true, characterData: true, subtree: true});
+    const originalConfirm = window.confirm.bind(window);
+    window.confirm = message => originalConfirm(translatedText(String(message), document.documentElement.lang));
 
     (() => {
       const toggle = document.getElementById("mobileMenuToggle");
@@ -595,5 +755,7 @@
       document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") sendDuration(); });
     })();
   </script>
+{% if ident and ident.role == 'admin' %}<script src="/static/engagement.js?v=20260929" data-role="admin"></script>
+{% elif ident and ident.user_id %}<script src="/static/engagement.js?v=20260929" data-user="{{ ident.user_id }}"></script>{% endif %}
 </body>
 </html>

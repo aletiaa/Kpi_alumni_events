@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<a href="/events">Усі події</a>
+<article class="py-3">
+<img src="{{ event.image_url or '/static/img/kpi-main.png' }}" alt="" style="width:100%;max-height:380px;object-fit:cover">
+<h1 class="section-title mt-3">{{ content_text('event', event.id, 'title', event.title) }}</h1>
+<p>{{ display_datetime(event.start_time) }}{% if event.end_time %} · {{ display_datetime(event.end_time) }}{% endif %}</p>
+<p>{{ content_text('event', event.id, 'location', event.location) }}</p>
+<div style="white-space:pre-wrap;overflow-wrap:anywhere">{{ content_text('event', event.id, 'description', event.description) }}</div>
+<section id="register-area" class="border-top pt-3 mt-4">
+<p><span>Місця:</span> {{ count }}/{{ event.capacity }}</p>
+{% if registered %}<p class="alert alert-success">Ви зареєстровані.</p>
+{% elif closed %}<p class="alert alert-secondary">Реєстрацію закрито.</p>
+{% elif allowed %}<form method="post" action="/events/{{ event.id }}/register"><button class="btn btn-primary">Зареєструватися</button></form>
+{% else %}<a class="btn btn-primary" href="/login?next=/events/{{ event.id }}%23register-area">Увійти для реєстрації</a>{% endif %}
+{% if allowed %}
+<button type="button" class="btn btn-outline-primary mt-3" id="generate-event-qr">Згенерувати QR для реєстрації</button>
+<div id="event-qr-panel" hidden class="mt-3"><img id="event-qr" width="256" height="256" alt="QR-код реєстрації" style="max-width:100%;height:auto"><p><a href="/events/{{ event.id }}/registration-qr" download="event-{{ event.id }}.png">Завантажити QR</a></p></div>
+<script>document.getElementById('generate-event-qr').addEventListener('click',()=>{document.getElementById('event-qr').src='/events/{{ event.id }}/registration-qr';document.getElementById('event-qr-panel').hidden=false;});</script>
+{% endif %}
+</section></article>
+{% endblock %}

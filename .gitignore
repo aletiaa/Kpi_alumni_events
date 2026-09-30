@@ -221,3 +221,7 @@ work_utf8_test.txt
 
 # Streamlit
 .streamlit/secrets.toml
+# Local credentials and release backups must never be committed.
+admins.csv
+backups/
+work_utf8_test.txt

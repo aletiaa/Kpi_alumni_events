@@ -1,5 +1,34 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="academic-band mb-3"><div class="kicker">Повідомлення</div><h2 class="section-title mb-1">Листування на сайті</h2><div class="text-muted">Писати можна користувачам з вашого потоку.</div></section>
-<div class="list-group shadow-soft">{% for m in messages %}{% set other = m.receiver if m.sender_id == ident.user_id else m.sender %}<a class="list-group-item list-group-item-action" href="/messages/{{ other.id }}"><div class="d-flex justify-content-between gap-3"><div><div class="fw-bold">{{ other.full_name }}</div><div class="small text-muted">{{ m.body }}</div></div><span class="small text-muted">{{ m.created_at }}</span></div></a>{% else %}<div class="alert alert-secondary">Повідомлень ще немає. Відкрийте профілі alumni і напишіть користувачу зі свого потоку.</div>{% endfor %}</div>
+<section class="academic-band mb-3"><h1 class="section-title mb-0">Повідомлення</h1></section>
+{% if personal_profile_required %}
+<div class="alert alert-info">Для листування потрібен особистий профіль користувача.</div>
+<p>Ви увійшли як адміністратор. Для особистого листування увійдіть у зареєстрований профіль.</p>
+<a class="btn btn-primary" href="/logout">Змінити обліковий запис</a>
+{% else %}
+<div class="row g-4">
+<section class="col-12 col-lg-7">
+<div class="d-flex justify-content-between align-items-center mb-3"><h2 class="h4 mb-0">Розмови</h2><a class="btn btn-outline-primary btn-sm" href="/messages">Оновити</a></div>
+<div class="list-group">
+{% for m in messages %}{% set other = m.receiver if m.sender_id == ident.user_id else m.sender %}
+<a class="list-group-item list-group-item-action py-3" href="/messages/{{ other.id }}">
+<div class="d-flex justify-content-between flex-wrap gap-2"><b>{{ display_name(other) }}</b><small>{{ display_datetime(m.created_at) }}</small></div>
+<div class="d-flex justify-content-between gap-2 mt-1"><span class="text-truncate" data-no-translate>{{ m.body }}</span>{% if unread.get(other.id, 0) %}<span class="badge text-bg-primary">{{ unread[other.id] }} <span>непрочитаних</span></span>{% endif %}</div>
+</a>
+{% else %}<p class="text-muted">Розмов поки немає.</p>{% endfor %}
+</div>
+<nav class="d-flex gap-3 mt-3" aria-label="Pagination">{% if page > 1 %}<a href="/messages?page={{ page - 1 }}">Назад</a>{% endif %}{% if has_next %}<a href="/messages?page={{ page + 1 }}">Далі</a>{% endif %}</nav>
+</section>
+<section class="col-12 col-lg-5">
+<h2 class="h4">Нова розмова</h2>
+<form method="get" action="/messages" class="d-flex gap-2 mb-3"><input class="form-control" name="q" value="{{ q }}" placeholder="Знайти користувача" aria-label="Знайти користувача" maxlength="120"><button class="btn btn-primary">Шукати</button></form>
+<div class="list-group">
+{% for person in people %}<a href="/messages/{{ person.id }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3">
+{% if person.avatar_url %}<img src="{{ person.avatar_url }}" alt="" width="40" height="40" style="object-fit:cover;border-radius:50%" loading="lazy">{% endif %}
+<span>{{ display_name(person) }}</span></a>{% else %}<p class="text-muted">Користувачів не знайдено.</p>{% endfor %}
+</div>
+{% if more_people %}<p class="text-muted small mt-2">Уточніть пошук, щоб знайти інших користувачів.</p>{% endif %}
+</section>
+</div>
+{% endif %}
 {% endblock %}

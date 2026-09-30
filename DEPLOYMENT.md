@@ -12,7 +12,7 @@ cd Kpi_alumni_events
 Use the deployment branch that contains the latest AlumnixHub work:
 
 ```powershell
-git checkout deploy-alumnixhub
+git checkout codex/deploy-alumnixhub-clean
 ```
 
 ## 2. Required Environment Variables
@@ -43,7 +43,7 @@ For production, PostgreSQL is recommended.
 ## 3. Render Deployment
 
 1. Open Render and create a new Web Service from the GitHub repository.
-2. Connect the branch `deploy-alumnixhub`.
+2. Connect the branch `codex/deploy-alumnixhub-clean`.
 3. Use the existing `render.yaml` when Render detects it.
 4. If configuring manually:
 
@@ -56,7 +56,7 @@ uvicorn app.main:app --host 0.0.0.0 --port $PORT
 6. Add `DATABASE_URL`, `SECRET_KEY`, and `APP_BASE_URL`.
 7. Deploy the service.
 
-The app runs startup migration and seed logic automatically, so an empty database can be used.
+The app runs startup migrations automatically. Demo accounts and events are disabled by default (`SEED_DEMO_DATA=false`). Do not enable demo seeding in production.
 
 ## 4. Admin Access
 
@@ -65,11 +65,18 @@ Admin users are configured through `admins.csv`.
 Format:
 
 ```csv
-email,full_name
-admin@example.com,Admin User
+email,password_hash,full_name
 ```
 
-Use an email in this file when logging in as admin.
+Keep this file private; it is excluded from Git. Each administrator needs a PBKDF2-SHA256 password hash, not a plaintext password. Existing local files can be migrated without changing passwords:
+
+```powershell
+py -3.11 -m scripts.hash_admin_passwords
+```
+
+Provision the migrated file through your host's secret-file facility and set `ADMINS_CSV_PATH` to its absolute path. Login fails closed when the file is absent or contains plaintext credentials. The migration requires an existing local CSV and does not create administrators.
+
+Administrator credentials were previously tracked. Removing the file does not remove old Git history: rotate old administrator passwords and any API credentials previously shared or committed before public deployment.
 
 ## 5. Email
 
@@ -109,6 +116,9 @@ The accurate page duration endpoint uses browser `sendBeacon`.
 - Set a strong `SECRET_KEY`.
 - Set `APP_BASE_URL` to the public HTTPS URL.
 - Keep `.env` out of Git.
+- Keep `admins.csv`, databases and `backups/` out of Git.
+- Run only one application worker when Telegram polling is enabled; multiple polling processes conflict.
+- Keep the hosting process online for Telegram replies and scheduled jobs.
 - Confirm admin email exists in `admins.csv`.
 - Run `py -3.11 -m pytest -q` before deploying.
 - Check `/analytics` after deployment to confirm middleware writes data.

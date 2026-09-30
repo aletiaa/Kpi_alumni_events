@@ -21,6 +21,11 @@ if "??" in APP_NAME:
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./dev.db")
 SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret")
 APP_BASE_URL = os.getenv("APP_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
+DEEPL_API_KEY = os.getenv("DEEPL_API_KEY", "").strip()
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
+TELEGRAM_ALLOWED_USERNAME = os.getenv("TELEGRAM_ALLOWED_USERNAME", "a_seikaaa").lstrip("@").lower()
+TELEGRAM_ENABLED = env_bool("TELEGRAM_ENABLED", False)
+SEED_DEMO_DATA = env_bool("SEED_DEMO_DATA", False)
 
 EMAIL_ENABLED = env_bool("EMAIL_ENABLED", False)
 SMTP_HOST = os.getenv("SMTP_HOST", "")

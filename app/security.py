@@ -18,7 +18,10 @@ def hash_password(password: str) -> str:
     return pwd_context.hash(password)
 
 def verify_password(password: str, password_hash: str) -> bool:
-    return pwd_context.verify(password, password_hash)
+    try:
+        return pwd_context.verify(password, password_hash)
+    except (ValueError, TypeError):
+        return False
 
 def create_session_token(user_id: int | None, role: str, email: str, full_name: str, avatar_url: str | None = None, status: str | None = None) -> str:
     return serializer.dumps({"user_id": user_id, "role": role, "email": email, "full_name": full_name, "avatar_url": avatar_url, "status": status})

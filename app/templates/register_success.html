@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="alert alert-success shadow-soft">Акаунт створено.</div>
+<div class="alert alert-success shadow-soft" data-i18n="registration_created">Акаунт створено.</div>
 {% if email_sent %}
-  <div class="alert alert-info shadow-soft">Ми надіслали лист підтвердження на {{ email }}.</div>
+  <div class="alert alert-info shadow-soft"><span data-i18n="registration_email_sent">Ми надіслали лист підтвердження на</span> <span data-no-translate>{{ email }}</span>.</div>
 {% else %}
-  <div class="alert alert-warning shadow-soft">Акаунт створено, але лист підтвердження не вдалося надіслати автоматично. Спробуйте пізніше або зверніться до адміністратора платформи.</div>
-  {% if email_unavailable %}<div class="text-muted mb-3">Вхід буде доступний після підтвердження email.</div>{% endif %}
+  <div class="alert alert-warning shadow-soft" data-i18n="registration_email_failed">Акаунт створено, але лист підтвердження не вдалося надіслати автоматично. Зверніться до адміністратора платформи.</div>
 {% endif %}
-<a class="btn btn-primary" href="/login">До входу</a>
+<div class="text-muted mb-3" data-i18n="registration_verify_required">Вхід буде доступний після підтвердження email.</div>
+<a class="btn btn-primary" href="/login" data-i18n="registration_login">До входу</a>
 {% endblock %}

@@ -1,4 +1,19 @@
 ﻿{% extends "base.html" %}
 {% block content %}
-<section class="academic-band mb-3"><div class="kicker">Опитування</div><h2 class="section-title mb-1">Активні анкети для спільноти</h2><div class="text-muted">Відповіді допомагають адміністраторам планувати події та сервіси.</div></section><div class="row g-3">{% for survey in surveys %}<div class="col-12 col-lg-6"><div class="card shadow-soft h-100"><div class="card-body"><h4>{{ survey.title }}</h4><p>{{ survey.description or 'Опис відсутній.' }}</p><a class="btn btn-primary btn-sm" href="/surveys/{{ survey.id }}">Заповнити</a></div></div></div>{% else %}<div class="col-12"><div class="alert alert-secondary">Активних опитувань поки немає.</div></div>{% endfor %}</div>
+<section class="academic-band mb-3">
+<div class="kicker">Опитування</div><h1 class="section-title mb-1">Активні анкети для спільноти</h1>
+<p class="text-muted">Відповіді допомагають адміністраторам планувати події та сервіси.</p>
+{% if ident and ident.role == 'admin' %}<a class="btn btn-outline-primary" href="/admin/surveys">Керувати опитуваннями</a>{% endif %}
+</section>
+<div class="row g-3">
+{% for survey in surveys %}
+<div class="col-12 col-lg-6"><article class="card shadow-soft h-100"><div class="card-body">
+<h2 class="fs-4">{{ content_text('survey', survey.id, 'title', survey.title) }}</h2><p>{{ content_text('survey', survey.id, 'description', survey.description or 'Опис відсутній.') }}</p>
+<div class="d-flex flex-wrap gap-2">
+{% if not ident or ident.role != 'admin' %}<a class="btn btn-primary" href="/surveys/{{ survey.id }}">Заповнити</a>{% endif %}
+{% if ident %}<a class="btn btn-outline-primary" href="/surveys/{{ survey.id }}/results">Результати</a>{% endif %}
+{% if ident and ident.role == 'admin' %}<a class="btn btn-outline-secondary" href="/admin/surveys/{{ survey.id }}/questions">Керувати питаннями</a>{% endif %}
+</div></div></article></div>
+{% else %}<div class="col-12"><div class="alert alert-secondary">Активних опитувань поки немає.</div></div>{% endfor %}
+</div>
 {% endblock %}

@@ -1,4 +1,4 @@
-from collections import Counter, defaultdict
+from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 from shutil import copyfileobj
@@ -362,17 +362,9 @@ def admin_survey_results(survey_id: int, request: Request, db: Session = Depends
     survey = db.query(Survey).options(joinedload(Survey.questions).joinedload(SurveyQuestion.answers)).filter(Survey.id == survey_id).first()
     if not survey:
         raise HTTPException(status_code=404, detail="Опитування не знайдено")
-    grouped = []
-    total_answers = 0
-    for question in survey.questions:
-        answers = [a.answer_text for a in question.answers]
-        total_answers += len(answers)
-        grouped.append({
-            "question": question,
-            "answers": answers,
-            "counts": Counter(answers) if question.question_type == "single_choice" else None,
-        })
-    return render(request, "admin/survey_results.html", {"ident": admin, "survey": survey, "grouped": grouped, "total_answers": total_answers})
+    from app.services.survey_results import survey_results
+    return render(request, "admin/survey_results.html", {
+        "ident": admin, "survey": survey, **survey_results(db, survey, include_text=True)})
 
 
 @router.get("/users")

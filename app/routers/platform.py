@@ -13,6 +13,9 @@ from app.deps import get_current_identity, require_identity
 from app.models import ChatLink, Event, News, Notification, Registration, Survey, SurveyAnswer, User
 from app.routers.web import build_events_context
 from app.services.specialties import specialty_options
+from app.services.messaging import can_start_conversation
+from app.services.survey_results import survey_results
+from app.models import KpiImportItem
 
 router = APIRouter()
 
@@ -255,7 +258,8 @@ def news_detail(news_id: int, request: Request, db: Session = Depends(get_db), i
     item = db.query(News).filter(News.id == news_id, News.is_published == True).first()
     if not item:
         raise HTTPException(status_code=404, detail="Новину не знайдено")
-    return render(request, "news/detail.html", {"ident": ident, "item": item})
+    source = db.query(KpiImportItem).filter_by(news_id=item.id).first()
+    return render(request, "news/detail.html", {"ident": ident, "item": item, "source": source})
 
 
 @router.get("/profile")
@@ -272,6 +276,7 @@ def profile_form(request: Request, db: Session = Depends(get_db), ident=Depends(
 def profile_save(
     request: Request,
     full_name: str = Form(...),
+    full_name_en: str = Form("", max_length=120),
     group_name: str = Form(""),
     birth_date: str = Form(""),
     faculty: str = Form(""),
@@ -286,6 +291,7 @@ def profile_save(
     current_position: str = Form(""),
     company: str = Form(""),
     skills: str = Form(""),
+    interests: str = Form("", max_length=2000),
     help_topics: str = Form(""),
     is_mentor: str | None = Form(None),
     mentorship_topics: str = Form(""),
@@ -309,6 +315,7 @@ def profile_save(
         return render(request, "profile.html", template_context(request, ident, user=user, completeness=profile_completeness(user), error="LinkedIn URL має починатися з http:// або https://"), status_code=400)
 
     user.full_name = full_name.strip() or user.full_name
+    user.full_name_en = clean(full_name_en)
     user.group_name = clean(group_name)
     user.birth_date = parse_date(birth_date)
     user.faculty = clean(faculty)
@@ -323,6 +330,7 @@ def profile_save(
     user.current_position = clean(current_position)
     user.company = clean(company)
     user.skills = clean(skills)
+    user.interests = clean(interests)
     user.help_topics = clean(help_topics)
     user.is_mentor = bool(is_mentor)
     user.mentorship_topics = clean(mentorship_topics)
@@ -369,7 +377,7 @@ def alumni_list(
         query = query.filter(User.graduation_year == grad)
     users = query.order_by(User.full_name.asc()).limit(100).all()
     current_user = db.get(User, ident.user_id) if ident and ident.user_id else None
-    can_message_ids = {u.id for u in users if same_stream(current_user, u)}
+    can_message_ids = {u.id for u in users if can_start_conversation(current_user, u)}
     return render(request, "alumni/list.html", template_context(request, ident, users=users, can_message_ids=can_message_ids))
 
 
@@ -405,7 +413,7 @@ def mentors_list(
         query = query.filter(User.specialty.ilike(f"%{specialty.strip()}%"))
     mentors = query.order_by(User.full_name.asc()).limit(100).all()
     current_user = db.get(User, ident.user_id) if ident and ident.user_id else None
-    can_message_ids = {u.id for u in mentors if same_stream(current_user, u)}
+    can_message_ids = {u.id for u in mentors if can_start_conversation(current_user, u)}
     return render(
         request,
         "mentors/list.html",
@@ -453,21 +461,44 @@ def survey_detail(survey_id: int, request: Request, db: Session = Depends(get_db
     )
     if not survey:
         raise HTTPException(status_code=404, detail="Опитування не знайдено")
-    return render(request, "surveys/detail.html", {"ident": ident, "survey": survey})
+    answers = {}
+    if ident and ident.user_id:
+        answers = {a.question_id: a.answer_text for a in db.query(SurveyAnswer).filter_by(
+            survey_id=survey.id, user_id=ident.user_id).order_by(SurveyAnswer.id)}
+    return render(request, "surveys/detail.html", {"ident": ident, "survey": survey, "answers": answers})
+
+
+@router.get("/surveys/{survey_id}/results")
+def survey_results_page(survey_id: int, request: Request, db: Session = Depends(get_db), ident=Depends(require_identity)):
+    survey = db.query(Survey).options(joinedload(Survey.questions)).filter_by(id=survey_id, is_active=True).first()
+    if not survey:
+        raise HTTPException(status_code=404, detail="Опитування не знайдено")
+    return render(request, "admin/survey_results.html", {
+        "ident": ident, "survey": survey, **survey_results(db, survey, include_text=ident.role == "admin")})
 
 
 @router.post("/surveys/{survey_id}")
 async def survey_submit(survey_id: int, request: Request, db: Session = Depends(get_db), ident=Depends(require_identity)):
     if ident.role == "admin" or not ident.user_id:
-        return RedirectResponse("/surveys", status_code=303)
+        raise HTTPException(status_code=403, detail="Адміністратор керує опитуваннями. Для участі увійдіть як учасник.")
     survey = db.query(Survey).options(joinedload(Survey.questions)).filter(Survey.id == survey_id, Survey.is_active == True).first()
     if not survey:
         raise HTTPException(status_code=404, detail="Опитування не знайдено")
     form = await request.form()
+    answers = {q.id: str(form.get(f"question_{q.id}", "")).strip() for q in survey.questions}
+    if not survey.questions or any(
+        not answers[q.id] or len(answers[q.id]) > 4000 or
+        (q.question_type == "single_choice" and answers[q.id] not in
+         [option.strip() for option in (q.options_text or "").splitlines() if option.strip()])
+        for q in survey.questions
+    ):
+        return render(request, "surveys/detail.html", {
+            "ident": ident, "survey": survey, "answers": answers,
+            "error": "Заповніть усі питання. Оберіть запропонований варіант або введіть текст до 4000 символів."
+        }, status_code=400)
+    db.query(SurveyAnswer).filter_by(survey_id=survey.id, user_id=ident.user_id).delete(synchronize_session=False)
     for question in survey.questions:
-        answer = clean(str(form.get(f"question_{question.id}", "")))
-        if answer:
-            db.add(SurveyAnswer(survey_id=survey.id, question_id=question.id, user_id=ident.user_id, answer_text=answer))
+        db.add(SurveyAnswer(survey_id=survey.id, question_id=question.id, user_id=ident.user_id, answer_text=answers[question.id]))
     db.commit()
     return RedirectResponse(f"/surveys/{survey_id}?submitted=1", status_code=303)
 

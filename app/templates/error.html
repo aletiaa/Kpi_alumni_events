@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="error-page" aria-labelledby="error-title">
+  <div class="error-code" data-no-translate>{{ status_code }}</div>
+  <div class="kicker">AlumnixHub</div>
+  <h1 id="error-title" data-i18n="error_{{ error_key }}_title">{{ error_title }}</h1>
+  <p data-i18n="error_{{ error_key }}_message">{{ error_message }}</p>
+  <div class="d-flex flex-wrap gap-3 mt-4">
+    {% if status_code == 401 %}<a class="btn btn-primary" href="/login" data-i18n="nav_login">Увійти</a>{% endif %}
+    <a class="btn {{ 'btn-outline-primary' if status_code == 401 else 'btn-primary' }}" href="/" data-i18n="error_home">На головну</a>
+    {% if status_code == 404 %}<a class="btn btn-outline-primary" href="/events" data-i18n="nav_events">Події</a>{% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -24,7 +24,7 @@
             {% if day %}
               <div class="calendar-day">{{ day }}</div>
               {% for event in calendar.events_by_day.get(day, [])[:2] %}
-                <a class="calendar-event" href="#event-{{ event.id }}">{{ event.title }}</a>
+                <a class="calendar-event" href="#event-{{ event.id }}">{{ content_text('event', event.id, 'title', event.title) }}</a>
               {% endfor %}
               {% if calendar.events_by_day.get(day, [])|length > 2 %}<span class="calendar-more">+{{ calendar.events_by_day.get(day, [])|length - 2 }}</span>{% endif %}
             {% endif %}
@@ -43,10 +43,11 @@
   <div class="card shadow-soft hover-lift h-100 overflow-hidden">
     <img class="event-image" src="{{ e.image_url or '/static/img/kpi-main.png' }}" alt="{{ e.title }}">
     <div class="card-body">
-      <div class="kicker mb-2">{{ e.location }}</div>
-      <h4>{{ e.title }}</h4>
-      <div class="text-muted small mb-3">{{ e.start_time }}{% if e.end_time %} · до {{ e.end_time }}{% endif %}</div>
-      <p>{{ e.short_description or e.description }}</p>
+      <div class="kicker mb-2">{{ content_text('event', e.id, 'location', e.location) }}</div>
+      <h4>{{ content_text('event', e.id, 'title', e.title) }}</h4>
+      <div class="text-muted small mb-3">{{ display_datetime(e.start_time) }}{% if e.end_time %} · <span>до</span> {{ display_datetime(e.end_time) }}{% endif %}</div>
+      <p>{{ content_text('event', e.id, 'preview', e.short_description or e.description) }}</p>
+      <a class="btn btn-outline-primary mb-3" href="/events/{{ e.id }}">Повний опис</a>
       <div class="d-flex gap-2 flex-wrap align-items-center mb-3">
         <span class="badge text-bg-light border">Місця: {{ current_regs }}/{{ e.capacity }}</span>
         <span class="badge {% if status == 'open' %}text-bg-success{% elif status == 'registered' %}text-bg-primary{% else %}text-bg-secondary{% endif %}">{{ status }}</span>
@@ -64,7 +65,7 @@
       {% elif ident and ident.role == "admin" %}<a class="btn btn-outline-primary" href="/admin/events/{{ e.id }}/edit">Редагувати</a>{% else %}<a class="btn btn-primary" href="/login">Увійти, щоб реагувати й коментувати</a>{% endif %}
       <div class="event-comments mt-3">
         <div class="fw-bold mb-2">Коментарі</div>
-        {% for c in comments_by_event.get(e.id, [])[-3:] %}<div class="comment-row"><div class="fw-semibold">{{ c.user.full_name if c.user else 'Користувач' }}</div><div>{{ c.body }}</div><div class="text-muted small">{{ c.created_at }}</div></div>{% else %}<div class="text-muted small">Коментарів ще немає.</div>{% endfor %}
+        {% for c in comments_by_event.get(e.id, [])[-3:] %}<div class="comment-row"><div class="fw-semibold">{{ display_name(c.user) if c.user else 'Користувач' }}</div><div>{{ c.body }}</div><div class="text-muted small">{{ display_datetime(c.created_at) }}</div></div>{% else %}<div class="text-muted small">Коментарів ще немає.</div>{% endfor %}
         {% if ident and ident.role != "admin" %}<form method="post" action="/events/{{ e.id }}/comments" class="mt-2"><textarea class="form-control" name="body" rows="2" maxlength="1000" placeholder="Ваш коментар до події" required></textarea><button class="btn btn-outline-primary btn-sm mt-2">Додати коментар</button></form>{% endif %}
       </div>
     </div>

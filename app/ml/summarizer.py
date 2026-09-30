@@ -46,7 +46,10 @@ def generate_short_description(
     corpus = sents + [doc]
 
     vec = TfidfVectorizer(stop_words="english", ngram_range=(1, 2), min_df=1)
-    X = vec.fit_transform(corpus)
+    try:
+        X = vec.fit_transform(corpus)
+    except ValueError:
+        return desc[:max_chars].strip()
 
     sent_X = X[:-1]
     doc_X = X[-1]

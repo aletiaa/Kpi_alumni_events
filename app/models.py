@@ -6,11 +6,115 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .db import Base
 
 
+class TelegramBotReply(Base):
+    __tablename__ = "telegram_bot_replies"
+    key: Mapped[str] = mapped_column(String(160), primary_key=True)
+    chat_id: Mapped[str] = mapped_column(String(40))
+    user_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    payload: Mapped[str] = mapped_column(Text)
+    method: Mapped[str] = mapped_column(String(30), default="sendMessage")
+    status: Mapped[str] = mapped_column(String(30), default="queued")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    attempted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+
+class TelegramUpload(Base):
+    __tablename__ = "telegram_uploads"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    update_id: Mapped[int] = mapped_column(Integer, unique=True)
+    file_id: Mapped[str] = mapped_column(Text)
+    kind: Mapped[str] = mapped_column(String(20))
+    filename: Mapped[str] = mapped_column(String(255))
+    size: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class TelegramAutomationPreference(Base):
+    __tablename__ = "telegram_automation_preferences"
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    reminders: Mapped[bool] = mapped_column(Boolean, default=False)
+    birthdays: Mapped[bool] = mapped_column(Boolean, default=False)
+
+
+class TelegramSubscription(Base):
+    __tablename__ = "telegram_subscriptions"
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    chat_id: Mapped[str | None] = mapped_column(String(40), unique=True, nullable=True)
+    username: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    code_hash: Mapped[str | None] = mapped_column(String(64), unique=True, nullable=True)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    consent_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    news: Mapped[bool] = mapped_column(Boolean, default=False)
+    events: Mapped[bool] = mapped_column(Boolean, default=False)
+
+
+class TelegramBroadcast(Base):
+    __tablename__ = "telegram_broadcasts"
+    campaign_id: Mapped[int] = mapped_column(ForeignKey("bot_campaigns.id"), primary_key=True)
+    topic: Mapped[str] = mapped_column(String(20))
+    queued_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    cancelled_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+
+class TelegramRecipientDelivery(Base):
+    __tablename__ = "telegram_recipient_deliveries"
+    campaign_id: Mapped[int] = mapped_column(ForeignKey("bot_campaigns.id"), primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    chat_id: Mapped[str] = mapped_column(String(40))
+    consent_at: Mapped[datetime] = mapped_column(DateTime)
+    status: Mapped[str] = mapped_column(String(30), default="queued", index=True)
+    attempted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    message_id: Mapped[str | None] = mapped_column(String(40), nullable=True)
+
+
+class TelegramLink(Base):
+    __tablename__ = "telegram_links"
+    admin_email: Mapped[str] = mapped_column(String(200), primary_key=True)
+    code_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    chat_id: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    username: Mapped[str | None] = mapped_column(String(100), nullable=True)
+
+
+class TelegramState(Base):
+    __tablename__ = "telegram_state"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    offset: Mapped[int] = mapped_column(Integer, default=0)
+    checked_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    status: Mapped[str] = mapped_column(String(30), default="not_checked")
+    bot_username: Mapped[str | None] = mapped_column(String(100), nullable=True)
+
+
+class TelegramDelivery(Base):
+    __tablename__ = "telegram_deliveries"
+    campaign_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    admin_email: Mapped[str] = mapped_column(String(200))
+    chat_id: Mapped[str] = mapped_column(String(40))
+    status: Mapped[str] = mapped_column(String(30), default="pending")
+    message_id: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class BotCampaign(Base):
+    __tablename__ = "bot_campaigns"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    body: Mapped[str] = mapped_column(Text)
+    audience: Mapped[str] = mapped_column(String(30))
+    created_by: Mapped[str] = mapped_column(String(200))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    simulated_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+
 class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     full_name: Mapped[str] = mapped_column(String(120))
+    full_name_en: Mapped[str | None] = mapped_column(String(120), nullable=True)
     email: Mapped[str] = mapped_column(String(200), unique=True, index=True)
     password_hash: Mapped[str] = mapped_column(String(200))
 
@@ -40,6 +144,7 @@ class User(Base):
     current_position: Mapped[str | None] = mapped_column(String(160), nullable=True)
     company: Mapped[str | None] = mapped_column(String(160), nullable=True)
     skills: Mapped[str | None] = mapped_column(Text, nullable=True)
+    interests: Mapped[str | None] = mapped_column(Text, nullable=True)
     help_topics: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_mentor: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     mentorship_topics: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -150,6 +255,41 @@ class ChatLink(Base):
     graduation_year: Mapped[int | None] = mapped_column(Integer, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class ContentTranslation(Base):
+    __tablename__ = "content_translations"
+
+    source_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    english: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class KpiImportState(Base):
+    __tablename__ = "kpi_import_state"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    next_run: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    lease_until: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    last_success: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    last_error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    added: Mapped[int] = mapped_column(Integer, default=0)
+
+
+class KpiImportItem(Base):
+    __tablename__ = "kpi_import_items"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    source_url: Mapped[str] = mapped_column(String(500), unique=True)
+    title: Mapped[str] = mapped_column(String(200))
+    excerpt: Mapped[str] = mapped_column(Text)
+    image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    source_published: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    imported_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    status: Mapped[str] = mapped_column(String(20), default="pending", index=True)
+    news_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    event_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
 
 class Survey(Base):

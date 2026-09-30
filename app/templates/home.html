@@ -54,7 +54,7 @@
   </div>
   <div class="personal-list">
     {% for event in personal_events %}
-      <a href="/events#event-{{ event.id }}"><b>{{ event.title }}</b><span>{{ event.start_time.strftime("%Y-%m-%d %H:%M") }} · {{ event.location }}</span></a>
+      <a href="/events#event-{{ event.id }}"><b>{{ content_text('event', event.id, 'title', event.title) }}</b><span>{{ display_datetime(event.start_time) }} · {{ event.location }}</span></a>
     {% else %}
       <a href="/events"><b>Зареєструйтесь на першу подію</b><span>Після реєстрації вона з'явиться тут автоматично.</span></a>
     {% endfor %}
@@ -141,7 +141,7 @@
     <div class="live-home-column">
       <h3>Події</h3>
       {% for event in upcoming_events %}
-        <a href="/events#event-{{ event.id }}" class="live-home-item"><b>{{ event.title }}</b><span>{{ event.start_time.strftime("%Y-%m-%d %H:%M") }} · {{ event.location }}</span></a>
+        <a href="/events#event-{{ event.id }}" class="live-home-item"><b>{{ content_text('event', event.id, 'title', event.title) }}</b><span>{{ display_datetime(event.start_time) }} · {{ event.location }}</span></a>
       {% else %}
         <div class="text-muted">Майбутніх подій поки немає.</div>
       {% endfor %}
@@ -149,7 +149,7 @@
     <div class="live-home-column">
       <h3>Новини</h3>
       {% for item in latest_news %}
-        <a href="/news/{{ item.id }}" class="live-home-item"><b>{{ item.title }}</b><span>{{ item.short_description or item.content[:120] }}</span></a>
+        <a href="/news/{{ item.id }}" class="live-home-item"><b>{{ content_text('news', item.id, 'title', item.title) }}</b><span>{{ content_text('news', item.id, 'preview_short', item.short_description or item.content[:120]) }}</span></a>
       {% else %}
         <div class="text-muted">Новин поки немає.</div>
       {% endfor %}
@@ -157,7 +157,7 @@
     <div class="live-home-column">
       <h3>Ментори</h3>
       {% for mentor in mentors %}
-        <a href="/mentors?q={{ mentor.full_name|urlencode }}" class="live-home-item"><b>{{ mentor.full_name }}</b><span>{{ mentor.current_position or mentor.status or mentor.role }}{% if mentor.company %} · {{ mentor.company }}{% endif %}</span></a>
+        <a href="/mentors?q={{ mentor.full_name|urlencode }}" class="live-home-item"><b><span data-no-translate>{{ display_name(mentor) }}</span></b><span>{{ mentor.current_position or mentor.status or mentor.role }}{% if mentor.company %} · {{ mentor.company }}{% endif %}</span></a>
       {% else %}
         <div class="text-muted">Ментори з'являться після оновлення профілів.</div>
       {% endfor %}

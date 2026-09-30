@@ -1,4 +1,36 @@
 ﻿{% extends "base.html" %}
 {% block content %}
-<div class="card shadow-soft"><div class="card-body p-4"><a href="/surveys" class="btn btn-outline-secondary btn-sm mb-3">Назад до опитувань</a><div class="kicker">Опитування</div><h2 class="section-title">{{ survey.title }}</h2><p class="text-muted">{{ survey.description }}</p>{% if request.query_params.get('submitted') == '1' %}<div class="alert alert-success">Дякуємо. Ваші відповіді збережено.</div>{% endif %}{% if not ident %}<div class="alert alert-info">Увійдіть, щоб надіслати відповіді.</div>{% endif %}<form method="post">{% for question in survey.questions %}<div class="mb-3"><label class="form-label fw-bold">{{ loop.index }}. {{ question.question_text }}</label>{% if question.question_type == 'single_choice' %}{% for option in (question.options_text or '').split('\n') if option.strip() %}<div class="form-check"><input class="form-check-input" type="radio" name="question_{{ question.id }}" value="{{ option.strip() }}" id="q{{ question.id }}_{{ loop.index }}"><label class="form-check-label" for="q{{ question.id }}_{{ loop.index }}">{{ option.strip() }}</label></div>{% endfor %}{% else %}<textarea class="form-control" name="question_{{ question.id }}" rows="3"></textarea>{% endif %}</div>{% else %}<div class="alert alert-secondary">У цьому опитуванні ще немає питань.</div>{% endfor %}<button class="btn btn-primary" {% if not ident or ident.role == 'admin' %}disabled{% endif %}>Надіслати відповіді</button></form></div></div>
+<section class="academic-band">
+<a href="/surveys">Назад до опитувань</a>
+<h1 class="section-title mt-3">{{ content_text('survey', survey.id, 'title', survey.title) }}</h1><p>{{ content_text('survey', survey.id, 'description', survey.description or '') }}</p>
+{% if ident %}<a class="btn btn-outline-primary mb-3" href="/surveys/{{ survey.id }}/results">Результати</a>{% endif %}
+{% if error %}<div class="alert alert-danger" role="alert">{{ error }}</div>{% endif %}
+{% if request.query_params.get('submitted') == '1' %}<div class="alert alert-success" role="status">Дякуємо. Ваші відповіді збережено.</div>{% endif %}
+{% if ident and ident.role == 'admin' %}
+<div class="alert alert-info">Адміністратор керує опитуваннями. Для участі увійдіть як учасник.</div>
+<a class="btn btn-primary" href="/admin/surveys/{{ survey.id }}/questions">Керувати питаннями</a>
+{% elif not ident %}
+<a class="btn btn-primary" href="/login">Увійдіть, щоб надіслати відповіді.</a>
+{% else %}
+{% if answers %}<p class="text-muted">Повторне надсилання оновить ваші попередні відповіді.</p>{% endif %}
+<form method="post" action="/surveys/{{ survey.id }}">
+{% for question in survey.questions|sort(attribute='id') %}
+<fieldset class="mb-4">
+<legend class="fs-6 fw-bold"><span data-no-translate>{{ loop.index }}.</span> <span>{{ content_text('survey', survey.id, 'question_' ~ question.id, question.question_text) }}</span></legend>
+{% if question.question_type == 'single_choice' %}
+{% for option in (question.options_text or '').splitlines() if option.strip() %}
+<div class="form-check mb-2">
+<input class="form-check-input" type="radio" required name="question_{{ question.id }}" value="{{ option.strip() }}" id="q{{ question.id }}_{{ loop.index }}" {% if answers.get(question.id) == option.strip() %}checked{% endif %}>
+<label class="form-check-label" for="q{{ question.id }}_{{ loop.index }}">{{ content_text('survey', survey.id, 'option_' ~ question.id ~ '_' ~ loop.index0, option.strip()) }}</label>
+</div>
+{% endfor %}
+{% else %}
+<textarea class="form-control" name="question_{{ question.id }}" aria-label="{{ question.question_text }}" rows="3" maxlength="4000" required>{{ answers.get(question.id, '') }}</textarea>
+{% endif %}
+</fieldset>
+{% else %}<div class="alert alert-secondary">У цьому опитуванні ще немає питань.</div>{% endfor %}
+{% if survey.questions %}<button type="submit" class="btn btn-primary">Надіслати відповіді</button>{% endif %}
+</form>
+{% endif %}
+</section>
 {% endblock %}

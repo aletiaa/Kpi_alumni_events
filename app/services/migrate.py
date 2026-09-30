@@ -32,6 +32,8 @@ def ensure_password_reset_columns(engine):
 
 def ensure_alumni_profile_columns(engine):
     with engine.begin() as conn:
+        _add_column_if_missing(conn, "users", "interests", "interests TEXT")
+        _add_column_if_missing(conn, "users", "full_name_en", "full_name_en VARCHAR(120)")
         _add_column_if_missing(conn, "users", "is_blocked", "is_blocked BOOLEAN NOT NULL DEFAULT FALSE")
         _add_column_if_missing(conn, "users", "group_name", "group_name VARCHAR(80)")
         _add_column_if_missing(conn, "users", "birth_date", "birth_date DATE")
@@ -158,6 +160,7 @@ def ensure_iot_visits_table(engine):
             """))
 def ensure_news_image_columns(engine):
     with engine.begin() as conn:
+        _add_column_if_missing(conn, "kpi_import_items", "image_url", "image_url VARCHAR(500)")
         _add_column_if_missing(conn, "news", "image_url", "image_url VARCHAR(500)")
         _add_column_if_missing(conn, "news", "image_source_url", "image_source_url VARCHAR(500)")
 

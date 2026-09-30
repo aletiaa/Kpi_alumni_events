@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<a href="/admin/bots">Керування ботом</a>
+<h1 class="h2 mt-3"><span>Розсилка</span> #{{ campaign.id }}</h1>
+<p><span>Аудиторія:</span> <strong>{{ {'telegram_all':'Усі підписники', 'telegram_alumni':'Випускники з підпискою', 'telegram_student':'Студенти з підпискою'}[campaign.audience] }}</strong> · <span>{{ 'Новини' if broadcast.topic == 'news' else 'Події' }}</span></p>
+<p class="border-top border-bottom py-3" style="white-space:pre-wrap;overflow-wrap:anywhere" data-no-translate>{{ campaign.body }}</p>
+{% if broadcast.cancelled_at %}<p class="alert alert-warning">Розсилку скасовано</p>
+{% elif not broadcast.queued_at %}
+<p><span>Підписників за поточними налаштуваннями:</span> <strong>{{ eligible_count }}</strong></p>
+<details class="mb-3"><summary>Попередній перегляд отримувачів (до 50)</summary><ul>{% for person in preview_people %}<li>{{ display_name(person) }}</li>{% endfor %}</ul></details>
+<form method="post" action="/admin/bots/campaigns/{{ campaign.id }}/queue">
+<input type="hidden" name="csrf" value="{{ csrf }}">
+<div class="form-check mb-3"><input class="form-check-input" id="confirm-send" name="confirm" value="yes" type="checkbox" required><label for="confirm-send" class="form-check-label">Підтверджую реальне надсилання всім підписникам обраної аудиторії.</label></div>
+<button class="btn btn-primary" {% if not eligible_count %}disabled{% endif %}>Поставити в чергу</button>
+</form>
+{% else %}<p><span>Поставлено в чергу:</span> {{ display_datetime(broadcast.queued_at) }}</p>{% endif %}
+{% if not broadcast.cancelled_at %}
+<form class="mt-3" method="post" action="/admin/bots/campaigns/{{ campaign.id }}/cancel"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn btn-outline-danger">Скасувати ненадіслані</button></form>
+{% endif %}
+<section class="border-top mt-4 pt-3">
+<h2 class="h4">Статус доставки</h2>
+<p>Прийнято Telegram не означає прочитано. Повідомлення в процесі надсилання вже можуть бути доставлені.</p>
+<div class="d-flex flex-wrap gap-3 mb-3">{% for status, count in counts.items() %}<span><span>{{ telegram_status(status) }}</span>: <strong>{{ count }}</strong></span>{% endfor %}</div>
+<div class="table-responsive"><table class="table"><thead><tr><th>Отримувач</th><th>Статус</th><th>Час</th><th>Telegram ID</th></tr></thead>
+<tbody>{% for delivery, user in rows %}<tr><td>{{ display_name(user) }}</td><td>{{ telegram_status(delivery.status) }}</td><td>{{ display_datetime(delivery.completed_at) if delivery.completed_at else '' }}</td><td>{{ delivery.message_id or '' }}</td></tr>{% else %}<tr><td colspan="4">Записів ще немає</td></tr>{% endfor %}</tbody></table></div>
+<nav class="d-flex gap-3">{% if page > 1 %}<a href="?page={{ page-1 }}">Назад</a>{% endif %}{% if has_next %}<a href="?page={{ page+1 }}">Далі</a>{% endif %}<a href="?page={{ page }}">Оновити</a></nav>
+</section>
+{% endblock %}

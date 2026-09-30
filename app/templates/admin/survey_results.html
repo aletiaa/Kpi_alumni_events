@@ -1,1 +1,27 @@
-﻿{% extends "base.html" %}{% block content %}<div class="card shadow-soft mb-3"><div class="card-body"><h4>Результати опитування: {{ survey.title }}</h4><div class="text-muted">Усього відповідей: {{ total_answers }}</div></div></div>{% for row in grouped %}<div class="card shadow-soft mb-3"><div class="card-body"><h5>{{ row.question.question_text }}</h5>{% if row.counts %}<table class="table"><thead><tr><th>Варіант</th><th>Кількість</th></tr></thead><tbody>{% for option, count in row.counts.items() %}<tr><td>{{ option }}</td><td>{{ count }}</td></tr>{% endfor %}</tbody></table>{% else %}<ul class="list-group">{% for answer in row.answers %}<li class="list-group-item">{{ answer }}</li>{% else %}<li class="list-group-item text-muted">Відповідей поки немає.</li>{% endfor %}</ul>{% endif %}</div></div>{% endfor %}{% endblock %}
+{% extends "base.html" %}
+{% block content %}
+<section class="academic-band mb-3">
+{% if survey.title.startswith('[DEMO]') %}<p class="alert alert-warning">DEMO: Демонстраційні анонімні відповіді, не результати дослідження.</p>{% endif %}
+<a href="/surveys">Назад до опитувань</a>
+<div class="kicker mt-3">Результати опитування</div><h1 class="section-title">{{ content_text('survey', survey.id, 'title', survey.title) }}</h1>
+<p><span>Учасників</span>: <strong>{{ respondents }}</strong> · <span>Відповідей</span>: <strong>{{ total_answers }}</strong></p>
+</section>
+{% for row in grouped %}
+<section class="py-4 border-bottom">
+<h2 class="fs-4">{{ content_text('survey', survey.id, 'question_' ~ row.question.id, row.question.question_text) }}</h2><p class="text-muted"><span>Відповідей</span>: {{ row.total }}</p>
+{% if row.counts is not none %}
+{% for option, count in row.counts.items() %}
+{% set percentage = (100 * count / row.total) if row.total else 0 %}
+<div class="mb-3">
+<div class="d-flex justify-content-between gap-3"><span style="overflow-wrap:anywhere">{{ option }}</span><span class="text-nowrap" data-no-translate>{{ count }} · {{ percentage|round(1) }}%</span></div>
+<div class="progress mt-1" style="height:18px" role="img" aria-label="{{ option }}: {{ count }} ({{ percentage|round(1) }}%)">
+<div class="progress-bar {{ ['bg-primary', 'bg-success', 'bg-info'][loop.index0 % 3] }}" style="width:{{ percentage }}%"></div>
+</div></div>
+{% endfor %}
+{% if not row.total %}<p class="text-muted">Відповідей поки немає.</p>{% endif %}
+{% elif ident.role == 'admin' %}
+{% for answer in row.answers %}<p class="border-bottom pb-2" style="white-space:pre-wrap;overflow-wrap:anywhere" data-no-translate>{{ answer }}</p>{% else %}<p>Відповідей поки немає.</p>{% endfor %}
+{% else %}<p class="text-muted">Текстові відповіді доступні лише адміністраторам.</p>{% endif %}
+</section>
+{% endfor %}
+{% endblock %}
