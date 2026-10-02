@@ -225,3 +225,4 @@ work_utf8_test.txt
 admins.csv
 backups/
 work_utf8_test.txt
+tests/performance/results/
