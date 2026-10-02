@@ -2,12 +2,10 @@ from datetime import datetime, timedelta
 from urllib.parse import urlsplit
 import re
 
-import numpy as np
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 from sqlalchemy import func
 
 from app.models import Event, News, PageDuration, Registration
+from app.services.interest_topics import topics
 
 
 def recommendations(db, user, section, now=None):
@@ -22,9 +20,11 @@ def recommendations(db, user, section, now=None):
     candidates += [('news', n, n.title + ' ' + (n.content or '')[:4000]) for n in news]
     if not candidates:
         return []
-    history = [(' '.join(filter(None, [user.interests, user.skills, user.bio, user.mentorship_topics])), 3.0)]
+    explicit = topics(user.interests)
+    inferred = {}
     for event in db.query(Event).join(Registration).filter(Registration.user_id == user.id).limit(30):
-        history.append((event.title + ' ' + (event.description or ''), 1.0))
+        for topic in topics(event.title + ' ' + (event.description or '')):
+            inferred[topic] = 0.5
     section_time = {'event': 0, 'news': 0}
     seen = set()
     durations = db.query(PageDuration.page, func.sum(PageDuration.duration_seconds)).filter(
@@ -43,23 +43,22 @@ def recommendations(db, user, section, now=None):
             if record and (kind == 'event' or record.is_published):
                 seen.add((kind, record.id))
                 body = record.description if kind == 'event' else record.content
-                history.append((record.title + ' ' + (body or '')[:4000], 1 + np.log1p(seconds)))
-    history = [(text, weight) for text, weight in history if text.strip()]
-    scores = np.zeros(len(candidates))
-    if history:
-        try:
-            matrix = TfidfVectorizer(ngram_range=(1, 2), max_features=12000).fit_transform(
-                [text for text, _ in history] + [text for _, _, text in candidates])
-            scores = np.average(cosine_similarity(matrix[len(history):], matrix[:len(history)]),
-                                axis=1, weights=[weight for _, weight in history])
-        except ValueError:
-            pass
+                for topic in topics(record.title + ' ' + (body or '')[:4000]):
+                    inferred[topic] = max(inferred.get(topic, 0), min(seconds / 300, 1) * 0.5)
+    # Explicit interests override inferred topics, rather than averaging away intent.
+    interests = {topic: 1.0 for topic in explicit} if explicit else inferred
+    if not interests:
+        return []
     total = sum(section_time.values()) or 1
     ranked = []
-    for index, (kind, item, _) in enumerate(candidates):
+    for kind, item, text in candidates:
         if (kind, item.id) in seen:
             continue
-        score = float(scores[index]) * 5 + section_time[kind] / total * .25
+        matched = topics(text).intersection(interests)
+        if not matched:
+            continue
+        score = sum(interests[topic] for topic in matched) / sum(interests.values()) * 5
+        score += section_time[kind] / total * .25
         score += .15 if kind == section else 0
         ranked.append((score, kind, item))
     ranked.sort(key=lambda row: row[0], reverse=True)

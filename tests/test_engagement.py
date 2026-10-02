@@ -60,7 +60,37 @@ def test_reading_time_changes_recommendation_and_is_private(client,db):
         opened_at=datetime.utcnow(),closed_at=datetime.utcnow(),duration_seconds=500));db.commit()
     assert recommendations(db,user,'event')[0]['id']==relevant.id
     other=SimpleNamespace(id=999,interests='',skills='',bio='',mentorship_topics='')
-    assert recommendations(db,other,'event')[0]['id']==unrelated.id
+    assert recommendations(db,other,'event') == []
+
+
+def test_recommendations_ignore_filler_and_repetition(client, db):
+    user = setup_user(client, db)
+    user.interests = 'та що але and the'
+    db.commit()
+    event(db, 'та що але and the ' * 30)
+    assert recommendations(db, user, 'event') == []
+    user.interests = 'Python Python Python та що'
+    db.commit()
+    wanted = event(db, 'Python workshop')
+    repeated = event(db, 'Python ' * 50)
+    result = recommendations(db, user, 'event')
+    assert result[0]['id'] == wanted.id
+    assert {r['id'] for r in result} == {wanted.id, repeated.id}
+
+
+def test_explicit_interests_override_other_activity_and_translate(client, db):
+    user = setup_user(client, db)
+    user.interests = 'кібербезпека'
+    user.bio = 'Python ' * 50
+    source = News(title='Robotics sensors', content='Robotics', is_published=True)
+    db.add(source)
+    db.commit()
+    db.add(PageDuration(user_id=user.id, session_id='topics', page=f'/news/{source.id}',
+        opened_at=datetime.utcnow(), closed_at=datetime.utcnow(), duration_seconds=3000))
+    wanted = event(db, 'Cybersecurity workshop')
+    event(db, 'Robotics sensors workshop')
+    db.commit()
+    assert [r['id'] for r in recommendations(db, user, 'event')] == [wanted.id]
 
 
 def test_autumn_schedule_preserves_duration():

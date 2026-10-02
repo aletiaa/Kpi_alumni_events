@@ -28,7 +28,7 @@ Web-based Telegram bot administration and university alumni communication platfo
 | Опитування | Надсилання відповідей після входу, доступні результати й діаграми |
 | Сповіщення | Повідомлення про активність |
 
-Рекомендації враховують інтереси та активність. Перемикач UA/EN змінює інтерфейс. Переклади матеріалів через DeepL кешуються; при недоступності сервісу може залишатися оригінальний текст. Закриті демонстраційні анкети із синтетичними відповідями не є реальними результатами дослідження.
+Рекомендації зіставляють тематики інтересів, а не частоту повторення слів. Українські й англійські назви розпізнаються через словник тематик у app/services/interest_topics.py. Явно вказані розпізнані інтереси мають пріоритет; за їх відсутності використовуються тематики реєстрацій та переглядів. Без тематичних сигналів рекомендацій немає. Це детермінований тематичний алгоритм, не генеративна модель; нові тематики потребують доповнення словника. Перемикач UA/EN змінює інтерфейс. Переклади матеріалів через DeepL кешуються; при недоступності сервісу може залишатися оригінальний текст. Закриті демонстраційні анкети із синтетичними відповідями не є реальними результатами дослідження.
 
 ### Telegram
 У профілі відкрийте підключення Telegram, оберіть згоду на потрібні сповіщення, перейдіть за персональним посиланням і натисніть Start. Не передавайте це посилання іншій людині.
@@ -75,7 +75,7 @@ SQLite зберігається на сервері в /home/std19/alumnixhub/da
 | Surveys | Submit answers after login and view available results and charts |
 | Notifications | Review activity notifications |
 
-Recommendations use interests and website activity. UA/EN changes the interface language. DeepL content translations are cached; original text can remain visible when translation is unavailable. Closed demonstration surveys with synthetic answers are not real research findings.
+Recommendations match interest topics rather than repeated-word frequency. Ukrainian and English aliases are defined in app/services/interest_topics.py. Recognized explicit interests take priority; registration and reading topics are used when explicit topics are absent. No topical signal means no recommendations. This is a deterministic topic algorithm, not a generative model; new topics require dictionary additions. UA/EN changes the interface language. DeepL content translations are cached; original text can remain visible when translation is unavailable. Closed demonstration surveys with synthetic answers are not real research findings.
 
 ### Telegram
 Open Telegram linking in your profile, select notification consent, follow your personal link and press Start. Do not share your linking link.
