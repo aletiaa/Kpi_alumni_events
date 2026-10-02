@@ -167,9 +167,11 @@ def login(
     if not user.is_email_verified:
         return render(request, "login.html", {"error": "Підтвердьте email перед входом."}, status_code=403)
 
-    token = create_session_token(user.id, user.role, user.email, user.full_name, getattr(user, "avatar_url", None), getattr(user, "status", None))
+    from app.services.admin_permissions import valid_grant
+    role = "admin" if valid_grant(db, user) else user.role
+    token = create_session_token(user.id, role, user.email, user.full_name, getattr(user, "avatar_url", None), getattr(user, "status", None))
     import re
-    destination = next if re.fullmatch(r'/events/\d+(?:#register-area)?', next) else '/'
+    destination = '/admin' if role == 'admin' else next if re.fullmatch(r'/events/\d+(?:#register-area)?', next) else '/'
     return redirect(destination, session_token=token)
 
 

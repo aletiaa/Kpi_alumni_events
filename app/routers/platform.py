@@ -269,7 +269,12 @@ def profile_form(request: Request, db: Session = Depends(get_db), ident=Depends(
     user = db.get(User, ident.user_id)
     if not user:
         raise HTTPException(status_code=404, detail="Користувача не знайдено")
-    return render(request, "profile.html", template_context(request, ident, user=user, completeness=profile_completeness(user)))
+    from app.models import InterestTopic
+    from app.services.topic_catalog import catalog_topics
+    catalog = db.query(InterestTopic).all()
+    return render(request, "profile.html", template_context(request, ident, user=user,
+        completeness=profile_completeness(user), interest_topics=[t for t in catalog if t.is_active],
+        selected_topics=catalog_topics(user.interests, catalog)))
 
 
 @router.post("/profile")
@@ -292,6 +297,8 @@ def profile_save(
     company: str = Form(""),
     skills: str = Form(""),
     interests: str = Form("", max_length=2000),
+    topic_keys: list[str] = Form([]),
+    topics_selected: str = Form(""),
     help_topics: str = Form(""),
     is_mentor: str | None = Form(None),
     mentorship_topics: str = Form(""),
@@ -330,7 +337,14 @@ def profile_save(
     user.current_position = clean(current_position)
     user.company = clean(company)
     user.skills = clean(skills)
-    user.interests = clean(interests)
+    if topics_selected == "yes":
+        from app.models import InterestTopic
+        selected = db.query(InterestTopic).filter(InterestTopic.key.in_(set(topic_keys)), InterestTopic.is_active==True).all()
+        if len(selected) != len(set(topic_keys)):
+            raise HTTPException(400, "Невідома або неактивна тематика.")
+        user.interests = ", ".join(t.key for t in selected)
+    else:
+        user.interests = clean(interests)
     user.help_topics = clean(help_topics)
     user.is_mentor = bool(is_mentor)
     user.mentorship_topics = clean(mentorship_topics)

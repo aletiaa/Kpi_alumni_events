@@ -11,6 +11,17 @@
   </div>
   {% else %}<span class="badge text-bg-warning">Демонстраційний режим</span>{% endif %}
 </header>
+{% from "operations_macros.html" import tr %}
+<section class="py-3 border-bottom">
+  <p>{{ tr('Остання перевірка', 'Last check') }}: {{ display_datetime(telegram_state.checked_at) if telegram_state else '—' }}</p>
+  <div class="d-flex flex-wrap gap-4">
+    <span>{{ tr('Відповіді в черзі', 'Queued replies') }}: {{ reply_counts.get('queued', 0) }}</span>
+    <span>{{ tr('Помилки відповідей', 'Failed replies') }}: {{ reply_counts.values()|sum - reply_counts.get('sent', 0) - reply_counts.get('queued', 0) - reply_counts.get('cancelled', 0) }}</span>
+    <span>{{ tr('Доставки в черзі', 'Queued deliveries') }}: {{ recipient_counts.get('queued', 0) }}</span>
+    <span>{{ tr('Помилки доставки', 'Failed deliveries') }}: {{ recipient_counts.values()|sum - recipient_counts.get('sent', 0) - recipient_counts.get('queued', 0) - recipient_counts.get('cancelled', 0) }}</span>
+  </div>
+  <p class="mt-2 mb-0"><a href="/admin/operations/submissions">{{ tr('Матеріали на модерації', 'Pending submissions') }}: {{ pending_submissions }}</a> · <a href="/admin/operations/audit">{{ tr('Журнал дій', 'Audit log') }}</a></p>
+</section>
 {% if telegram_enabled %}
 <details class="py-3 border-bottom" {% if not telegram_link or not telegram_link.chat_id or link_code %}open{% endif %}>
   <summary>Мій акаунт для перевірки надсилання</summary>

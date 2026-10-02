@@ -8,8 +8,17 @@ vm.runInContext(fs.readFileSync(root+'/app/static/ui-en.js','utf8'),context);
 vm.runInContext(code+'; this.dictionary = CONTENT_TRANSLATIONS.en; this.keyed = I18N;',context);
 const known = new Set([...Object.keys(context.dictionary),...Object.values(context.keyed.uk),...Object.keys(context.window.ALUMNIX_UI_EN)]);
 const missing = new Set();
+function registerInlineTranslations(html) {
+  for (const match of html.matchAll(/\btr\('([^']*)',\s*'([^']*)'\)/g)) {
+    if (match[2].trim() && !/[А-Яа-яІіЇїЄєҐґ]/.test(match[2])) known.add(match[1]);
+  }
+  for (const match of html.matchAll(/data-ops-uk="([^"]*)"\s+data-ops-en="([^"]*)"/g)) {
+    if (match[2].trim() && !/[А-Яа-яІіЇїЄєҐґ]/.test(match[2])) known.add(match[1]);
+  }
+}
 function walk(dir){for(const e of fs.readdirSync(dir,{withFileTypes:true})){const p=dir+'/'+e.name;if(e.isDirectory()){walk(p);continue;}if(!p.endsWith('.html')||p.endsWith('/base.html'))continue;
 const html=fs.readFileSync(p,'utf8').replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'');
+registerInlineTranslations(html);
 const plain=html.replace(/\{[{%][\s\S]*?[%}]\}/g,'|');
 for(const m of plain.matchAll(/>([^<>]+)</g)){for(const s of m[1].split('|')){const t=s.trim();if(/[А-Яа-яІіЇїЄєҐґ]/.test(t)&&!known.has(t)) missing.add(t);}}
 for(const m of html.matchAll(/(?:placeholder|title|aria-label)="([^"{}]+)"/g)){if(/[А-Яа-яІіЇїЄєҐґ]/.test(m[1])&&!known.has(m[1]))missing.add(m[1]);}

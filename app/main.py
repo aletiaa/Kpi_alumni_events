@@ -40,6 +40,9 @@ from .config import TELEGRAM_ENABLED, SEED_DEMO_DATA
 from .services.telegram_live import poll_loop
 from .services.telegram_broadcasts import delivery_loop, status_label
 from .services.telegram_bot_jobs import reply_loop
+from .services.backups import backup_loop
+from .config import env_bool
+from .middleware.admin_audit import AdminAuditMiddleware
 
 
 def bootstrap_database():
@@ -58,6 +61,8 @@ def bootstrap_database():
 
     db = SessionLocal()
     try:
+        from .services.topic_catalog import seed_catalog
+        seed_catalog(db)
         clean_saved_import_labels(db)
         db.commit()
         if SEED_DEMO_DATA:
@@ -75,6 +80,9 @@ async def lifespan(app: FastAPI):
     telegram_task = None
     delivery_task = None
     reply_task = None
+    backup_task = None
+    if env_bool("BACKUP_ENABLED", False) and not getattr(app.state, "disable_backups", False):
+        backup_task = asyncio.create_task(backup_loop(SessionLocal))
     if TELEGRAM_ENABLED and not getattr(app.state, "disable_telegram", False):
         telegram_task = asyncio.create_task(poll_loop(SessionLocal))
         delivery_task = asyncio.create_task(delivery_loop(SessionLocal))
@@ -85,6 +93,10 @@ async def lifespan(app: FastAPI):
     try:
         yield
     finally:
+        if backup_task:
+            backup_task.cancel()
+            with suppress(asyncio.CancelledError):
+                await backup_task
         if reply_task:
             reply_task.cancel()
             with suppress(asyncio.CancelledError):
@@ -108,6 +120,7 @@ app.add_exception_handler(StarletteHTTPException, handle_http_error)
 app.add_exception_handler(RequestValidationError, handle_validation_error)
 app.add_exception_handler(Exception, handle_server_error)
 app.add_middleware(AnalyticsMiddleware)
+app.add_middleware(AdminAuditMiddleware)
 
 templates = Jinja2Templates(directory="app/templates")
 from app.services.localization import content_text
@@ -115,6 +128,8 @@ from app.services.localization import display_name, display_datetime
 templates.env.globals.update(display_name=display_name, display_datetime=display_datetime)
 templates.env.globals["content_text"] = content_text
 templates.env.globals["telegram_status"] = status_label
+from app.services.operational_security import token as operations_csrf
+templates.env.globals["operations_csrf"] = operations_csrf
 app.state.templates = templates
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
@@ -134,3 +149,5 @@ app.include_router(assistant_router)
 app.include_router(iot_router)
 app.include_router(kpi_import_router)
 app.include_router(translations_router)
+from .routers.operations import router as operations_router
+app.include_router(operations_router)

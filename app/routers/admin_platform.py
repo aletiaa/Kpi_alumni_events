@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.config import APP_NAME
 from app.db import get_db
 from app.deps import require_admin
+from app.services.operational_security import destructive_confirmation
 from app.models import ChatLink, News, Survey, SurveyAnswer, SurveyQuestion, User
 
 router = APIRouter(prefix="/admin", tags=["admin-platform"])
@@ -161,7 +162,7 @@ def admin_news_edit(
     return RedirectResponse("/admin/news?updated=1", status_code=303)
 
 
-@router.post("/news/{news_id}/delete")
+@router.post("/news/{news_id}/delete", dependencies=[Depends(destructive_confirmation)])
 def admin_news_delete(news_id: int, db: Session = Depends(get_db), admin=Depends(require_admin)):
     item = db.get(News, news_id)
     if item:
@@ -255,7 +256,7 @@ def admin_chat_edit(
     return RedirectResponse("/admin/chats?updated=1", status_code=303)
 
 
-@router.post("/chats/{chat_id}/delete")
+@router.post("/chats/{chat_id}/delete", dependencies=[Depends(destructive_confirmation)])
 def admin_chat_delete(chat_id: int, db: Session = Depends(get_db), admin=Depends(require_admin)):
     link = db.get(ChatLink, chat_id)
     if link:
@@ -311,7 +312,7 @@ def admin_survey_edit(survey_id: int, title: str = Form(...), description: str =
     return RedirectResponse("/admin/surveys?updated=1", status_code=303)
 
 
-@router.post("/surveys/{survey_id}/delete")
+@router.post("/surveys/{survey_id}/delete", dependencies=[Depends(destructive_confirmation)])
 def admin_survey_delete(survey_id: int, db: Session = Depends(get_db), admin=Depends(require_admin)):
     survey = db.get(Survey, survey_id)
     if survey:
@@ -347,7 +348,7 @@ def admin_survey_question_create(survey_id: int, question_text: str = Form(...),
     return RedirectResponse(f"/admin/surveys/{survey_id}/questions?created=1", status_code=303)
 
 
-@router.post("/survey-questions/{question_id}/delete")
+@router.post("/survey-questions/{question_id}/delete", dependencies=[Depends(destructive_confirmation)])
 def admin_survey_question_delete(question_id: int, db: Session = Depends(get_db), admin=Depends(require_admin)):
     question = db.get(SurveyQuestion, question_id)
     survey_id = question.survey_id if question else None
@@ -392,6 +393,11 @@ def admin_user_role(user_id: int, role: str = Form(...), db: Session = Depends(g
 
 @router.post("/users/{user_id}/block")
 def admin_user_block(user_id: int, db: Session = Depends(get_db), admin=Depends(require_admin)):
+    from app.models import AdministratorGrant
+    from app.services.admin_permissions import may_manage
+    grant = db.get(AdministratorGrant, user_id)
+    if grant and (grant.can_manage_admins or not may_manage(db, admin) or user_id==admin.user_id):
+        raise HTTPException(409, "Спочатку відкличте адміністративні права через керування адміністраторами.")
     user = db.get(User, user_id)
     if user:
         user.is_blocked = not user.is_blocked

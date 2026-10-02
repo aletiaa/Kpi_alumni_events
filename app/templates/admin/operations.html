@@ -1,0 +1,72 @@
+{% extends "base.html" %}{% from "operations_macros.html" import tr, verification %}
+{% block content %}
+<a href="/admin">{{ tr('Адміністрування', 'Administration') }}</a>
+<nav class="d-flex flex-wrap gap-3 py-3 border-bottom mb-4">
+  <a href="/admin/operations">{{ tr('Адміністратори', 'Administrators') }}</a>
+  <a href="/admin/operations/audit">{{ tr('Журнал дій', 'Audit log') }}</a>
+  <a href="/admin/operations/topics">{{ tr('Каталог інтересів', 'Interest catalog') }}</a>
+  <a href="/admin/operations/submissions">{{ tr('Матеріали з Telegram', 'Telegram submissions') }}</a>
+  {% if manager %}<a href="/admin/operations/backups">{{ tr('Резервні копії', 'Backups') }}</a>{% endif %}
+</nav>
+{% if section == 'admins' %}
+<h1 class="h3">{{ tr('Адміністратори', 'Administrators') }}</h1>
+<p>{{ ident.email }} · {{ tr('Керівник адміністраторів', 'Administrator manager') if manager else tr('Адміністратор', 'Administrator') }}</p>
+<div class="table-responsive"><table class="table align-middle">
+<thead><tr><th>{{ tr('Користувач', 'User') }}</th><th>{{ tr('Доступ', 'Access') }}</th><th>{{ tr('Дії', 'Actions') }}</th></tr></thead><tbody>
+{% for user in users %}{% set grant = grants.get(user.id) %}
+<tr><td>{{ display_name(user) }}<div class="small text-muted">{{ user.email }}</div></td>
+<td>{% if grant %}{{ tr('Керівник', 'Manager') if grant.can_manage_admins else tr('Адміністратор', 'Administrator') }}{% else %}{{ tr('Користувач', 'User') }}{% endif %}</td>
+<td>{% if manager and user.id != ident.user_id and user.is_active and user.is_email_verified and not user.is_blocked %}
+<details><summary>{{ tr('Змінити доступ', 'Change access') }}</summary>
+<form method="post" action="/admin/operations/administrators/{{ user.id }}" class="py-3" style="max-width:360px">
+<select name="action" class="form-select mb-2" aria-label="Access">
+<option value="admin" data-ops-uk="Адміністратор" data-ops-en="Administrator">Адміністратор</option>
+<option value="manager" {% if grant and grant.can_manage_admins %}selected{% endif %} data-ops-uk="Керівник адміністраторів" data-ops-en="Administrator manager">Керівник адміністраторів</option>
+<option value="revoke" data-ops-uk="Відкликати доступ" data-ops-en="Revoke access">Відкликати доступ</option>
+</select>{{ verification(csrf) }}<button class="btn btn-primary">{{ tr('Зберегти', 'Save') }}</button></form></details>
+{% endif %}{% if manager and user.id != ident.user_id and not grant %}<a class="text-danger" href="/admin/operations/users/{{ user.id }}/delete">{{ tr('Видалення користувача', 'Delete user') }}</a>{% endif %}</td></tr>{% endfor %}</tbody></table></div>
+{% elif section == 'audit' %}
+<h1 class="h3">{{ tr('Журнал дій', 'Audit log') }}</h1>
+<div class="table-responsive"><table class="table"><thead><tr><th>UTC</th><th>{{ tr('Адміністратор', 'Administrator') }}</th><th>{{ tr('Дія', 'Action') }}</th><th>{{ tr('Об’єкт', 'Target') }}</th><th>HTTP</th></tr></thead>
+<tbody>{% for row in rows %}<tr><td>{{ display_datetime(row.created_at) }}</td><td>{{ row.actor }}</td><td>{{ row.action }}</td><td>{{ row.target }}</td><td>{{ row.status }}</td></tr>{% endfor %}</tbody></table></div>
+{% if page_number>1 %}<a href="?page_number={{ page_number-1 }}">{{ tr('Назад', 'Previous') }}</a>{% endif %}
+{% if has_next %}<a href="?page_number={{ page_number+1 }}">{{ tr('Далі', 'Next') }}</a>{% endif %}
+{% elif section == 'topics' %}
+<h1 class="h3">{{ tr('Каталог інтересів', 'Interest catalog') }}</h1>
+{% for item in rows + [none] %}
+<details class="py-3 border-bottom" {% if not item %}open{% endif %}><summary>{{ tr(item.label_uk, item.label_en) if item else tr('Нова тематика', 'New topic') }}</summary>
+<form method="post" action="/admin/operations/topics" class="row g-3 pt-3">
+<input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="key" value="{{ item.key if item else '' }}">
+<label class="col-md-6">{{ tr('Назва українською', 'Ukrainian label') }}<input class="form-control" name="label_uk" maxlength="120" value="{{ item.label_uk if item else '' }}" required></label>
+<label class="col-md-6">{{ tr('Назва англійською', 'English label') }}<input class="form-control" name="label_en" maxlength="120" value="{{ item.label_en if item else '' }}" required></label>
+<label class="col-12">{{ tr('Синоніми — по одному в рядку', 'Aliases — one per line') }}<textarea name="aliases" class="form-control" maxlength="4000" rows="3">{{ item.aliases if item else '' }}</textarea></label>
+<label class="col-12"><input type="checkbox" name="active" value="yes" {% if not item or item.is_active %}checked{% endif %}> {{ tr('Активна', 'Active') }}</label>
+<div class="col-12"><button class="btn btn-primary">{{ tr('Зберегти', 'Save') }}</button></div>
+</form></details>{% endfor %}
+{% elif section == 'submissions' %}
+<h1 class="h3">{{ tr('Матеріали з Telegram', 'Telegram submissions') }}</h1>
+{% for submission, news, user in rows %}
+<article class="py-4 border-bottom"><h2 class="h4">{{ news.title }}</h2><p>{{ display_name(user) }} · {{ display_datetime(submission.created_at) }}</p>
+<p style="white-space:pre-wrap;overflow-wrap:anywhere">{{ news.content }}</p>
+<a href="/admin/news/{{ news.id }}/edit">{{ tr('Редагувати матеріал', 'Edit article') }}</a>
+<form method="post" action="/admin/operations/submissions/{{ submission.update_id }}" class="mt-3">
+<input type="hidden" name="csrf" value="{{ csrf }}">
+<label class="d-block mb-2"><input type="checkbox" name="confirm" value="yes" required> {{ tr('Матеріал перевірено', 'Article reviewed') }}</label>
+<button class="btn btn-primary" name="action" value="publish">{{ tr('Опублікувати', 'Publish') }}</button>
+<button class="btn btn-outline-danger" name="action" value="reject">{{ tr('Відхилити', 'Reject') }}</button>
+</form></article>{% else %}<p>{{ tr('Нових матеріалів немає.', 'No new submissions.') }}</p>{% endfor %}
+{% elif section == 'backups' %}
+<h1 class="h3">{{ tr('Резервні копії', 'Backups') }}</h1>
+<p>{{ tr('Щоденне копіювання увімкнено', 'Daily backups enabled') if enabled else tr('Щоденне копіювання вимкнено', 'Daily backups disabled') }}</p>
+<details class="mb-4"><summary>{{ tr('Створити приватну копію на сервері', 'Create a private server backup') }}</summary>
+<form method="post" action="/admin/operations/backups" class="py-3" style="max-width:360px">{{ verification(csrf) }}<button class="btn btn-primary">{{ tr('Створити копію', 'Create backup') }}</button></form></details>
+<div class="table-responsive"><table class="table"><thead><tr><th>{{ tr('Створено', 'Created') }}</th><th>{{ tr('Відновлення перевірено', 'Restore verified') }}</th><th>{{ tr('Дії', 'Actions') }}</th></tr></thead>
+<tbody>{% for row in rows %}<tr><td>{{ display_datetime(row.created_at) }}</td><td>{{ display_datetime(row.verified_at) }}</td><td>
+<form method="post" action="/admin/operations/backups/{{ row.id }}/verify"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn btn-outline-primary btn-sm">{{ tr('Перевірити копію', 'Verify backup') }}</button></form>
+</td></tr>{% endfor %}</tbody></table></div>
+{% elif section == 'delete' %}
+<h1 class="h3">{{ tr('Видалення користувача', 'Delete user') }}</h1><p>{{ display_name(user) }} · {{ user.email }}</p>
+<p class="alert alert-warning">{{ tr('Буде видалено профіль, реєстрації, відповіді на анкети, особисті повідомлення та Telegram-прив’язування. Опубліковані новини збережуться без автора.', 'This removes the profile, registrations, survey answers, direct messages and Telegram linking. Published news is preserved without its author.') }}</p>
+<form method="post" action="/admin/operations/users/{{ user.id }}/delete" style="max-width:360px">{{ verification(csrf) }}<button class="btn btn-danger">{{ tr('Видалити користувача', 'Delete user') }}</button></form>
+{% endif %}
+{% endblock %}

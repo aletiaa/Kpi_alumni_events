@@ -269,6 +269,9 @@ def _ensure_schema():
 @pytest.fixture(scope="session", autouse=True)
 def _create_schema_once():
     _ensure_schema()
+    from app.models import AdministratorGrant, AdminAudit, InterestTopic, TelegramNewsSubmission, BackupRecord
+    for model in (AdministratorGrant, AdminAudit, InterestTopic, TelegramNewsSubmission, BackupRecord):
+        model.__table__.create(engine_test, checkfirst=True)
     from app.models import BotCampaign
     BotCampaign.__table__.create(engine_test, checkfirst=True)
     from app.models import TelegramLink, TelegramState, TelegramDelivery, TelegramSubscription, TelegramBroadcast, TelegramRecipientDelivery
@@ -288,6 +291,8 @@ def _create_schema_once():
 def db():
     session = TestingSessionLocal()
     try:
+        for table in ("administrator_grants", "admin_audit", "interest_topics", "telegram_news_submissions", "backup_records"):
+            session.execute(text(f"DELETE FROM {table}"))
         for table in ('telegram_bot_replies', 'telegram_uploads', 'telegram_automation_preferences'):
             session.execute(text(f"DELETE FROM {table}"))
         for table in ('telegram_recipient_deliveries', 'telegram_broadcasts', 'telegram_subscriptions'):
@@ -308,6 +313,7 @@ def db():
 
 @pytest.fixture(scope="function")
 def client(db, monkeypatch):
+    monkeypatch.setattr(app.state, "disable_backups", True, raising=False)
     monkeypatch.setattr(app.state, "disable_kpi_import", True, raising=False)
     # Lifespan startup must not seed or migrate the configured live database.
     monkeypatch.setattr("app.main.bootstrap_database", lambda: None)
@@ -316,6 +322,7 @@ def client(db, monkeypatch):
 
     app.dependency_overrides[get_db] = override_get_db
     app.state.analytics_session_factory = TestingSessionLocal
+    app.state.audit_session_factory = TestingSessionLocal
     os.environ["IOT_API_KEY"] = "test-key"
 
     with TestClient(app) as c:

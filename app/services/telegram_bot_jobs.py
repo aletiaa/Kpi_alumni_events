@@ -57,7 +57,8 @@ def send_reply(factory):
         if payload.get('_admin'):
             from app.services.admin_csv import find_admin_by_email
             link = db.get(TelegramLink,payload['_admin'])
-            valid = bool(link and link.chat_id==row.chat_id and find_admin_by_email(payload['_admin']))
+            from app.services.admin_permissions import is_administrator_email
+            valid = bool(link and link.chat_id==row.chat_id and is_administrator_email(db, payload['_admin']))
         if row.user_id:
             sub = db.get(TelegramSubscription,row.user_id)
             valid = bool(eligible_user(db.get(User,row.user_id)) and sub and not sub.revoked_at and sub.chat_id==row.chat_id)

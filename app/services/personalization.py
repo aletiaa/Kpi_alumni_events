@@ -5,11 +5,14 @@ import re
 from sqlalchemy import func
 
 from app.models import Event, News, PageDuration, Registration
-from app.services.interest_topics import topics
+from app.services.topic_catalog import catalog_topics
+from app.models import InterestTopic
 
 
 def recommendations(db, user, section, now=None):
     now = now or datetime.utcnow()
+    catalog = db.query(InterestTopic).all()
+    recognize = lambda text: catalog_topics(text, catalog)
     registered = {row[0] for row in db.query(Registration.event_id).filter_by(user_id=user.id)}
     counts = dict(db.query(Registration.event_id, func.count(Registration.id)).group_by(Registration.event_id))
     events = db.query(Event).filter(Event.start_time > now).order_by(Event.start_time).limit(300).all()
@@ -20,10 +23,10 @@ def recommendations(db, user, section, now=None):
     candidates += [('news', n, n.title + ' ' + (n.content or '')[:4000]) for n in news]
     if not candidates:
         return []
-    explicit = topics(user.interests)
+    explicit = recognize(user.interests)
     inferred = {}
     for event in db.query(Event).join(Registration).filter(Registration.user_id == user.id).limit(30):
-        for topic in topics(event.title + ' ' + (event.description or '')):
+        for topic in recognize(event.title + ' ' + (event.description or '')):
             inferred[topic] = 0.5
     section_time = {'event': 0, 'news': 0}
     seen = set()
@@ -43,7 +46,7 @@ def recommendations(db, user, section, now=None):
             if record and (kind == 'event' or record.is_published):
                 seen.add((kind, record.id))
                 body = record.description if kind == 'event' else record.content
-                for topic in topics(record.title + ' ' + (body or '')[:4000]):
+                for topic in recognize(record.title + ' ' + (body or '')[:4000]):
                     inferred[topic] = max(inferred.get(topic, 0), min(seconds / 300, 1) * 0.5)
     # Explicit interests override inferred topics, rather than averaging away intent.
     interests = {topic: 1.0 for topic in explicit} if explicit else inferred
@@ -51,17 +54,21 @@ def recommendations(db, user, section, now=None):
         return []
     total = sum(section_time.values()) or 1
     ranked = []
+    labels = {t.key: t for t in catalog}
     for kind, item, text in candidates:
         if (kind, item.id) in seen:
             continue
-        matched = topics(text).intersection(interests)
+        matched = recognize(text).intersection(interests)
         if not matched:
             continue
         score = sum(interests[topic] for topic in matched) / sum(interests.values()) * 5
         score += section_time[kind] / total * .25
         score += .15 if kind == section else 0
-        ranked.append((score, kind, item))
+        reasons = [{"uk":labels[t].label_uk if t in labels else t,
+                    "en":labels[t].label_en if t in labels else t} for t in sorted(matched)]
+        ranked.append((score, kind, item, reasons))
     ranked.sort(key=lambda row: row[0], reverse=True)
     return [{'kind':kind, 'id':item.id, 'title':item.title,
              'url':f'/{"events" if kind == "event" else "news"}/{item.id}',
-             'image':item.image_url or '/static/img/kpi-main.png'} for _, kind, item in ranked[:3]]
+             'topics':reasons, 'explicit':bool(explicit),
+             'image':item.image_url or '/static/img/kpi-main.webp'} for _, kind, item, reasons in ranked[:3]]

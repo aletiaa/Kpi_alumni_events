@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.config import APP_BASE_URL, APP_NAME
 from app.db import get_db
 from app.deps import require_admin
+from app.services.operational_security import destructive_confirmation
 from app.ml.qr import generate_event_qr_png
 from app.ml.summarizer import generate_short_description
 from app.models import Event
@@ -126,7 +127,7 @@ def admin_edit_event_save(
     return RedirectResponse("/admin/events?updated=1", status_code=303)
 
 
-@router.post("/events/{event_id}/delete")
+@router.post("/events/{event_id}/delete", dependencies=[Depends(destructive_confirmation)])
 def admin_delete_event(event_id: int, db: Session = Depends(get_db), admin=Depends(require_admin)):
     event = db.get(Event, event_id)
     if not event:

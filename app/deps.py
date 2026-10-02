@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from fastapi import Cookie, Depends, HTTPException, status
+from fastapi import Cookie, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from .db import get_db
 from .security import read_session_token
@@ -42,12 +42,19 @@ def require_identity(
         user = db.get(User, ident.user_id)
         if not user or getattr(user, "is_blocked", False) or not user.is_active:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Обліковий запис заблоковано")
+        from .services.admin_permissions import valid_grant
+        ident.role = "admin" if valid_grant(db, user) else user.role
+    elif ident.role == "admin":
+        from .services.admin_csv import find_admin_by_email
+        if not find_admin_by_email(ident.email):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Адміністративний доступ відкликано")
     return ident
 
 
-def require_admin(ident: CurrentIdentity = Depends(require_identity)) -> CurrentIdentity:
+def require_admin(request: Request, ident: CurrentIdentity = Depends(require_identity)) -> CurrentIdentity:
     if ident.role != "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Потрібні права адміністратора")
+    request.state.admin_actor = ident.email
     return ident
 
 

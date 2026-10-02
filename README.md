@@ -6,6 +6,8 @@ Web-based Telegram bot administration and university alumni communication platfo
 **Website / Сайт:** http://77.47.192.6:4063/  
 **Telegram:** https://t.me/NniteUnity_bot
 
+**Admin guide / Посібник адміністратора:** [docs/ADMINISTRATION.md](docs/ADMINISTRATION.md)
+
 ## Українська
 
 ### Реєстрація та профіль
@@ -28,7 +30,7 @@ Web-based Telegram bot administration and university alumni communication platfo
 | Опитування | Надсилання відповідей після входу, доступні результати й діаграми |
 | Сповіщення | Повідомлення про активність |
 
-Рекомендації зіставляють тематики інтересів, а не частоту повторення слів. Українські й англійські назви розпізнаються через словник тематик у app/services/interest_topics.py. Явно вказані розпізнані інтереси мають пріоритет; за їх відсутності використовуються тематики реєстрацій та переглядів. Без тематичних сигналів рекомендацій немає. Це детермінований тематичний алгоритм, не генеративна модель; нові тематики потребують доповнення словника. Перемикач UA/EN змінює інтерфейс. Переклади матеріалів через DeepL кешуються; при недоступності сервісу може залишатися оригінальний текст. Закриті демонстраційні анкети із синтетичними відповідями не є реальними результатами дослідження.
+Рекомендації зіставляють тематики інтересів, а не частоту повторення слів. Адміністратор керує двомовним каталогом тематик та додатковими синонімами через сайт. Явно обрані інтереси мають пріоритет; за їх відсутності використовуються тематики реєстрацій та переглядів. Без тематичних сигналів рекомендацій немає. Це детермінований тематичний алгоритм, не генеративна модель. Перемикач UA/EN змінює інтерфейс. Переклади матеріалів через DeepL кешуються; при недоступності сервісу може залишатися оригінальний текст. Закриті демонстраційні анкети із синтетичними відповідями не є реальними результатами дослідження.
 
 ### Telegram
 У профілі відкрийте підключення Telegram, оберіть згоду на потрібні сповіщення, перейдіть за персональним посиланням і натисніть Start. Не передавайте це посилання іншій людині.
@@ -75,7 +77,7 @@ SQLite зберігається на сервері в /home/std19/alumnixhub/da
 | Surveys | Submit answers after login and view available results and charts |
 | Notifications | Review activity notifications |
 
-Recommendations match interest topics rather than repeated-word frequency. Ukrainian and English aliases are defined in app/services/interest_topics.py. Recognized explicit interests take priority; registration and reading topics are used when explicit topics are absent. No topical signal means no recommendations. This is a deterministic topic algorithm, not a generative model; new topics require dictionary additions. UA/EN changes the interface language. DeepL content translations are cached; original text can remain visible when translation is unavailable. Closed demonstration surveys with synthetic answers are not real research findings.
+Recommendations match interest topics rather than repeated-word frequency. Administrators manage bilingual topics and additional aliases through the website. Selected interests take priority; registration and reading topics are used when explicit topics are absent. No topical signal means no recommendations. This is a deterministic topic algorithm, not a generative model. UA/EN changes the interface language. DeepL content translations are cached; original text can remain visible when translation is unavailable. Closed demonstration surveys with synthetic answers are not real research findings.
 
 ### Telegram
 Open Telegram linking in your profile, select notification consent, follow your personal link and press Start. Do not share your linking link.

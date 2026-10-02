@@ -15,7 +15,7 @@ from app.services.bot_bridge import demo_recipients, export_events
 from app.models import TelegramBroadcast, TelegramRecipientDelivery, TelegramSubscription, User
 from app.services.telegram_broadcasts import AUDIENCES, recipients, queue, cancel
 from app.services.telegram_health import health
-from app.models import TelegramUpload, TelegramBotReply
+from app.models import TelegramUpload, TelegramBotReply, TelegramNewsSubmission
 import json
 
 router = APIRouter(prefix="/admin/bots", tags=["bot-administration"])
@@ -53,6 +53,9 @@ def dashboard(request: Request, source: str = "", source_id: int = 0, code: str 
         "telegram_state": db.get(TelegramState, 1),
         "telegram_link": db.get(TelegramLink, admin.email),
         "link_code": code,
+        "reply_counts":dict(db.query(TelegramBotReply.status, func.count()).group_by(TelegramBotReply.status)),
+        "recipient_counts":dict(db.query(TelegramRecipientDelivery.status, func.count()).group_by(TelegramRecipientDelivery.status)),
+        "pending_submissions":db.query(TelegramNewsSubmission).filter_by(status="pending").count(),
         "deliveries": {d.campaign_id: d for d in db.query(TelegramDelivery).order_by(TelegramDelivery.campaign_id.desc()).limit(100)},
     })
 
@@ -172,7 +175,12 @@ def queue_broadcast(campaign_id: int, csrf: str = Form(''), confirm: str = Form(
 @router.get('/status')
 def bot_status(request: Request, db: Session = Depends(get_db), admin=Depends(require_admin)):
     link = db.get(TelegramLink,admin.email)
-    return {'online':health(request,db)['online'], 'linked':bool(link and link.chat_id)}
+    state = db.get(TelegramState, 1)
+    return {'online':health(request,db)['online'], 'linked':bool(link and link.chat_id),
+            'checked_at':state.checked_at.isoformat() if state and state.checked_at else None,
+            'status':state.status if state else 'not_checked',
+            'replies':dict(db.query(TelegramBotReply.status, func.count()).group_by(TelegramBotReply.status)),
+            'deliveries':dict(db.query(TelegramRecipientDelivery.status, func.count()).group_by(TelegramRecipientDelivery.status))}
 
 
 @router.get('/files')

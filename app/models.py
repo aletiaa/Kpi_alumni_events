@@ -6,6 +6,51 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .db import Base
 
 
+class BackupRecord(Base):
+    __tablename__ = "backup_records"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    filename: Mapped[str] = mapped_column(String(120), unique=True)
+    checksum: Mapped[str] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    verified_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+
+class AdministratorGrant(Base):
+    __tablename__ = "administrator_grants"
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    can_manage_admins: Mapped[bool] = mapped_column(Boolean, default=False)
+    granted_by: Mapped[str] = mapped_column(String(200))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class AdminAudit(Base):
+    __tablename__ = "admin_audit"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    actor: Mapped[str] = mapped_column(String(200), index=True)
+    action: Mapped[str] = mapped_column(String(120))
+    target: Mapped[str] = mapped_column(String(300))
+    status: Mapped[int] = mapped_column(Integer, default=200)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+
+
+class InterestTopic(Base):
+    __tablename__ = "interest_topics"
+    key: Mapped[str] = mapped_column(String(80), primary_key=True)
+    label_uk: Mapped[str] = mapped_column(String(120))
+    label_en: Mapped[str] = mapped_column(String(120))
+    aliases: Mapped[str] = mapped_column(Text, default="")
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+
+
+class TelegramNewsSubmission(Base):
+    __tablename__ = "telegram_news_submissions"
+    update_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    news_id: Mapped[int] = mapped_column(ForeignKey("news.id"), unique=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    status: Mapped[str] = mapped_column(String(20), default="pending")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
 class TelegramBotReply(Base):
     __tablename__ = "telegram_bot_replies"
     key: Mapped[str] = mapped_column(String(160), primary_key=True)

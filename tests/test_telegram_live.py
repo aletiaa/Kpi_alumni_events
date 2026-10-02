@@ -12,6 +12,7 @@ def update(code, username='a_seikaaa', chat_type='private'):
 
 def test_link_requires_one_use_code_and_allowed_private_account(db, monkeypatch):
     monkeypatch.setattr(live, 'TELEGRAM_ALLOWED_USERNAME', 'a_seikaaa')
+    monkeypatch.setattr('app.services.admin_csv.find_admin_by_email', lambda email: {'email': email})
     code = live.begin_link(db, 'admin@test.local')
     link = db.get(TelegramLink, 'admin@test.local')
     assert code != link.code_hash
@@ -27,6 +28,7 @@ def test_link_requires_one_use_code_and_allowed_private_account(db, monkeypatch)
 
 def test_expired_code_and_stop(db, monkeypatch):
     monkeypatch.setattr(live, 'TELEGRAM_ALLOWED_USERNAME', 'a_seikaaa')
+    monkeypatch.setattr('app.services.admin_csv.find_admin_by_email', lambda email: {'email': email})
     code = live.begin_link(db, 'admin@test.local')
     link = db.get(TelegramLink, 'admin@test.local')
     link.expires_at = datetime.utcnow() - timedelta(seconds=1)

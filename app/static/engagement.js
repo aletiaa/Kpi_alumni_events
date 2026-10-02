@@ -54,7 +54,15 @@
         const img=document.createElement('img'); img.src=item.image; img.alt=''; img.width=80; img.height=60; img.style.objectFit='cover';
         const name=document.createElement('span'); name.textContent=item.title;
         name.dataset.contentKind=item.kind; name.dataset.contentId=item.id; name.dataset.contentField='title';
-        link.append(img,name); dialog.append(link);
+        const text = document.createElement('div'); text.append(name);
+        if (item.topics?.length) {
+          const reason = document.createElement('small'); reason.className='d-block text-muted';
+          const en = document.documentElement.lang === 'en';
+          const prefix = item.explicit ? (en ? 'Your interests: ' : 'Ваші інтереси: ') : (en ? 'Based on your activity: ' : 'За вашою активністю: ');
+          reason.textContent = prefix + item.topics.map(t => en ? t.en : t.uk).join(', ');
+          text.append(reason);
+        }
+        link.append(img,text); dialog.append(link);
       }
       document.body.append(dialog);
       try { sessionStorage.setItem(key,'1'); } catch {}

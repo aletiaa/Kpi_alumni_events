@@ -67,7 +67,8 @@ def dispatch(db, update):
     if admin_link:
         from app.services.admin_csv import find_admin_by_email
         try:
-            is_admin = bool(find_admin_by_email(admin_link.admin_email))
+            from app.services.admin_permissions import is_administrator_email
+            is_admin = is_administrator_email(db, admin_link.admin_email)
         except OSError:
             pass
     method = 'sendMessage'
@@ -82,6 +83,8 @@ def dispatch(db, update):
                 [button(t('Надіслати файл','Submit a file'),'upload'), button(t('Налаштування','Settings'),'settings')],
                 [button(t('Повідомлення','Messages'),'messages'), button(t('Опитування','Surveys'),'surveys')],
                 [button(t('Реєстрація','Register'),'register'), button(t('Увійти','Log in'),'login')]]
+        if user:
+            rows.append([button(t('Запропонувати новину','Submit news'),'submit_news')])
         if is_admin:
             rows.append([button(t('Адміністрування','Administration'),'admin')])
             if not user:
@@ -115,7 +118,27 @@ def dispatch(db, update):
         parts = command.split(':')
         action = parts[0]
         number = int(parts[1]) if len(parts) == 2 and parts[1].isdigit() and len(parts[1]) < 10 else 0
-        if action in {'events','news','my_events','chats','files'}:
+        if action == 'submit_news':
+            from app.models import TelegramNewsSubmission
+            content = data.partition(' ')[2].strip()
+            title, separator, body = content.partition('\n')
+            recent = db.query(TelegramNewsSubmission).filter(
+                TelegramNewsSubmission.user_id==user.id,
+                TelegramNewsSubmission.created_at > datetime.utcnow()-timedelta(hours=1)).count()
+            if callback or not separator or not title.strip() or not body.strip():
+                payload = message(t('Надішліть текст у форматі:\n/submit_news Заголовок\nТекст новини\nМатеріал буде перевірено адміністратором.',
+                                    'Send text in this format:\n/submit_news Title\nArticle text\nAn administrator will review it.'))
+            elif len(title)>200 or len(body)>10000 or recent>=3:
+                payload = message(t('Ліміт: заголовок 200 символів, текст 10000 символів, 3 матеріали на годину.',
+                                    'Limit: title 200 characters, text 10000 characters, 3 submissions per hour.'))
+            else:
+                article = News(title=title.strip(), content=body.strip(), author_id=user.id, is_published=False)
+                db.add(article)
+                db.flush()
+                db.add(TelegramNewsSubmission(update_id=update['update_id'], news_id=article.id, user_id=user.id))
+                payload = message(t('Новину надіслано на модерацію. Вона не публікується автоматично.',
+                                    'News submitted for review. It is not published automatically.'))
+        elif action in {'events','news','my_events','chats','files'}:
             page = min(number, 1000)
             if action in {'events', 'my_events'}:
                 query = db.query(Event).filter(Event.start_time > datetime.utcnow())

@@ -25,7 +25,13 @@
   </div>
   {% if request.query_params.get('saved') == '1' %}<div class="alert alert-success">Профіль оновлено.</div>{% endif %}{% if error is defined %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
   <form method="post" class="row g-3">
-    <div class="col-12"><label class="form-label" for="interests">Мої інтереси</label><textarea id="interests" class="form-control" name="interests" rows="2" maxlength="2000">{{ user.interests or '' }}</textarea></div>
+    <div class="col-12">
+    {% if interest_topics %}<fieldset><legend class="fs-6"><span data-ops-uk="Мої інтереси" data-ops-en="My interests" data-no-translate>Мої інтереси</span></legend>
+    <input type="hidden" name="topics_selected" value="yes">
+    <div class="row g-2">{% for topic in interest_topics %}<label class="col-sm-6 col-lg-4"><input type="checkbox" name="topic_keys" value="{{ topic.key }}" {% if topic.key in selected_topics %}checked{% endif %}>
+    <span data-no-translate data-ops-uk="{{ topic.label_uk }}" data-ops-en="{{ topic.label_en }}">{{ topic.label_uk }}</span></label>{% endfor %}</div></fieldset>
+    {% else %}<label class="form-label" for="interests">Мої інтереси</label><textarea id="interests" class="form-control" name="interests" rows="2" maxlength="2000">{{ user.interests or '' }}</textarea>{% endif %}
+    </div>
     <div class="col-md-6"><label class="form-label" for="full-name-en">Ваше ім'я англійською</label><input id="full-name-en" class="form-control" name="full_name_en" maxlength="120" value="{{ user.full_name_en or '' }}"></div>
     <div class="col-md-6"><label class="form-label">Повне ім'я</label><input class="form-control" name="full_name" value="{{ user.full_name }}" required></div>
     <div class="col-md-6"><label class="form-label">Email</label><input class="form-control" value="{{ user.email }}" disabled></div>

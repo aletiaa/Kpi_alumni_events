@@ -71,11 +71,23 @@ def consume_update(db, update):
     if len(parts) != 2 or parts[0].split("@")[0] != "/start":
         return
     accept_link(db, parts[1], str(chat['id']), username)
-    if not TELEGRAM_ALLOWED_USERNAME or username != TELEGRAM_ALLOWED_USERNAME:
-        return
     digest = hashlib.sha256(parts[1].encode()).hexdigest()
     link = db.query(TelegramLink).filter_by(code_hash=digest).first()
     if link and link.expires_at and link.expires_at > datetime.utcnow():
+        from app.models import User
+        from app.services.admin_permissions import valid_grant, is_administrator_email
+        if not is_administrator_email(db, link.admin_email):
+            return
+        user = db.query(User).filter_by(email=link.admin_email).first()
+        delegated = bool(valid_grant(db, user)) if user else False
+        if not delegated and (not TELEGRAM_ALLOWED_USERNAME or username != TELEGRAM_ALLOWED_USERNAME):
+            return
+        occupied = db.query(TelegramLink).filter(
+            TelegramLink.chat_id == str(chat["id"]),
+            TelegramLink.admin_email != link.admin_email,
+        ).first()
+        if occupied:
+            return
         link.chat_id = str(chat["id"])
         link.username = username
         link.code_hash = None
