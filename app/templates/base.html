@@ -63,6 +63,10 @@
             {% endif %}
           </div>
           <div class="mobile-nav-panel" id="mobileNavPanel" hidden>
+            <div class="d-flex align-items-center justify-content-between gap-3 py-3">
+              <label for="mobileLanguageSwitch" data-no-translate>UA / EN</label>
+              <select id="mobileLanguageSwitch" class="form-select w-auto" aria-label="Language"><option value="uk">UA</option><option value="en">EN</option></select>
+            </div>
             <a href="/events" data-i18n="nav_events">Події</a>
             <a href="/news" data-i18n="nav_news">Новини</a>
             <a href="/alumni" data-i18n="nav_alumni">Випускники</a>
@@ -688,8 +692,7 @@
       translateDynamicContent(lang);
       updateBreadcrumb(lang);
       try { localStorage.setItem("ui_language", lang); } catch (_) {}
-      const select = document.getElementById("languageSwitch");
-      if (select) select.value = lang;
+      document.querySelectorAll('#languageSwitch, #mobileLanguageSwitch').forEach(select => { select.value = lang; });
       document.dispatchEvent(new CustomEvent('alumnix:language', {detail: lang}));
     }
     Object.assign(CONTENT_TRANSLATIONS.en, window.ALUMNIX_UI_EN || {});
@@ -699,7 +702,7 @@
     let initialLanguage = 'uk';
     try { initialLanguage = localStorage.getItem('ui_language') || 'uk'; } catch (_) {}
     applyLanguage(initialLanguage);
-    document.getElementById("languageSwitch")?.addEventListener("change", e => applyLanguage(e.target.value));
+    document.querySelectorAll('#languageSwitch, #mobileLanguageSwitch').forEach(select => select.addEventListener("change", e => applyLanguage(e.target.value)));
     let translationScheduled = false;
     new MutationObserver(() => {
       if (translationScheduled) return;
