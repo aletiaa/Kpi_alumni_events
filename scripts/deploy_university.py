@@ -8,6 +8,7 @@ from pathlib import Path
 import secrets
 import sqlite3
 import time
+import sys
 
 from dotenv import dotenv_values
 
@@ -17,14 +18,14 @@ HOST = "77.47.192.6"
 HOST_KEY = "SHA256:KDR8aRwTxCGG5+j6taP01bvA/C9xoIdoq5/iF3rG2sg"
 
 
-def connect():
+def connect(password=None):
     transport = paramiko.Transport(socket.create_connection((HOST, 22), timeout=20))
     transport.start_client(timeout=20)
     digest = base64.b64encode(hashlib.sha256(transport.get_remote_server_key().asbytes()).digest()).decode().rstrip("=")
     if "SHA256:" + digest != HOST_KEY:
         transport.close()
         raise RuntimeError("SSH host identity changed; verify it before continuing")
-    transport.auth_password("std19", getpass.getpass("SSH password: "))
+    transport.auth_password("std19", password or getpass.getpass("SSH password: "))
     client = paramiko.SSHClient()
     client._transport = transport
     return client
@@ -90,13 +91,20 @@ def verify(client):
 
 
 def main():
+    sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser()
     parser.add_argument("--inspect-docker", action="store_true")
     parser.add_argument("--deploy", action="store_true")
     parser.add_argument("--verify", action="store_true")
+    parser.add_argument("--password-stdin", action="store_true", help="Read a password from a private input pipe")
+    parser.add_argument("--resume", action="store_true", help="Build and start the already uploaded release")
     args = parser.parse_args()
-    with connect() as client:
-        if args.deploy:
+    password = sys.stdin.readline().rstrip("\r\n") if args.password_stdin else None
+    with connect(password) as client:
+        if args.resume:
+            run(client, "docker build -t alumnixhub-std19:release /home/std19/alumnixhub/source")
+            run(client, "docker run -d --name alumnixhub-std19 --restart unless-stopped -p 4063:8000 --env-file /home/std19/alumnixhub/.env -v /home/std19/alumnixhub/data:/data -v /home/std19/alumnixhub/uploads:/app/app/static/uploads alumnixhub-std19:release")
+        elif args.deploy:
             deploy(client)
         elif args.verify:
             verify(client)
