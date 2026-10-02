@@ -98,10 +98,19 @@ def main():
     parser.add_argument("--verify", action="store_true")
     parser.add_argument("--password-stdin", action="store_true", help="Read a password from a private input pipe")
     parser.add_argument("--resume", action="store_true", help="Build and start the already uploaded release")
+    parser.add_argument("--update-source", action="store_true", help="Update application source, retaining server data and secrets")
     args = parser.parse_args()
     password = sys.stdin.readline().rstrip("\r\n") if args.password_stdin else None
     with connect(password) as client:
-        if args.resume:
+        if args.update_source:
+            archive = Path(__file__).resolve().parents[1] / ".pytest_cache" / "release-source.zip"
+            with client.open_sftp() as sftp:
+                sftp.put(str(archive), "/home/std19/alumnixhub/release-source.zip")
+            run(client, "python3 -m zipfile -e /home/std19/alumnixhub/release-source.zip /home/std19/alumnixhub/source")
+            run(client, "docker build -t alumnixhub-std19:release /home/std19/alumnixhub/source")
+            run(client, "docker stop alumnixhub-std19 && docker rm alumnixhub-std19")
+            run(client, "docker run -d --name alumnixhub-std19 --restart unless-stopped -p 4063:8000 --env-file /home/std19/alumnixhub/.env -v /home/std19/alumnixhub/data:/data -v /home/std19/alumnixhub/uploads:/app/app/static/uploads alumnixhub-std19:release")
+        elif args.resume:
             run(client, "docker build -t alumnixhub-std19:release /home/std19/alumnixhub/source")
             run(client, "docker run -d --name alumnixhub-std19 --restart unless-stopped -p 4063:8000 --env-file /home/std19/alumnixhub/.env -v /home/std19/alumnixhub/data:/data -v /home/std19/alumnixhub/uploads:/app/app/static/uploads alumnixhub-std19:release")
         elif args.deploy:
