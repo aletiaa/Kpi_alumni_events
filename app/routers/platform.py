@@ -68,7 +68,7 @@ def build_event_calendar(events: list[Event], year: int | None = None, month: in
     return {
         "year": year,
         "month": month,
-        "month_name": calendar.month_name[month],
+        "month_name": ["", "Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень", "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"][month],
         "weeks": cal.monthdayscalendar(year, month),
         "events_by_day": events_by_day,
         "prev_year": prev_year,

@@ -25,6 +25,10 @@ DEMO_NOTICE = "DEMO: Synthetic anonymous answers for chart demonstration only. N
 
 def clean_seed_users(db):
     ids = [u.id for u in db.query(User).filter(User.email.in_(SEED_EMAILS))]
+    return delete_users(db, ids)
+
+
+def delete_users(db, ids):
     if not ids:
         return 0
     # Preserve authored news, remove dependent test activity before its users.

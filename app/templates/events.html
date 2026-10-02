@@ -9,7 +9,7 @@
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
       <div>
         <div class="kicker">Календар подій</div>
-        <h3 class="mb-0">{{ calendar.month_name }} {{ calendar.year }}</h3>
+        <h3 class="mb-0"><span data-no-translate data-calendar-month="{{ calendar.month }}">{{ calendar.month_name }}</span> {{ calendar.year }}</h3>
       </div>
       <div class="d-flex gap-2">
         <a class="btn btn-outline-primary btn-sm" href="/events?year={{ calendar.prev_year }}&month={{ calendar.prev_month }}">‹ Попередній</a>
@@ -17,7 +17,7 @@
       </div>
     </div>
     <div class="calendar-grid">
-      {% for day_name in ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] %}<div class="calendar-head">{{ day_name }}</div>{% endfor %}
+      {% for day_name in ["Пн","Вт","Ср","Чт","Пт","Сб","Нд"] %}<div class="calendar-head" data-no-translate data-calendar-day="{{ loop.index0 }}">{{ day_name }}</div>{% endfor %}
       {% for week in calendar.weeks %}
         {% for day in week %}
           <div class="calendar-cell {% if not day %}calendar-empty{% endif %}">

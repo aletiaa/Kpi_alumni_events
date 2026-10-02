@@ -594,6 +594,22 @@
     }
 
     function translateDynamicContent(lang) {
+      const calendarLocale = lang === 'en' ? 'en-GB' : 'uk-UA';
+      const profileRolesUk = {alumni: 'випускник', student: 'студент', guest: 'гість', mentor: 'ментор'};
+      document.querySelectorAll('.kicker').forEach(el => {
+        const original = el.dataset.profileRoles || el.textContent.trim();
+        if (!/^(alumni|student|guest|mentor)( · mentor)?$/.test(original)) return;
+        el.dataset.profileRoles = original;
+        el.setAttribute('data-no-translate', '');
+        el.textContent = lang === 'en' ? original : original.split(' · ').map(role => profileRolesUk[role]).join(' · ');
+      });
+      document.querySelectorAll('[data-calendar-month]').forEach(el => {
+        const label = new Intl.DateTimeFormat(calendarLocale, {month: 'long', timeZone: 'UTC'}).format(new Date(Date.UTC(2026, Number(el.dataset.calendarMonth) - 1, 1)));
+        el.textContent = label.charAt(0).toUpperCase() + label.slice(1);
+      });
+      document.querySelectorAll('[data-calendar-day]').forEach(el => {
+        el.textContent = (lang === 'en' ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] : ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'])[Number(el.dataset.calendarDay)];
+      });
       document.querySelectorAll('[data-name-uk]').forEach(el => {
         el.textContent = lang === 'en' ? translatedText(el.dataset.nameEn, 'en') : el.dataset.nameUk;
       });

@@ -45,7 +45,7 @@ def translate_content(kind: str, item_id: int, db: Session = Depends(get_db), id
         fields = {"title": item.title, "description": item.description or ""} if item and (item.is_active or admin) else None
     elif kind == "profile":
         item = db.get(User, item_id)
-        fields = {key: getattr(item, key) or "" for key in ["bio", "status", "specialty", "faculty", "skills", "mentorship_topics", "current_position", "city_country", "help_topics", "company"]} if item and item.is_profile_public and item.is_active and not item.is_blocked else None
+        fields = {key: getattr(item, key) or "" for key in ["bio", "status", "specialty", "faculty", "skills", "mentorship_topics", "current_position", "city_country", "help_topics", "company", "interests"]} if item and item.is_profile_public and item.is_active and not item.is_blocked else None
         if fields is not None:
             fields["position"] = item.current_position or item.status or item.role
     else:
