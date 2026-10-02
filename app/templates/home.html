@@ -1,4 +1,8 @@
 {% extends "base.html" %}
+{% block head_extra %}
+<link rel="preload" as="image" href="/static/img/kpi-main-mobile.webp" media="(max-width: 720px)" fetchpriority="high">
+<link rel="preload" as="image" href="/static/img/kpi-main.webp" media="(min-width: 721px)" fetchpriority="high">
+{% endblock %}
 {% block content %}
 <section class="campus-hero mb-4">
   <div class="campus-hero-content">
