@@ -81,7 +81,7 @@ def dispatch(db, update):
                 [button(t('Чати','Chats'),'chats'), button(t('Мої файли','My files'),'files')],
                 [button(t('Надіслати файл','Submit a file'),'upload'), button(t('Налаштування','Settings'),'settings')],
                 [button(t('Повідомлення','Messages'),'messages'), button(t('Опитування','Surveys'),'surveys')],
-                [button(t('Реєстрація / вхід','Register / log in'),'login')]]
+                [button(t('Реєстрація','Register'),'register'), button(t('Увійти','Log in'),'login')]]
         if is_admin:
             rows.append([button(t('Адміністрування','Administration'),'admin')])
             if not user:

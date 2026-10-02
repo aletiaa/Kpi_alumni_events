@@ -39,6 +39,36 @@ def test_unlinked_user_cannot_open_administrator_menu(db):
     assert 'reply_markup' not in payload
 
 
+def test_user_menu_registration_and_login_have_separate_destinations(db):
+    dispatch(db, update())
+    dispatch(db, update('register', update_id=2, callback=True))
+    dispatch(db, update('login', update_id=3, callback=True))
+    db.commit()
+    menu = json.loads(db.get(TelegramBotReply, 'update:1').payload)
+    actions = [b.get('callback_data') for row in menu['reply_markup']['inline_keyboard'] for b in row]
+    assert 'register' in actions and 'login' in actions
+    assert '/register' in json.loads(db.get(TelegramBotReply, 'update:2').payload)['text']
+    assert '/login' in json.loads(db.get(TelegramBotReply, 'update:3').payload)['text']
+
+
+def test_linked_user_reads_published_website_news_and_updates(db):
+    person(db)
+    article = News(title='Website news', content='Original article', is_published=True)
+    draft = News(title='Unpublished draft', content='Private', is_published=False)
+    db.add_all([article, draft])
+    db.commit()
+    dispatch(db, update('news', callback=True))
+    db.commit()
+    listing = json.loads(db.get(TelegramBotReply, 'update:1').payload)
+    labels = [b['text'] for row in listing['reply_markup']['inline_keyboard'] for b in row]
+    assert 'Website news' in labels and 'Unpublished draft' not in labels
+    article.content = 'Updated on website'
+    db.commit()
+    dispatch(db, update(f'article:{article.id}', update_id=2, callback=True))
+    db.commit()
+    assert 'Updated on website' in json.loads(db.get(TelegramBotReply, 'update:2').payload)['text']
+
+
 def update(text='/start', update_id=1, chat_id=123, callback=False):
     sender={'id':chat_id,'language_code':'en','username':'test_alumni'}
     message={'from':sender,'chat':{'id':chat_id,'type':'private'},'text':text}
