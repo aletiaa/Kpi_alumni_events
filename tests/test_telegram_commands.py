@@ -10,6 +10,35 @@ from app.services.event_registration import register
 from conftest import TestingSessionLocal
 
 
+def test_admin_only_menu_has_no_unusable_personal_actions(db, monkeypatch):
+    from app.models import TelegramLink
+    from app.services import admin_csv
+    monkeypatch.setattr(admin_csv, 'find_admin_by_email', lambda email: {'email':email})
+    db.add(TelegramLink(admin_email='admin@test.local', chat_id='123'))
+    db.commit()
+    dispatch(db, update())
+    db.commit()
+    payload = json.loads(db.get(TelegramBotReply, 'update:1').payload)
+    assert 'Administrator account linked' in payload['text']
+    buttons = [b for row in payload['reply_markup']['inline_keyboard'] for b in row]
+    assert not any(b.get('callback_data') in {'profile','my_events','files','messages'} for b in buttons)
+    dispatch(db, update('admin', update_id=2, callback=True))
+    db.commit()
+    admin = json.loads(db.get(TelegramBotReply, 'update:2').payload)
+    assert 'does not sign your browser in' in admin['text']
+    links = [b for row in admin['reply_markup']['inline_keyboard'] for b in row]
+    assert len(links) == 6
+    assert all('url' in b and 'callback_data' not in b for b in links)
+
+
+def test_unlinked_user_cannot_open_administrator_menu(db):
+    dispatch(db, update('admin', callback=True))
+    db.commit()
+    payload = json.loads(db.get(TelegramBotReply, 'update:1').payload)
+    assert 'Link your website profile' in payload['text']
+    assert 'reply_markup' not in payload
+
+
 def update(text='/start', update_id=1, chat_id=123, callback=False):
     sender={'id':chat_id,'language_code':'en','username':'test_alumni'}
     message={'from':sender,'chat':{'id':chat_id,'type':'private'},'text':text}

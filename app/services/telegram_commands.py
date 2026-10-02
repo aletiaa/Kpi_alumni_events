@@ -72,6 +72,9 @@ def dispatch(db, update):
             pass
     method = 'sendMessage'
     payload = message(t('Пов’яжіть профіль на сайті: ', 'Link your website profile: ') + APP_BASE_URL + '/profile/telegram')
+    if is_admin and not user:
+        payload = message(t('Це адміністративне підключення. Відкрийте /menu для керування сайтом. Особисті функції потребують окремого профілю.',
+                            'This is an administrator connection. Open /menu to manage the website. Personal features require a separate profile.'))
     if command in {'start', 'menu', 'help'}:
         rows = [[button(t('Події','Events'),'events'), button(t('Новини','News'),'news')],
                 [button(t('Мій профіль','My profile'),'profile'), button(t('Мої події','My events'),'my_events')],
@@ -81,6 +84,12 @@ def dispatch(db, update):
                 [button(t('Реєстрація / вхід','Register / log in'),'login')]]
         if is_admin:
             rows.append([button(t('Адміністрування','Administration'),'admin')])
+            if not user:
+                rows = [[button(t('Адміністрування','Administration'),'admin')],
+                        [{'text':t('Події на сайті','Website events'), 'url':APP_BASE_URL+'/events'},
+                         {'text':t('Новини на сайті','Website news'), 'url':APP_BASE_URL+'/news'}],
+                        [{'text':t('Підключити особистий профіль','Link personal profile'),
+                          'url':APP_BASE_URL+'/profile/telegram'}]]
         payload = message(t('AlumnixHub — меню випускника', 'AlumnixHub — alumni menu') + '\n' +
             (t('Профіль підключено.', 'Profile linked.') if user else t('Акаунт адміністратора підключено.', 'Administrator account linked.') if is_admin else
              t('Увійдіть на сайт і підключіть Telegram у профілі.', 'Sign in on the website and connect Telegram in your profile.')), rows)
@@ -89,10 +98,14 @@ def dispatch(db, update):
     elif command in {'login','register'}:
         payload = website('/register' if command == 'register' else '/login', en)
     elif command == 'admin' and is_admin:
-        payload = message(t('Керування на сайті (потрібен вхід адміністратора):', 'Website administration (admin sign-in required):'), [
-            [button(t('Новини','News'),'admin_news'),button(t('Події','Events'),'admin_events')],
-            [button(t('Користувачі','Users'),'admin_users'),button(t('Чати','Chats'),'admin_chats')],
-            [button(t('Розсилки','Broadcasts'),'admin_bots'),button(t('Файли','Files'),'admin_files')]])
+        links = [
+            [('Новини','News','/admin/news'),('Події','Events','/admin/events')],
+            [('Користувачі','Users','/admin/users'),('Чати','Chats','/admin/chats')],
+            [('Розсилки','Broadcasts','/admin/bots'),('Файли','Files','/admin/bots/files')]]
+        payload = message(t('Створення та редагування відкриваються на сайті. Увійдіть як адміністратор у браузері. Підключення Telegram не авторизує браузер.',
+                            'Create and edit content on the website. Sign in as administrator in your browser. Telegram linking does not sign your browser in.'),
+                          [[{'text':t(uk, english),'url':APP_BASE_URL+path}
+                            for uk, english, path in row] for row in links])
     elif command.startswith('admin_') and is_admin:
         path = {'admin_news':'/admin/news','admin_events':'/admin/events','admin_users':'/admin/users',
                 'admin_chats':'/admin/chats','admin_bots':'/admin/bots','admin_files':'/admin/bots/files'}.get(command)
