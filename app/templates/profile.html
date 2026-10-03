@@ -38,8 +38,8 @@
     <div class="col-md-8"><label class="form-label">URL фото профілю</label><input class="form-control" name="avatar_url" value="{{ user.avatar_url or '' }}" placeholder="https://..."></div>
     <div class="col-md-4"><label class="form-label">Статус користувача</label><input class="form-control" name="status" value="{{ user.status or '' }}" placeholder="Product Manager, Mentor, Student"></div>
     <div class="col-md-4"><label class="form-label">Група</label><input class="form-control" name="group_name" value="{{ user.group_name or '' }}"></div>
-    <div class="col-md-4"><label class="form-label">Дата народження</label><input class="form-control" type="date" name="birth_date" value="{{ user.birth_date or '' }}"></div>
-    <div class="col-md-4"><label class="form-label">Рік випуску</label><input class="form-control" type="number" name="graduation_year" value="{{ user.graduation_year or '' }}"></div>
+    <div class="col-md-4"><label class="form-label">Дата народження</label><input class="form-control" type="date" name="birth_date" max="{{ profile_today.isoformat() }}" value="{{ entered_birth_date if entered_birth_date is defined else user.birth_date or '' }}"></div>
+    <div class="col-md-4"><label class="form-label">Рік випуску</label><input class="form-control" type="number" name="graduation_year" min="1900" max="{{ profile_today.year }}" step="1" value="{{ entered_graduation_year if entered_graduation_year is defined else user.graduation_year or '' }}"></div>
     <div class="col-md-6"><label class="form-label">Факультет</label><input class="form-control" name="faculty" value="{{ user.faculty or '' }}"></div>
     <div class="col-md-6"><label class="form-label">Спеціальність</label><select class="form-select" name="specialty"><option value="">Оберіть спеціальність</option>{% for item in specialties %}<option value="{{ item.name }}" {% if user.specialty == item.name %}selected{% endif %}>{{ item.code }} - {{ item.name }}</option>{% endfor %}</select></div>
     <div class="col-md-6"><label class="form-label">Telegram</label><input class="form-control" name="telegram_username" value="{{ user.telegram_username or '' }}"></div>

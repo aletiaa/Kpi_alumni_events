@@ -1,5 +1,10 @@
 // Full-phrase UI translations. Never substitute individual words inside content.
 window.ALUMNIX_UI_EN = {
+  "Вкажіть коректну дату народження.": "Enter a valid birth date.",
+  "Дата народження не може бути в майбутньому.": "Your birth date cannot be in the future.",
+  "Рік випуску має бути цілим числом.": "Graduation year must be a whole number.",
+  "Вкажіть рік завершеного випуску від 1900 до поточного року. Майбутній рік залиште порожнім.": "Enter a completed graduation year from 1900 to the current year. Leave a future graduation year blank.",
+  "Рік випуску має бути пізніше року народження.": "Graduation year must be later than your birth year.",
   "DEMO: Демонстраційні анонімні відповіді, не результати дослідження.": "DEMO: Synthetic anonymous answers for demonstration only. Not research data.",
   "Бот працює": "Bot is running",
   "Бот підключається": "Bot is connecting",

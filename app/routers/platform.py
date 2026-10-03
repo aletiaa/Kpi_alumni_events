@@ -97,6 +97,7 @@ def is_http_url(value: str) -> bool:
 def template_context(request: Request, ident, **context):
     context.setdefault("ident", ident)
     context.setdefault("specialties", specialty_options())
+    context.setdefault("profile_today", date.today())
     return context
 
 
@@ -314,6 +315,25 @@ def profile_save(
     if not user:
         raise HTTPException(status_code=404, detail="Користувача не знайдено")
 
+    birthday = parse_date(birth_date)
+    graduation = parse_int(graduation_year)
+    today = date.today()
+    date_error = None
+    if clean(birth_date) and birthday is None:
+        date_error = "Вкажіть коректну дату народження."
+    elif birthday and birthday > today:
+        date_error = "Дата народження не може бути в майбутньому."
+    elif clean(graduation_year) and graduation is None:
+        date_error = "Рік випуску має бути цілим числом."
+    elif graduation is not None and not 1900 <= graduation <= today.year:
+        date_error = "Вкажіть рік завершеного випуску від 1900 до поточного року. Майбутній рік залиште порожнім."
+    elif birthday and graduation is not None and graduation <= birthday.year:
+        date_error = "Рік випуску має бути пізніше року народження."
+    if date_error:
+        return render(request, "profile.html", template_context(request, ident, user=user,
+            completeness=profile_completeness(user), error=date_error,
+            entered_birth_date=birth_date, entered_graduation_year=graduation_year), status_code=400)
+
     linkedin = clean(linkedin_url)
     avatar = clean(avatar_url)
     if avatar and not is_http_url(avatar):
@@ -324,10 +344,10 @@ def profile_save(
     user.full_name = full_name.strip() or user.full_name
     user.full_name_en = clean(full_name_en)
     user.group_name = clean(group_name)
-    user.birth_date = parse_date(birth_date)
+    user.birth_date = birthday
     user.faculty = clean(faculty)
     user.specialty = clean(specialty)
-    user.graduation_year = parse_int(graduation_year)
+    user.graduation_year = graduation
     user.bio = clean(bio)
     user.telegram_username = clean(telegram_username)
     user.linkedin_url = linkedin
