@@ -326,7 +326,7 @@ window.ALUMNIX_UI_EN = {
   "Усі ролі": "All roles",
   "Факультет:": "Faculty:",
   "Фільтрувати": "Filter",
-  "Цей блок підтягує реальні записи з бази даних, тому головна сторінка змінюється разом із платформою.": "The latest community activity appears here as the platform grows.",
+  "Актуальні події, новини та ментори спільноти.": "Upcoming events, news, and community mentors.",
   "Цей графік допомагає зрозуміти, скільки активності створюють зареєстровані користувачі порівняно з гостями.": "Compare activity from signed-in members and anonymous visitors.",
   "Ця сторінка показує не технічні логи, а поведінку користувачів: які розділи відкривають, скільки тривають сесії та де люди проводять найбільше часу.": "See which sections people visit, how long their sessions last, and where they spend the most time.",
   "Час сторінки": "Time on page",
