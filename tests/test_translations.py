@@ -75,10 +75,11 @@ def test_profile_card_fields_are_independently_translatable(client, db, monkeypa
     db.commit()
     for path in ['/alumni', '/mentors']:
         html = client.get(path).text
-        assert '<span>Факультет не вказано</span>' in html
-        assert 'data-content-field="city_country"' in html
+        assert 'Факультет' in html
+        assert 'data-ops-uk="Україна, Київ"' in html
+        assert 'data-ops-en="Ukraine, Kyiv"' in html
         assert 'data-content-field="company"' in html
-    assert '<span>Статус:</span>' in client.get('/alumni').text
+    assert '<span>Професійний статус:</span>' in client.get('/alumni').text
     monkeypatch.setattr(translation, 'deepl_translate', lambda texts: ['Translated' for _ in texts])
     fields = client.get(f'/api/translations/profile/{user.id}').json()['fields']
     assert fields['position'] == 'Translated'

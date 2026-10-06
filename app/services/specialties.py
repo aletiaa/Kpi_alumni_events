@@ -43,5 +43,11 @@ KPI_SPECIALTIES: list[dict[str, str]] = [
 ]
 
 
-def specialty_options() -> list[dict[str, str]]:
+def specialty_options(db=None) -> list[dict[str, str]]:
+    if db is not None:
+        from app.models import SpecialtyDefinition
+        rows = db.query(SpecialtyDefinition).filter_by(is_active=True).order_by(
+            SpecialtyDefinition.classification.desc(), SpecialtyDefinition.code).all()
+        return [dict(key=r.key, code=r.code, name=r.name_uk, name_en=r.name_en,
+                     classification=r.classification) for r in rows]
     return KPI_SPECIALTIES

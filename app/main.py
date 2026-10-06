@@ -63,6 +63,8 @@ def bootstrap_database():
     try:
         from .services.topic_catalog import seed_catalog
         seed_catalog(db)
+        from .services.profile_catalog import seed_specialties
+        seed_specialties(db)
         clean_saved_import_labels(db)
         db.commit()
         if SEED_DEMO_DATA:

@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% from "operations_macros.html" import tr %}
+{% block content %}
+<a href="/admin/operations">{{ tr('Адміністрування', 'Administration') }}</a>
+<h1 class="h3">{{ tr('Спеціальності', 'Specialties') }}</h1>
+{% macro fields(item) %}
+<input type="hidden" name="csrf" value="{{ csrf }}">
+<label>{{ tr('Класифікація', 'Classification') }}<select name="classification" class="form-select" required>
+{% for key,label in [('legacy','До 2015 / Before 2015'),('2015','2015–2024'),('2025','Від 2025 / From 2025')] %}<option value="{{ key }}" {% if item and item.classification == key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+<label>{{ tr('Код', 'Code') }}<input class="form-control" name="code" maxlength="30" required value="{{ item.code if item else '' }}" {% if item %}readonly{% endif %}></label>
+<label>Українська<input class="form-control" name="name_uk" maxlength="200" required value="{{ item.name_uk if item else '' }}"></label>
+<label>English<input class="form-control" name="name_en" maxlength="200" required value="{{ item.name_en if item else '' }}"></label>
+<label><input type="checkbox" name="active" value="yes" {% if not item or item.is_active %}checked{% endif %}> {{ tr('Доступна для вибору', 'Available for selection') }}</label>
+<button class="btn btn-primary">{{ tr('Зберегти', 'Save') }}</button>
+{% endmacro %}
+<form method="post" class="d-flex flex-wrap align-items-end gap-3 mb-4">{{ fields(none) }}</form>
+{% for item in rows %}<details class="border-bottom py-2"><summary>{{ item.code }} — {{ tr(item.name_uk,item.name_en) }}</summary><form method="post" class="d-flex flex-wrap gap-3 py-3">{{ fields(item) }}</form></details>{% endfor %}
+{% endblock %}

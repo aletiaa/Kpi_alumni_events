@@ -57,3 +57,30 @@ def test_profile_form_has_date_limits(client, db):
     assert f'max="{date.today().isoformat()}"' in page
     assert f'max="{date.today().year}"' in page
     assert 'min="1900"' in page
+    assert 'min="1965"' in page
+
+
+@pytest.mark.parametrize('birthday,admission,graduation,expected', [
+    ('', '', '1964', 400), ('', '', '1965', 303),
+    ('1950-01-01', '', '1965', 303), ('1951-01-01', '', '1965', 400),
+    ('2000-01-01', '2014', '2015', 303), ('2000-01-01', '', '2014', 400),
+    ('2000-01-01', '2020', '2019', 400), ('2000-01-01', '2020', '2020', 303),
+    ('2000-01-01', '1999', '2020', 400), ('', '2020', '2019', 400),
+    ('', '2020', '2021', 303), ('', 'invalid', '2020', 400),
+    ('', '2020.5', '2021', 400), ('', str(date.today().year + 1), '', 400),
+    ('2027-01-01', '', '', 400), ('2026-01-01', '', '2026', 400),
+])
+def test_education_year_boundaries(client, db, birthday, admission, graduation, expected):
+    from app.models import ProfileReference
+    user = profile_user(client, db)
+    response = client.post('/profile', data={'full_name': 'Updated', 'birth_date': birthday,
+        'admission_year': admission, 'graduation_year': graduation}, follow_redirects=False)
+    assert response.status_code == expected
+    db.refresh(user)
+    if expected == 400:
+        assert user.full_name == 'Original Name'
+        assert user.graduation_year == 2012
+        assert db.get(ProfileReference, user.id) is None
+    else:
+        assert user.graduation_year == (int(graduation) if graduation else None)
+        assert db.get(ProfileReference, user.id).admission_year == (int(admission) if admission else None)

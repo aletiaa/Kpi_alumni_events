@@ -13,6 +13,36 @@ from app.services.backups import create_backup, verify_backup
 router = APIRouter(prefix="/admin/operations", tags=["operations"])
 
 
+@router.get('/specialties')
+def specialties(request: Request, db: Session = Depends(get_db), admin=Depends(require_admin)):
+    from app.models import SpecialtyDefinition
+    return request.app.state.templates.TemplateResponse(request, 'admin/specialties.html', {
+        'request': request, 'ident': admin, 'csrf': token(admin),
+        'rows': db.query(SpecialtyDefinition).order_by(SpecialtyDefinition.classification, SpecialtyDefinition.code).all()})
+
+
+@router.post('/specialties')
+def save_specialty(code: str = Form(..., max_length=30), classification: str = Form(...),
+                   name_uk: str = Form(..., max_length=200), name_en: str = Form(..., max_length=200),
+                   active: str = Form(''), csrf: str = Form(''),
+                   db: Session = Depends(get_db), admin=Depends(require_admin)):
+    from app.models import SpecialtyDefinition
+    verify(csrf, admin)
+    patterns = {'legacy': r'[678]\.\d{6}(?:\d{2})?', '2015': r'\d{3}', '2025': r'[A-Z]\d{1,2}(?:\.\d{2,3})?'}
+    code = code.strip().upper()
+    if classification not in patterns or not re.fullmatch(patterns[classification], code) or not name_uk.strip() or not name_en.strip():
+        raise HTTPException(400, 'Перевірте код, класифікацію та обидві назви.')
+    key = classification + ':' + code
+    item = db.get(SpecialtyDefinition, key)
+    if not item:
+        item = SpecialtyDefinition(key=key, code=code, classification=classification)
+        db.add(item)
+    item.name_uk, item.name_en = name_uk.strip(), name_en.strip()
+    item.is_active = active == 'yes'
+    db.commit()
+    return RedirectResponse('/admin/operations/specialties', 303)
+
+
 def page(request, db, admin, section, **values):
     return request.app.state.templates.TemplateResponse(request, "admin/operations.html", {
         "request":request, "ident":admin, "app_name":"AlumnixHub", "section":section,

@@ -32,6 +32,8 @@ def ensure_password_reset_columns(engine):
 
 def ensure_alumni_profile_columns(engine):
     with engine.begin() as conn:
+        if inspect(conn).has_table('profile_references'):
+            _add_column_if_missing(conn, 'profile_references', 'admission_year', 'admission_year INTEGER')
         _add_column_if_missing(conn, "users", "interests", "interests TEXT")
         _add_column_if_missing(conn, "users", "full_name_en", "full_name_en VARCHAR(120)")
         _add_column_if_missing(conn, "users", "is_blocked", "is_blocked BOOLEAN NOT NULL DEFAULT FALSE")

@@ -19,12 +19,12 @@
         <div class="alumni-card-head mb-3">
           <img class="profile-avatar-md" src="{{ user.avatar_url or 'https://ui-avatars.com/api/?name=' ~ user.full_name|urlencode ~ '&background=0b5f8a&color=fff&size=96' }}" alt="{{ user.full_name }}">
           <div>
-            <div class="kicker">mentor</div>
+            <div class="kicker">{{ role_label('mentor') }}</div>
             <h4 class="mb-1"><span data-no-translate>{{ display_name(user) }}</span></h4>
-            <div class="text-muted small">{{ content_text('profile', user.id, 'position', user.current_position or user.status or user.role) }}{% if user.company %} · {{ content_text('profile', user.id, 'company', user.company) }}{% endif %}</div>
+            <div class="text-muted small">{{ content_text('profile', user.id, 'position', user.current_position or professional_status(user) or 'Не вказано') }}{% if user.company %} · {{ content_text('profile', user.id, 'company', user.company) }}{% endif %}</div>
           </div>
         </div>
-        <div class="text-muted small mb-2">{% if user.faculty %}{{ content_text('profile', user.id, 'faculty', user.faculty) }}{% else %}<span>Факультет не вказано</span>{% endif %}{% if user.specialty %} · {{ content_text('profile', user.id, 'specialty', user.specialty) }}{% endif %}{% if user.city_country %} · {{ content_text('profile', user.id, 'city_country', user.city_country) }}{% endif %}</div>
+        <div class="text-muted small mb-2">{% if user.faculty %}{{ content_text('profile', user.id, 'faculty', user.faculty) }}{% else %}<span>Факультет / інститут не вказано</span>{% endif %}{% if user.specialty %} · {{ content_text('profile', user.id, 'specialty', user.specialty) }}{% endif %}{% if display_location(user) %} · {{ display_location(user) }}{% endif %}</div>
         <p>{{ content_text('profile', user.id, 'bio', user.bio or 'Опис профілю ще не додано.') }}</p>
         {% if user.mentorship_topics %}<div class="mentor-chip-row"><span>{{ content_text('profile', user.id, 'mentorship_topics', user.mentorship_topics) }}</span></div>{% endif %}
         {% if user.skills %}<div class="small text-muted mt-2"><b>Навички:</b> {{ content_text('profile', user.id, 'skills', user.skills) }}</div>{% endif %}

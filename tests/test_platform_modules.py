@@ -46,7 +46,7 @@ def test_profile_update_and_public_alumni_search(client, db):
             "group_name": "IP-01",
             "birth_date": "2000-01-02",
             "faculty": "FIOT",
-            "specialty": "Software Engineering",
+            "specialty": "Інженерія програмного забезпечення",
             "graduation_year": "2024",
             "bio": "Builds alumni communities.",
             "telegram_username": "@ada",

@@ -21,8 +21,15 @@ router = APIRouter()
 
 
 def render(request: Request, template: str, context: dict, status_code: int = 200):
+    from app.services.profile_catalog import countries, display_location, legacy_location, role_label, professional_status, graduation_display
+    request.app.state.templates.env.globals['display_location'] = display_location
+    request.app.state.templates.env.globals.update(role_label=role_label,
+        professional_status=professional_status, graduation_display=graduation_display)
     payload = {"request": request, "app_name": APP_NAME}
+    payload['countries'] = countries()
     payload.update(context)
+    if template == 'profile.html':
+        payload['location_code'], payload['location_city'] = legacy_location(context['user'].city_country)
     return request.app.state.templates.TemplateResponse(request, template, payload, status_code=status_code)
 
 
@@ -94,10 +101,16 @@ def is_http_url(value: str) -> bool:
     return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
 
 
-def template_context(request: Request, ident, **context):
+def template_context(request: Request, ident, db=None, **context):
     context.setdefault("ident", ident)
-    context.setdefault("specialties", specialty_options())
+    context.setdefault("specialties", specialty_options(db))
     context.setdefault("profile_today", date.today())
+    if db is not None and context.get('user'):
+        from app.models import ProfileReference
+        ref = db.get(ProfileReference, context['user'].id)
+        context['specialty_key'] = ref.specialty_key if ref and any(
+            item.get('key') == ref.specialty_key for item in context['specialties']) else None
+        context['admission_year'] = ref.admission_year if ref else None
     return context
 
 
@@ -265,7 +278,7 @@ def news_detail(news_id: int, request: Request, db: Session = Depends(get_db), i
 
 @router.get("/profile")
 def profile_form(request: Request, db: Session = Depends(get_db), ident=Depends(require_identity)):
-    if ident.role == "admin" or not ident.user_id:
+    if not ident.user_id:
         return RedirectResponse("/admin", status_code=303)
     user = db.get(User, ident.user_id)
     if not user:
@@ -273,7 +286,7 @@ def profile_form(request: Request, db: Session = Depends(get_db), ident=Depends(
     from app.models import InterestTopic
     from app.services.topic_catalog import catalog_topics
     catalog = db.query(InterestTopic).all()
-    return render(request, "profile.html", template_context(request, ident, user=user,
+    return render(request, "profile.html", template_context(request, ident, db=db, user=user,
         completeness=profile_completeness(user), interest_topics=[t for t in catalog if t.is_active],
         selected_topics=catalog_topics(user.interests, catalog)))
 
@@ -288,12 +301,16 @@ def profile_save(
     faculty: str = Form(""),
     specialty: str = Form(""),
     graduation_year: str = Form(""),
+    admission_year: str | None = Form(None),
     bio: str = Form(""),
     telegram_username: str = Form(""),
     linkedin_url: str = Form(""),
     avatar_url: str = Form(""),
     status: str = Form(""),
     city_country: str = Form(""),
+    country_code: str = Form("", max_length=2),
+    city: str = Form("", max_length=100),
+    location_fields: str = Form(""),
     current_position: str = Form(""),
     company: str = Form(""),
     skills: str = Form(""),
@@ -309,14 +326,35 @@ def profile_save(
     db: Session = Depends(get_db),
     ident=Depends(require_identity),
 ):
-    if ident.role == "admin" or not ident.user_id:
+    if not ident.user_id:
         return RedirectResponse("/admin", status_code=303)
     user = db.get(User, ident.user_id)
     if not user:
         raise HTTPException(status_code=404, detail="Користувача не знайдено")
 
+    from app.services.profile_catalog import country_by_code, legacy_location
+    from app.models import SpecialtyDefinition, ProfileReference
+    if location_fields == 'yes':
+        code = country_code.strip().upper()
+        if (code and not country_by_code(code)) or (city.strip() and not code):
+            raise HTTPException(400, 'Оберіть країну зі списку.')
+        city_country = ', '.join(v for v in [country_by_code(code)['name_uk'] if code else '', city.strip()] if v)
+    elif city_country.strip() and not legacy_location(city_country)[0]:
+        raise HTTPException(400, 'Оберіть країну зі списку.')
+    selected_specialty = db.get(SpecialtyDefinition, specialty) if ':' in specialty else None
+    existing_ref = db.get(ProfileReference, user.id)
+    preserved_key = existing_ref.specialty_key if existing_ref and specialty == user.specialty else None
+    if ':' in specialty and (not selected_specialty or (not selected_specialty.is_active and
+            (not existing_ref or existing_ref.specialty_key != specialty))):
+        raise HTTPException(400, 'Невідома або неактивна спеціальність.')
+    if specialty.strip() and not selected_specialty and specialty != user.specialty and specialty not in {r['name'] for r in specialty_options()}:
+        raise HTTPException(400, 'Оберіть спеціальність із довідника.')
+    if len(status.strip()) > 120:
+        raise HTTPException(400, 'Професійний статус: максимум 120 символів.')
+
     birthday = parse_date(birth_date)
     graduation = parse_int(graduation_year)
+    admission = existing_ref.admission_year if admission_year is None and existing_ref else parse_int(admission_year)
     today = date.today()
     date_error = None
     if clean(birth_date) and birthday is None:
@@ -325,14 +363,23 @@ def profile_save(
         date_error = "Дата народження не може бути в майбутньому."
     elif clean(graduation_year) and graduation is None:
         date_error = "Рік випуску має бути цілим числом."
-    elif graduation is not None and not 1900 <= graduation <= today.year:
-        date_error = "Вкажіть рік завершеного випуску від 1900 до поточного року. Майбутній рік залиште порожнім."
-    elif birthday and graduation is not None and graduation <= birthday.year:
-        date_error = "Рік випуску має бути пізніше року народження."
+    elif graduation is not None and not 1965 <= graduation <= today.year:
+        date_error = "Рік випуску має бути від 1965 до поточного року."
+    elif admission_year and admission is None:
+        date_error = "Рік вступу має бути цілим числом."
+    elif admission is not None and not 1900 <= admission <= today.year:
+        date_error = "Вкажіть коректний рік вступу до поточного року."
+    elif birthday and admission is not None and admission < birthday.year:
+        date_error = "Рік вступу не може бути раніше року народження."
+    elif admission is not None and graduation is not None and graduation < admission:
+        date_error = "Рік випуску не може бути раніше року вступу."
+    elif birthday and graduation is not None and graduation < birthday.year + 15:
+        date_error = "Рік випуску має бути щонайменше через 15 років після року народження."
     if date_error:
-        return render(request, "profile.html", template_context(request, ident, user=user,
+        return render(request, "profile.html", template_context(request, ident, db=db, user=user,
             completeness=profile_completeness(user), error=date_error,
-            entered_birth_date=birth_date, entered_graduation_year=graduation_year), status_code=400)
+            entered_birth_date=birth_date, entered_graduation_year=graduation_year,
+            entered_admission_year=admission_year), status_code=400)
 
     linkedin = clean(linkedin_url)
     avatar = clean(avatar_url)
@@ -346,13 +393,13 @@ def profile_save(
     user.group_name = clean(group_name)
     user.birth_date = birthday
     user.faculty = clean(faculty)
-    user.specialty = clean(specialty)
+    user.specialty = (selected_specialty.code + ' - ' + selected_specialty.name_uk) if selected_specialty else clean(specialty)
     user.graduation_year = graduation
     user.bio = clean(bio)
     user.telegram_username = clean(telegram_username)
     user.linkedin_url = linkedin
     user.avatar_url = avatar
-    user.status = clean(status)
+    user.status = None if status.strip().lower() in {'alumni', 'admin', 'student', 'guest'} else clean(status)
     user.city_country = clean(city_country)
     user.current_position = clean(current_position)
     user.company = clean(company)
@@ -371,6 +418,13 @@ def profile_save(
     user.preferred_language = preferred_language if preferred_language in {"uk", "en"} else "uk"
     user.notifications_enabled = bool(notifications_enabled)
     user.is_profile_public = bool(is_profile_public)
+    reference = db.get(ProfileReference, user.id)
+    if not reference:
+        reference = ProfileReference(user_id=user.id)
+        db.add(reference)
+    reference.country_code, reference.city = legacy_location(user.city_country)
+    reference.admission_year = admission
+    reference.specialty_key = selected_specialty.key if selected_specialty else preserved_key
     db.commit()
     return RedirectResponse("/profile?saved=1", status_code=303)
 
@@ -412,7 +466,7 @@ def alumni_list(
     users = query.order_by(User.full_name.asc()).limit(100).all()
     current_user = db.get(User, ident.user_id) if ident and ident.user_id else None
     can_message_ids = {u.id for u in users if can_start_conversation(current_user, u)}
-    return render(request, "alumni/list.html", template_context(request, ident, users=users, can_message_ids=can_message_ids))
+    return render(request, "alumni/list.html", template_context(request, ident, db=db, users=users, can_message_ids=can_message_ids))
 
 
 @router.get("/mentors")
@@ -451,7 +505,7 @@ def mentors_list(
     return render(
         request,
         "mentors/list.html",
-        template_context(request, ident, mentors=mentors, can_message_ids=can_message_ids, q=q, faculty=faculty, specialty=specialty),
+        template_context(request, ident, db=db, mentors=mentors, can_message_ids=can_message_ids, q=q, faculty=faculty, specialty=specialty),
     )
 
 

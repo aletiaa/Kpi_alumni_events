@@ -269,8 +269,8 @@ def _ensure_schema():
 @pytest.fixture(scope="session", autouse=True)
 def _create_schema_once():
     _ensure_schema()
-    from app.models import AdministratorGrant, AdminAudit, InterestTopic, TelegramNewsSubmission, BackupRecord
-    for model in (AdministratorGrant, AdminAudit, InterestTopic, TelegramNewsSubmission, BackupRecord):
+    from app.models import AdministratorGrant, AdminAudit, InterestTopic, TelegramNewsSubmission, BackupRecord, SpecialtyDefinition, ProfileReference
+    for model in (AdministratorGrant, AdminAudit, InterestTopic, TelegramNewsSubmission, BackupRecord, SpecialtyDefinition, ProfileReference):
         model.__table__.create(engine_test, checkfirst=True)
     from app.models import BotCampaign
     BotCampaign.__table__.create(engine_test, checkfirst=True)
@@ -291,7 +291,7 @@ def _create_schema_once():
 def db():
     session = TestingSessionLocal()
     try:
-        for table in ("administrator_grants", "admin_audit", "interest_topics", "telegram_news_submissions", "backup_records"):
+        for table in ("profile_references", "specialty_definitions", "administrator_grants", "admin_audit", "interest_topics", "telegram_news_submissions", "backup_records"):
             session.execute(text(f"DELETE FROM {table}"))
         for table in ('telegram_bot_replies', 'telegram_uploads', 'telegram_automation_preferences'):
             session.execute(text(f"DELETE FROM {table}"))

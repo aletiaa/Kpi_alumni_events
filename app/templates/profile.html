@@ -1,10 +1,10 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% from "operations_macros.html" import tr %}
 {% block content %}
 <p><a class="btn btn-outline-primary" href="/profile/telegram">Сповіщення Telegram</a></p>
 <div class="card shadow-soft"><div class="card-body p-4">
   <div class="profile-head mb-4">
     <img class="profile-avatar-lg" src="{{ user.avatar_url or 'https://ui-avatars.com/api/?name=' ~ user.full_name|urlencode ~ '&background=0b5f8a&color=fff&size=160' }}" alt="{{ user.full_name }}">
-    <div><div class="kicker">Особистий кабінет</div><h2 class="section-title mb-1">{{ display_name(user) }}</h2><div class="text-muted">Статус: {{ user.status or user.role }}</div></div>
+    <div><div class="kicker">Особистий кабінет</div><h2 class="section-title mb-1">{{ display_name(user) }}</h2><div class="text-muted">{{ tr('Професійний статус', 'Professional status') }}: {% if user.status and user.status not in ['alumni','admin','student','guest'] %}{{ content_text('profile', user.id, 'status', user.status) }}{% else %}{{ tr('Не вказано','Not specified') }}{% endif %}</div></div>
   </div>
   <div class="border rounded-2 p-3 mb-4">
     <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
@@ -36,15 +36,19 @@
     <div class="col-md-6"><label class="form-label">Повне ім'я</label><input class="form-control" name="full_name" value="{{ user.full_name }}" required></div>
     <div class="col-md-6"><label class="form-label">Email</label><input class="form-control" value="{{ user.email }}" disabled></div>
     <div class="col-md-8"><label class="form-label">URL фото профілю</label><input class="form-control" name="avatar_url" value="{{ user.avatar_url or '' }}" placeholder="https://..."></div>
-    <div class="col-md-4"><label class="form-label">Статус користувача</label><input class="form-control" name="status" value="{{ user.status or '' }}" placeholder="Product Manager, Mentor, Student"></div>
+    <div class="col-md-4"><label class="form-label">Професійний статус</label><input class="form-control" name="status" maxlength="120" value="{{ user.status if user.status and user.status not in ['alumni','admin','student','guest'] else '' }}" placeholder="Шукаю роботу / відкритий до співпраці"></div>
     <div class="col-md-4"><label class="form-label">Група</label><input class="form-control" name="group_name" value="{{ user.group_name or '' }}"></div>
     <div class="col-md-4"><label class="form-label">Дата народження</label><input class="form-control" type="date" name="birth_date" max="{{ profile_today.isoformat() }}" value="{{ entered_birth_date if entered_birth_date is defined else user.birth_date or '' }}"></div>
-    <div class="col-md-4"><label class="form-label">Рік випуску</label><input class="form-control" type="number" name="graduation_year" min="1900" max="{{ profile_today.year }}" step="1" value="{{ entered_graduation_year if entered_graduation_year is defined else user.graduation_year or '' }}"></div>
-    <div class="col-md-6"><label class="form-label">Факультет</label><input class="form-control" name="faculty" value="{{ user.faculty or '' }}"></div>
-    <div class="col-md-6"><label class="form-label">Спеціальність</label><select class="form-select" name="specialty"><option value="">Оберіть спеціальність</option>{% for item in specialties %}<option value="{{ item.name }}" {% if user.specialty == item.name %}selected{% endif %}>{{ item.code }} - {{ item.name }}</option>{% endfor %}</select></div>
+    <div class="col-md-4"><label class="form-label" for="admission-year">Рік вступу</label><input id="admission-year" class="form-control" type="number" name="admission_year" min="1900" max="{{ profile_today.year }}" step="1" value="{{ entered_admission_year if entered_admission_year is defined and entered_admission_year else admission_year or '' }}"></div>
+    <div class="col-md-4"><label class="form-label">Рік випуску</label><input class="form-control" type="number" name="graduation_year" min="1965" max="{{ profile_today.year }}" step="1" value="{{ entered_graduation_year if entered_graduation_year is defined else user.graduation_year or '' }}"></div>
+    <div class="col-md-6"><label class="form-label">Факультет / навчально-науковий інститут</label><input class="form-control" name="faculty" value="{{ user.faculty or '' }}"></div>
+    <div class="col-md-6"><label class="form-label" for="specialty-classification">Класифікація спеціальностей</label><select id="specialty-classification" class="form-select"><option value="">Усі коди</option><option value="legacy">До 2015 — 6.050103</option><option value="2015">2015–2024 — 121</option><option value="2025">Від 2025 — F2</option></select></div>
+    <div class="col-md-6"><label class="form-label">Спеціальність (код у дипломі)</label><select class="form-select" name="specialty"><option value="">Оберіть спеціальність</option>{% if user.specialty and not specialty_key %}<option value="{{ user.specialty }}" selected>{{ user.specialty }}</option>{% endif %}{% for item in specialties %}<option value="{{ item.key or item.name }}" {% if specialty_key == item.key %}selected{% endif %} data-classification="{{ item.classification }}" data-no-translate data-ops-uk="{{ item.code }} - {{ item.name }}" data-ops-en="{{ item.code }} - {{ item.name_en or item.name }}">{{ item.code }} - {{ item.name }}</option>{% endfor %}</select></div>
     <div class="col-md-6"><label class="form-label">Telegram</label><input class="form-control" name="telegram_username" value="{{ user.telegram_username or '' }}"></div>
     <div class="col-md-6"><label class="form-label">LinkedIn URL</label><input class="form-control" name="linkedin_url" value="{{ user.linkedin_url or '' }}"></div>
-    <div class="col-md-4"><label class="form-label">Країна / місто</label><input class="form-control" name="city_country" value="{{ user.city_country or '' }}" placeholder="Україна, Київ"></div>
+    <input type="hidden" name="location_fields" value="yes">
+    <div class="col-md-4"><label class="form-label">Країна</label><select class="form-select" name="country_code"><option value="">Оберіть країну</option>{% for country in countries %}<option value="{{ country.alpha2 }}" {% if location_code == country.alpha2 %}selected{% endif %} data-no-translate data-ops-uk="{{ country.name_uk }}" data-ops-en="{{ country.name_en }}">{{ country.name_uk }}</option>{% endfor %}</select></div>
+    <div class="col-md-4"><label class="form-label">Місто</label><input class="form-control" name="city" maxlength="100" value="{{ location_city or '' }}"></div>
     <div class="col-md-4"><label class="form-label">Поточна посада</label><input class="form-control" name="current_position" value="{{ user.current_position or '' }}" placeholder="Backend Engineer"></div>
     <div class="col-md-4"><label class="form-label">Компанія / організація</label><input class="form-control" name="company" value="{{ user.company or '' }}" placeholder="EPAM, SoftServe, KPI..."></div>
     <div class="col-md-6"><label class="form-label">Навички</label><textarea class="form-control" name="skills" rows="3" placeholder="Python, FastAPI, Data Analytics, Product...">{{ user.skills or '' }}</textarea></div>
@@ -57,5 +61,6 @@
     <div class="col-12"><div class="form-check"><input class="form-check-input" type="checkbox" name="is_profile_public" value="1" id="public" {% if user.is_profile_public %}checked{% endif %}><label class="form-check-label" for="public">Показувати профіль у пошуку випускників</label></div></div>
     <div class="col-12"><button class="btn btn-primary">Зберегти</button></div>
   </form>
+  <script src="/static/profile-catalog.js" defer></script>
 </div></div>
 {% endblock %}

@@ -15,6 +15,26 @@ class BackupRecord(Base):
     verified_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
 
+class SpecialtyDefinition(Base):
+    __tablename__ = "specialty_definitions"
+    key: Mapped[str] = mapped_column(String(60), primary_key=True)
+    code: Mapped[str] = mapped_column(String(30))
+    classification: Mapped[str] = mapped_column(String(20))
+    name_uk: Mapped[str] = mapped_column(String(200))
+    name_en: Mapped[str] = mapped_column(String(200))
+    source_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+
+
+class ProfileReference(Base):
+    __tablename__ = "profile_references"
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    country_code: Mapped[str | None] = mapped_column(String(2), nullable=True)
+    city: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    admission_year: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    specialty_key: Mapped[str | None] = mapped_column(ForeignKey("specialty_definitions.key"), nullable=True)
+
+
 class AdministratorGrant(Base):
     __tablename__ = "administrator_grants"
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
