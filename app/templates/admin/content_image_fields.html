@@ -1,0 +1,10 @@
+{% from "operations_macros.html" import tr %}
+<div class="col-12">
+  <label class="form-label" for="content-image-url">{{ tr('Посилання на фото', 'Photo URL') }}</label>
+  <input id="content-image-url" class="form-control" name="image_url" value="{{ current_image or '' }}" placeholder="https://example.com/photo.jpg">
+</div>
+<div class="col-12">
+  <label class="form-label" for="content-image-file">{{ tr("Фото з комп'ютера", 'Photo from your computer') }}</label>
+  <input id="content-image-file" class="form-control" type="file" name="image_file" accept="image/jpeg,image/png,image/webp,image/gif">
+  <div class="form-text">{{ tr('JPG, PNG, WEBP, GIF · до 5 МБ. Вибраний файл має пріоритет над посиланням.', 'JPG, PNG, WEBP, GIF · up to 5 MB. A selected file takes priority over the URL.') }}</div>
+</div>

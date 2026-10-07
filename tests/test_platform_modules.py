@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
+from io import BytesIO
 from types import SimpleNamespace
+from PIL import Image
 
 from app.deps import require_admin, require_identity
 from app.models import ChatLink, DirectMessage, Event, EventComment, EventReaction, News, Notification, Registration, Survey, SurveyAnswer, SurveyQuestion, User
@@ -114,11 +116,14 @@ def test_admin_news_moderation_filter(admin_client, db):
     assert "Published item" not in response.text
 
 
-def test_admin_can_upload_news_image_file(admin_client, db):
+def test_admin_can_upload_news_image_file(admin_client, db, monkeypatch, tmp_path):
+    monkeypatch.setattr("app.services.content_images.UPLOAD_ROOT", tmp_path)
+    image = BytesIO()
+    Image.new("RGB", (2, 2), "red").save(image, format="PNG")
     response = admin_client.post(
         "/admin/news/create",
         data={"title": "Photo news", "short_description": "With image", "content": "Full text", "is_published": "1"},
-        files={"image_file": ("poster.png", b"fake-png-bytes", "image/png")},
+        files={"image_file": ("poster.png", image.getvalue(), "image/png")},
         follow_redirects=False,
     )
     assert response.status_code == 303

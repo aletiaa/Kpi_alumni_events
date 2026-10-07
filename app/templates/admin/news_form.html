@@ -13,10 +13,9 @@
         <label class="form-label">Короткий опис</label>
         <textarea class="form-control" name="short_description" rows="2">{{ item.short_description if item else '' }}</textarea>
       </div>
-      <div class="mb-3">
-        <label class="form-label">Зображення з комп'ютера</label>
-        <input class="form-control" type="file" name="image_file" accept="image/png,image/jpeg,image/webp,image/gif">
-        <div class="form-text">Оберіть файл JPG, PNG, WEBP або GIF. Система сама збереже його для новини.</div>
+      <div class="row g-3 mb-3">
+        {% set current_image = item.image_url if item else '' %}
+        {% include 'admin/content_image_fields.html' %}
       </div>
       {% if item and item.image_url %}
         <div class="mb-3">
@@ -24,10 +23,6 @@
           <img class="news-form-preview" src="{{ item.image_url }}" alt="{{ item.title }}">
         </div>
       {% endif %}
-      <div class="mb-3">
-        <label class="form-label">URL зображення, якщо файл не завантажується</label>
-        <input class="form-control" name="image_url" value="{{ item.image_url if item and item.image_url else '' }}" placeholder="/static/img/kpi-main.png або https://...">
-      </div>
       <div class="mb-3">
         <label class="form-label">Джерело/ліцензія зображення</label>
         <input class="form-control" name="image_source_url" value="{{ item.image_source_url if item and item.image_source_url else '' }}" placeholder="https://www.gettyimages.com/... або інше джерело">

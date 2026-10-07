@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Request
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
@@ -10,6 +10,7 @@ from app.config import APP_BASE_URL, APP_NAME
 from app.db import get_db
 from app.deps import require_admin
 from app.services.operational_security import destructive_confirmation
+from app.services.content_images import resolve_content_image
 from app.ml.qr import generate_event_qr_png
 from app.ml.summarizer import generate_short_description
 from app.models import Event
@@ -29,11 +30,6 @@ def parse_dt(value: Optional[str]) -> Optional[datetime]:
         return parsed.astimezone(timezone.utc).replace(tzinfo=None) if parsed.tzinfo else parsed
     except ValueError:
         raise HTTPException(status_code=400, detail=f"Некоректна дата й час: {value}")
-
-
-def clean_image_url(value: str | None) -> str:
-    value = (value or "").strip()
-    return value or "/static/img/kpi-main.png"
 
 
 def validate_event_dates(start, end, deadline, capacity):
@@ -67,6 +63,7 @@ def admin_create_event(
     end_time: str = Form(""),
     registration_deadline: str = Form(""),
     image_url: str = Form(""),
+    image_file: UploadFile | None = File(None),
     capacity: int = Form(100),
     db: Session = Depends(get_db),
     admin=Depends(require_admin),
@@ -75,6 +72,10 @@ def admin_create_event(
         return RedirectResponse("/admin/events?error=title_required", status_code=303)
     start, end, deadline = parse_dt(start_time), parse_dt(end_time), parse_dt(registration_deadline)
     validate_event_dates(start, end, deadline, capacity)
+    try:
+        selected_image = resolve_content_image(image_file, image_url, "events")
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
     ev = Event(
         title=title.strip(),
         description=description.strip(),
@@ -83,7 +84,7 @@ def admin_create_event(
         start_time=start,
         end_time=end,
         registration_deadline=deadline,
-        image_url=clean_image_url(image_url),
+        image_url=selected_image or "/static/img/kpi-main.png",
         capacity=max(int(capacity), 1),
     )
     db.add(ev)
@@ -117,6 +118,7 @@ def admin_edit_event_save(
     end_time: str = Form(""),
     registration_deadline: str = Form(""),
     image_url: str = Form(""),
+    image_file: UploadFile | None = File(None),
     capacity: int = Form(100),
     db: Session = Depends(get_db),
     admin=Depends(require_admin),
@@ -130,12 +132,17 @@ def admin_edit_event_save(
     start, end, deadline = parse_dt(start_time), parse_dt(end_time), parse_dt(registration_deadline)
     validate_event_dates(start, end, deadline, capacity)
 
+    try:
+        selected_image = resolve_content_image(image_file, image_url, "events")
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+
     event.title = title.strip()
     event.description = description.strip()
     event.short_description = short_description.strip()
     event.location = location.strip() or "КПІ"
     event.capacity = max(int(capacity), 1)
-    event.image_url = clean_image_url(image_url)
+    event.image_url = selected_image or event.image_url or "/static/img/kpi-main.png"
     event.start_time = start
     event.end_time = end
     event.registration_deadline = deadline

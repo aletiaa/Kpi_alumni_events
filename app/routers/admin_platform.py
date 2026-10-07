@@ -1,8 +1,5 @@
 from collections import defaultdict
 from datetime import datetime
-from pathlib import Path
-from shutil import copyfileobj
-from uuid import uuid4
 from urllib.parse import urlparse
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
@@ -14,11 +11,10 @@ from app.config import APP_NAME
 from app.db import get_db
 from app.deps import require_admin
 from app.services.operational_security import destructive_confirmation
+from app.services.content_images import resolve_content_image
 from app.models import ChatLink, News, Survey, SurveyAnswer, SurveyQuestion, User
 
 router = APIRouter(prefix="/admin", tags=["admin-platform"])
-NEWS_UPLOAD_DIR = Path("app/static/uploads/news")
-ALLOWED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
 
 
 def render(request: Request, template: str, context: dict, status_code: int = 200):
@@ -49,20 +45,6 @@ def as_bool(value: str | None) -> bool:
 def is_http_url(value: str) -> bool:
     parsed = urlparse(value)
     return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
-
-
-def save_news_image(image_file: UploadFile | None) -> str | None:
-    if not image_file or not image_file.filename:
-        return None
-    suffix = Path(image_file.filename).suffix.lower()
-    if suffix not in ALLOWED_IMAGE_EXTENSIONS:
-        raise ValueError("Завантажте зображення у форматі JPG, PNG, WEBP або GIF.")
-    NEWS_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-    filename = f"{uuid4().hex}{suffix}"
-    destination = NEWS_UPLOAD_DIR / filename
-    with destination.open("wb") as buffer:
-        copyfileobj(image_file.file, buffer)
-    return f"/static/uploads/news/{filename}"
 
 
 @router.get("/news")
@@ -100,17 +82,14 @@ def admin_news_create(
     admin=Depends(require_admin),
 ):
     try:
-        uploaded_image_url = save_news_image(image_file)
+        selected_image = resolve_content_image(image_file, image_url, "news")
     except ValueError as exc:
         return render(request, "admin/news_form.html", {"ident": admin, "item": None, "error": str(exc)}, status_code=400)
-    clean_image_url = clean(image_url)
-    if clean_image_url and not (clean_image_url.startswith("/static/") or is_http_url(clean_image_url)):
-        return render(request, "admin/news_form.html", {"ident": admin, "item": None, "error": "URL зображення має починатися з /static/, http:// або https://"}, status_code=400)
     item = News(
         title=title.strip(),
         short_description=clean(short_description),
         content=content.strip(),
-        image_url=uploaded_image_url or clean_image_url,
+        image_url=selected_image,
         image_source_url=clean(image_source_url),
         is_published=as_bool(is_published),
     )
@@ -145,16 +124,13 @@ def admin_news_edit(
     if not item:
         raise HTTPException(status_code=404, detail="Новину не знайдено")
     try:
-        uploaded_image_url = save_news_image(image_file)
+        selected_image = resolve_content_image(image_file, image_url, "news")
     except ValueError as exc:
         return render(request, "admin/news_form.html", {"ident": admin, "item": item, "error": str(exc)}, status_code=400)
-    clean_image_url = clean(image_url)
-    if clean_image_url and not (clean_image_url.startswith("/static/") or is_http_url(clean_image_url)):
-        return render(request, "admin/news_form.html", {"ident": admin, "item": item, "error": "URL зображення має починатися з /static/, http:// або https://"}, status_code=400)
     item.title = title.strip()
     item.short_description = clean(short_description)
     item.content = content.strip()
-    item.image_url = uploaded_image_url or clean_image_url or item.image_url
+    item.image_url = selected_image or item.image_url
     item.image_source_url = clean(image_source_url)
     item.is_published = as_bool(is_published)
     item.updated_at = datetime.utcnow()
