@@ -16,6 +16,11 @@
   {% for user in mentors %}
     <div class="card shadow-soft mentor-card">
       <div class="card-body">
+        {% set staff = staff_record(user) %}
+        {% if staff %}
+        <p class="small text-muted" data-ops-uk="Участь у менторстві не підтверджено" data-ops-en="Mentoring participation is not confirmed">Участь у менторстві не підтверджено</p>
+        <p class="small" data-ops-uk="{{ staff.areas_uk }}" data-ops-en="{{ staff.areas_en }}">{{ staff.areas_uk }}</p>
+        {% endif %}
         <div class="alumni-card-head mb-3">
           <img class="profile-avatar-md" src="{{ user.avatar_url or 'https://ui-avatars.com/api/?name=' ~ user.full_name|urlencode ~ '&background=0b5f8a&color=fff&size=96' }}" alt="{{ user.full_name }}">
           <div>
@@ -30,6 +35,11 @@
         {% if user.skills %}<div class="small text-muted mt-2"><b>Навички:</b> {{ content_text('profile', user.id, 'skills', user.skills) }}</div>{% endif %}
         {% if user.help_topics %}<div class="small text-muted mt-1"><b>Можу допомогти:</b> {{ content_text('profile', user.id, 'help_topics', user.help_topics) }}</div>{% endif %}
         <div class="d-flex gap-2 flex-wrap align-items-center mt-3">
+          {% if staff %}
+          <a href="{{ staff.profile_url }}" target="_blank" rel="noopener noreferrer" data-ops-uk="Офіційний профіль" data-ops-en="Official profile">Офіційний профіль</a>
+          {% for email in staff.contact_emails %}<a href="mailto:{{ email }}" data-no-translate>{{ email }}</a>{% endfor %}
+          {% if staff.contact_telegram %}<a href="https://t.me/{{ staff.contact_telegram }}" target="_blank" rel="noopener noreferrer">Telegram: @{{ staff.contact_telegram }}</a>{% endif %}
+          {% endif %}
           {% if user.telegram_username %}<span class="badge text-bg-light border">Telegram: {{ user.telegram_username }}</span>{% endif %}
           {% if user.linkedin_url %}<a class="badge text-bg-light border text-decoration-none" href="{{ user.linkedin_url }}" target="_blank">LinkedIn</a>{% endif %}
           {% if ident and ident.user_id and user.id in can_message_ids %}<a class="btn btn-sm btn-primary" href="/messages/{{ user.id }}">Написати</a>{% elif ident and ident.user_id and ident.role != 'admin' and ident.user_id != user.id %}<span class="badge text-bg-light border">Листування недоступне</span>{% endif %}

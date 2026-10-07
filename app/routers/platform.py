@@ -21,6 +21,8 @@ router = APIRouter()
 
 
 def render(request: Request, template: str, context: dict, status_code: int = 200):
+    from app.services.staff_directory import staff_record
+    request.app.state.templates.env.globals['staff_record'] = staff_record
     from app.services.profile_catalog import countries, display_location, legacy_location, role_label, professional_status, graduation_display
     request.app.state.templates.env.globals['display_location'] = display_location
     request.app.state.templates.env.globals.update(role_label=role_label,
@@ -424,6 +426,8 @@ def profile_save(
         db.add(reference)
     reference.country_code, reference.city = legacy_location(user.city_country)
     reference.admission_year = admission
+    from app.services.alumni_role import promote_graduated_student
+    promote_graduated_student(user, admission)
     reference.specialty_key = selected_specialty.key if selected_specialty else preserved_key
     db.commit()
     return RedirectResponse("/profile?saved=1", status_code=303)

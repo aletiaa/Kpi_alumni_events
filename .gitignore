@@ -223,6 +223,7 @@ work_utf8_test.txt
 .streamlit/secrets.toml
 # Local credentials and release backups must never be committed.
 admins.csv
+.private/
 backups/
 work_utf8_test.txt
 tests/performance/results/

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -25,7 +25,8 @@ def parse_dt(value: Optional[str]) -> Optional[datetime]:
     if not v:
         return None
     try:
-        return datetime.fromisoformat(v)
+        parsed = datetime.fromisoformat(v)
+        return parsed.astimezone(timezone.utc).replace(tzinfo=None) if parsed.tzinfo else parsed
     except ValueError:
         raise HTTPException(status_code=400, detail=f"Некоректна дата й час: {value}")
 
@@ -33,6 +34,17 @@ def parse_dt(value: Optional[str]) -> Optional[datetime]:
 def clean_image_url(value: str | None) -> str:
     value = (value or "").strip()
     return value or "/static/img/kpi-main.png"
+
+
+def validate_event_dates(start, end, deadline, capacity):
+    if start is None:
+        raise HTTPException(400, 'Вкажіть дату й час початку події.')
+    if end is not None and end <= start:
+        raise HTTPException(400, 'Завершення події має бути пізніше її початку.')
+    if deadline is not None and deadline > start:
+        raise HTTPException(400, 'Реєстрація має завершитися не пізніше початку події.')
+    if capacity < 1:
+        raise HTTPException(400, 'Кількість місць має бути більшою за нуль.')
 
 
 @router.get("/events")
@@ -61,14 +73,16 @@ def admin_create_event(
 ):
     if not title.strip():
         return RedirectResponse("/admin/events?error=title_required", status_code=303)
+    start, end, deadline = parse_dt(start_time), parse_dt(end_time), parse_dt(registration_deadline)
+    validate_event_dates(start, end, deadline, capacity)
     ev = Event(
         title=title.strip(),
         description=description.strip(),
         short_description=short_description.strip(),
         location=location.strip() or "КПІ",
-        start_time=parse_dt(start_time),
-        end_time=parse_dt(end_time),
-        registration_deadline=parse_dt(registration_deadline),
+        start_time=start,
+        end_time=end,
+        registration_deadline=deadline,
         image_url=clean_image_url(image_url),
         capacity=max(int(capacity), 1),
     )
@@ -113,15 +127,18 @@ def admin_edit_event_save(
     if not title.strip():
         return RedirectResponse(f"/admin/events/{event_id}/edit?error=title_required", status_code=303)
 
+    start, end, deadline = parse_dt(start_time), parse_dt(end_time), parse_dt(registration_deadline)
+    validate_event_dates(start, end, deadline, capacity)
+
     event.title = title.strip()
     event.description = description.strip()
     event.short_description = short_description.strip()
     event.location = location.strip() or "КПІ"
     event.capacity = max(int(capacity), 1)
     event.image_url = clean_image_url(image_url)
-    event.start_time = parse_dt(start_time) or event.start_time
-    event.end_time = parse_dt(end_time)
-    event.registration_deadline = parse_dt(registration_deadline)
+    event.start_time = start
+    event.end_time = end
+    event.registration_deadline = deadline
     db.commit()
     db.refresh(event)
     return RedirectResponse("/admin/events?updated=1", status_code=303)

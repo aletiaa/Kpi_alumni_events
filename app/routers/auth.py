@@ -168,6 +168,11 @@ def login(
         return render(request, "login.html", {"error": "Підтвердьте email перед входом."}, status_code=403)
 
     from app.services.admin_permissions import valid_grant
+    from app.services.alumni_role import promote_graduated_student
+    from app.models import ProfileReference
+    reference = db.get(ProfileReference, user.id)
+    if promote_graduated_student(user, reference.admission_year if reference else None):
+        db.commit()
     role = "admin" if valid_grant(db, user) else user.role
     token = create_session_token(user.id, role, user.email, user.full_name, getattr(user, "avatar_url", None), getattr(user, "status", None))
     import re

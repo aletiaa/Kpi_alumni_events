@@ -25,7 +25,6 @@ from .services.migrate import (
     ensure_news_image_columns,
     ensure_notifications_table,
     ensure_password_reset_columns,
-    ensure_regular_profiles_are_public,
 )
 from .services.seeding import seed_demo_content_if_empty, seed_events_if_empty
 from .services.survey_catalog import seed_additional_surveys
@@ -57,7 +56,6 @@ def bootstrap_database():
     ensure_news_image_columns(engine)
     ensure_analytics_tables(engine)
     ensure_notifications_table(engine)
-    ensure_regular_profiles_are_public(engine)
 
     db = SessionLocal()
     try:
@@ -65,6 +63,8 @@ def bootstrap_database():
         seed_catalog(db)
         from .services.profile_catalog import seed_specialties
         seed_specialties(db)
+        from .services.alumni_role import promote_existing_students
+        promote_existing_students(db)
         clean_saved_import_labels(db)
         db.commit()
         if SEED_DEMO_DATA:

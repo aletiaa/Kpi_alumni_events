@@ -43,6 +43,11 @@ def require_identity(
         if not user or getattr(user, "is_blocked", False) or not user.is_active:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Обліковий запис заблоковано")
         from .services.admin_permissions import valid_grant
+        from .services.alumni_role import promote_graduated_student
+        from .models import ProfileReference
+        reference = db.get(ProfileReference, user.id)
+        if promote_graduated_student(user, reference.admission_year if reference else None):
+            db.commit()
         ident.role = "admin" if valid_grant(db, user) else user.role
     elif ident.role == "admin":
         from .services.admin_csv import find_admin_by_email

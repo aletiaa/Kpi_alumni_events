@@ -28,6 +28,7 @@
   function dateLimits() {
     const birthYear = birth && birth.value ? Number(birth.value.split('-')[0]) : 0;
     const entryYear = admission && admission.value ? Number(admission.value) : 0;
+    if (admission) admission.min = String(Math.max(1900, birthYear));
     year.min = String(Math.max(1965, birthYear ? birthYear + 15 : 1965, entryYear));
   }
   if (birth) birth.addEventListener('change', dateLimits);

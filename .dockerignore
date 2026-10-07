@@ -4,6 +4,7 @@
 __pycache__
 *.pyc
 .env
+.private/
 dev.db
 dev.db-journal
 app/static/uploads/*

@@ -1,0 +1,318 @@
+[
+  {
+    "slug": "koval",
+    "full_name": "Олександр Коваль",
+    "full_name_en": "Oleksandr Koval",
+    "position": "завідувач кафедри, доктор технічних наук, професор",
+    "areas_uk": "Інформаційний пошук; дані та знання; моделювання ПЗ",
+    "areas_en": "Information retrieval; data and knowledge; software modelling",
+    "photo_url": "https://iate.kpi.ua/wp-content/uploads/iate-staff/staff-16de9a8e5633177fc04e.webp",
+    "profile_url": "https://ipze.kpi.ua/%D0%9A%D0%BE%D0%B2%D0%B0%D0%BB%D1%8C-%D0%9E%D0%BB%D0%B5%D0%BA%D1%81%D0%B0%D0%BD%D0%B4%D1%80-%D0%92%D0%B0%D1%81%D0%B8%D0%BB%D1%8C%D0%BE%D0%B2%D0%B8%D1%87/",
+    "source_url": "https://iate.kpi.ua/about/departments/software-engineering-in-energy/academic-staff/",
+    "contact_source": "https://ipze.kpi.ua/%D0%9D%D0%B0%D0%B2%D1%87%D0%B0%D0%BD%D0%BD%D1%8F/%D0%9E%D1%80%D0%B3%D0%B0%D0%BD%D1%96%D0%B7%D0%B0%D1%86%D1%96%D1%8F%D0%BD%D0%B0%D0%B2%D1%87%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%B3%D0%BE-%D0%BF%D1%80%D0%BE%D1%86%D0%B5%D1%81%D1%83/%D0%9A%D0%BE%D0%BD%D1%82%D0%B0%D0%BA%D1%82%D0%B8-%D0%B2%D0%B8%D0%BA%D0%BB%D0%B0%D0%B4%D0%B0%D1%87%D1%96%D0%B2-%D0%BA%D0%B0%D1%84%D0%B5%D0%B4%D1%80%D0%B8/",
+    "contact_emails": [
+      "avkovalgm@gmail.com",
+      "o.koval@kpi.ua"
+    ],
+    "contact_telegram": null,
+    "login_email": "koval@faculty.example.test",
+    "diploma_specialty": "Прикладна математика",
+    "checked_on": "2026-10-06",
+    "mentoring_confirmed": false,
+    "source_full_name": "Олександр Васильович Коваль"
+  },
+  {
+    "slug": "bandurka",
+    "full_name": "Олена Бандурка",
+    "full_name_en": "Olena Bandurka",
+    "position": "старший викладач кафедри",
+    "areas_uk": "Економіка ІТ; підприємництво; геоаналітика",
+    "areas_en": "IT economics; entrepreneurship; geospatial analytics",
+    "photo_url": "https://iate.kpi.ua/wp-content/uploads/iate-staff/staff-036a9e74723dd027579c.webp",
+    "profile_url": "https://ipze.kpi.ua/%D0%91%D0%B0%D0%BD%D0%B4%D1%83%D1%80%D0%BA%D0%B0-%D0%9E%D0%BB%D0%B5%D0%BD%D0%B0-%D0%86%D0%B2%D0%B0%D0%BD%D1%96%D0%B2%D0%BD%D0%B0/",
+    "source_url": "https://iate.kpi.ua/about/departments/software-engineering-in-energy/academic-staff/",
+    "contact_source": "https://ipze.kpi.ua/%D0%9D%D0%B0%D0%B2%D1%87%D0%B0%D0%BD%D0%BD%D1%8F/%D0%9E%D1%80%D0%B3%D0%B0%D0%BD%D1%96%D0%B7%D0%B0%D1%86%D1%96%D1%8F%D0%BD%D0%B0%D0%B2%D1%87%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%B3%D0%BE-%D0%BF%D1%80%D0%BE%D1%86%D0%B5%D1%81%D1%83/%D0%9A%D0%BE%D0%BD%D1%82%D0%B0%D0%BA%D1%82%D0%B8-%D0%B2%D0%B8%D0%BA%D0%BB%D0%B0%D0%B4%D0%B0%D1%87%D1%96%D0%B2-%D0%BA%D0%B0%D1%84%D0%B5%D0%B4%D1%80%D0%B8/",
+    "contact_emails": [
+      "o.i.bandurka@ukr.net"
+    ],
+    "contact_telegram": null,
+    "login_email": "bandurka@faculty.example.test",
+    "diploma_specialty": null,
+    "checked_on": "2026-10-06",
+    "mentoring_confirmed": false,
+    "source_full_name": "Олена Іванівна Бандурка"
+  },
+  {
+    "slug": "barabash",
+    "full_name": "Олег Барабаш",
+    "full_name_en": "Oleh Barabash",
+    "position": "професор кафедри",
+    "areas_uk": "Алгоритми; структури даних; інформаційні системи",
+    "areas_en": "Algorithms; data structures; information systems",
+    "photo_url": "https://iate.kpi.ua/wp-content/uploads/iate-staff/staff-2caf80c31d424d13d5ff.webp",
+    "profile_url": "https://ipze.kpi.ua/%D0%91%D0%B0%D1%80%D0%B0%D0%B1%D0%B0%D1%88-%D0%9E%D0%BB%D0%B5%D0%B3-%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80%D0%BE%D0%B2%D0%B8%D1%87/",
+    "source_url": "https://iate.kpi.ua/about/departments/software-engineering-in-energy/academic-staff/",
+    "contact_source": "https://ipze.kpi.ua/%D0%9D%D0%B0%D0%B2%D1%87%D0%B0%D0%BD%D0%BD%D1%8F/%D0%9E%D1%80%D0%B3%D0%B0%D0%BD%D1%96%D0%B7%D0%B0%D1%86%D1%96%D1%8F%D0%BD%D0%B0%D0%B2%D1%87%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%B3%D0%BE-%D0%BF%D1%80%D0%BE%D1%86%D0%B5%D1%81%D1%83/%D0%9A%D0%BE%D0%BD%D1%82%D0%B0%D0%BA%D1%82%D0%B8-%D0%B2%D0%B8%D0%BA%D0%BB%D0%B0%D0%B4%D0%B0%D1%87%D1%96%D0%B2-%D0%BA%D0%B0%D1%84%D0%B5%D0%B4%D1%80%D0%B8/",
+    "contact_emails": [
+      "bar64@ukr.net"
+    ],
+    "contact_telegram": "OlegBarabas",
+    "login_email": "barabash@faculty.example.test",
+    "diploma_specialty": "Авіаційне електро- та приладне обладнання",
+    "checked_on": "2026-10-06",
+    "mentoring_confirmed": false,
+    "source_full_name": "Олег Володимирович Барабаш"
+  },
+  {
+    "slug": "varava",
+    "full_name": "Іван Варава",
+    "full_name_en": "Ivan Varava",
+    "position": "доцент кафедри",
+    "areas_uk": "Якість ПЗ; тестування",
+    "areas_en": "Software quality; testing",
+    "photo_url": "https://iate.kpi.ua/wp-content/uploads/iate-staff/staff-d66713955104c8aaece3.webp",
+    "profile_url": "https://ipze.kpi.ua/%D0%92%D0%B0%D1%80%D0%B0%D0%B2%D0%B0-%D0%86%D0%B2%D0%B0%D0%BD-%D0%90%D0%BD%D0%B4%D1%80%D1%96%D0%B9%D0%BE%D0%B2%D0%B8%D1%87/",
+    "source_url": "https://iate.kpi.ua/about/departments/software-engineering-in-energy/academic-staff/",
+    "contact_source": "https://ipze.kpi.ua/%D0%9D%D0%B0%D0%B2%D1%87%D0%B0%D0%BD%D0%BD%D1%8F/%D0%9E%D1%80%D0%B3%D0%B0%D0%BD%D1%96%D0%B7%D0%B0%D1%86%D1%96%D1%8F%D0%BD%D0%B0%D0%B2%D1%87%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%B3%D0%BE-%D0%BF%D1%80%D0%BE%D1%86%D0%B5%D1%81%D1%83/%D0%9A%D0%BE%D0%BD%D1%82%D0%B0%D0%BA%D1%82%D0%B8-%D0%B2%D0%B8%D0%BA%D0%BB%D0%B0%D0%B4%D0%B0%D1%87%D1%96%D0%B2-%D0%BA%D0%B0%D1%84%D0%B5%D0%B4%D1%80%D0%B8/",
+    "contact_emails": [
+      "varava_ivan@lll.kpi.ua"
+    ],
+    "contact_telegram": null,
+    "login_email": "varava@faculty.example.test",
+    "diploma_specialty": "Інформаційні технології проектування",
+    "checked_on": "2026-10-06",
+    "mentoring_confirmed": false,
+    "source_full_name": "Іван Андрійович Варава"
+  },
+  {
+    "slug": "verlan",
+    "full_name": "Андрій Верлань",
+    "full_name_en": "Andrii Verlan",
+    "position": "професор кафедри",
+    "areas_uk": "Аналіз даних; енергетика; сталий розвиток",
+    "areas_en": "Data analysis; energy; sustainable development",
+    "photo_url": null,
+    "profile_url": "https://ipze.kpi.ua/%D0%92%D0%B5%D1%80%D0%BB%D0%B0%D0%BD%D1%8C-%D0%90%D0%BD%D0%B4%D1%80%D1%96%D0%B9-%D0%90%D0%BD%D0%B0%D1%82%D0%BE%D0%BB%D1%96%D0%B9%D0%BE%D0%B2%D0%B8%D1%87/",
+    "source_url": "https://iate.kpi.ua/about/departments/software-engineering-in-energy/academic-staff/",
+    "contact_source": "https://ipze.kpi.ua/%D0%9D%D0%B0%D0%B2%D1%87%D0%B0%D0%BD%D0%BD%D1%8F/%D0%9E%D1%80%D0%B3%D0%B0%D0%BD%D1%96%D0%B7%D0%B0%D1%86%D1%96%D1%8F%D0%BD%D0%B0%D0%B2%D1%87%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%B3%D0%BE-%D0%BF%D1%80%D0%BE%D1%86%D0%B5%D1%81%D1%83/%D0%9A%D0%BE%D0%BD%D1%82%D0%B0%D0%BA%D1%82%D0%B8-%D0%B2%D0%B8%D0%BA%D0%BB%D0%B0%D0%B4%D0%B0%D1%87%D1%96%D0%B2-%D0%BA%D0%B0%D1%84%D0%B5%D0%B4%D1%80%D0%B8/",
+    "contact_emails": [
+      "verlandr.apeps@gmail.com"
+    ],
+    "contact_telegram": null,
+    "login_email": "verlan@faculty.example.test",
+    "diploma_specialty": "Електронні обчислювальні машини",
+    "checked_on": "2026-10-06",
+    "mentoring_confirmed": false,
+    "source_full_name": "Андрій Анатолійович Верлань"
+  },
+  {
+    "slug": "havrylko",
+    "full_name": "Євген Гаврилко",
+    "full_name_en": "Yevhen Havrylko",
+    "position": "професор кафедри",
+    "areas_uk": "Кібербезпека; приватність; децентралізовані застосунки",
+    "areas_en": "Cybersecurity; privacy; decentralised applications",
+    "photo_url": "https://iate.kpi.ua/wp-content/uploads/iate-staff/staff-e6990a74599db08552cc.webp",
+    "profile_url": "https://ipze.kpi.ua/%D0%93%D0%B0%D0%B2%D1%80%D0%B8%D0%BB%D0%BA%D0%BE-%D0%84%D0%B2%D0%B3%D0%B5%D0%BD-%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80%D0%BE%D0%B2%D0%B8%D1%87/",
+    "source_url": "https://iate.kpi.ua/about/departments/software-engineering-in-energy/academic-staff/",
+    "contact_source": "https://ipze.kpi.ua/%D0%9D%D0%B0%D0%B2%D1%87%D0%B0%D0%BD%D0%BD%D1%8F/%D0%9E%D1%80%D0%B3%D0%B0%D0%BD%D1%96%D0%B7%D0%B0%D1%86%D1%96%D1%8F%D0%BD%D0%B0%D0%B2%D1%87%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%B3%D0%BE-%D0%BF%D1%80%D0%BE%D1%86%D0%B5%D1%81%D1%83/%D0%9A%D0%BE%D0%BD%D1%82%D0%B0%D0%BA%D1%82%D0%B8-%D0%B2%D0%B8%D0%BA%D0%BB%D0%B0%D0%B4%D0%B0%D1%87%D1%96%D0%B2-%D0%BA%D0%B0%D1%84%D0%B5%D0%B4%D1%80%D0%B8/",
+    "contact_emails": [
+      "gev.1964@ukr.net"
+    ],
+    "contact_telegram": null,
+    "login_email": "havrylko@faculty.example.test",
+    "diploma_specialty": null,
+    "checked_on": "2026-10-06",
+    "mentoring_confirmed": false,
+    "source_full_name": "Євген Володимирович Гаврилко"
+  },
+  {
+    "slug": "haharin",
+    "full_name": "Олександр Гагарін",
+    "full_name_en": "Oleksandr Haharin",
+    "position": "доцент кафедри",
+    "areas_uk": "Системне програмування; веброзробка; мультимедіа",
+    "areas_en": "Systems programming; web development; multimedia",
+    "photo_url": "https://iate.kpi.ua/wp-content/uploads/iate-staff/staff-a16352120b4f76129bf7.webp",
+    "profile_url": "https://ipze.kpi.ua/%D0%93%D0%B0%D0%B3%D0%B0%D1%80%D1%96%D0%BD-%D0%9E%D0%BB%D0%B5%D0%BA%D1%81%D0%B0%D0%BD%D0%B4%D1%80-%D0%9E%D0%BB%D0%B5%D0%BA%D1%81%D0%B0%D0%BD%D0%B4%D1%80%D0%BE%D0%B2%D0%B8%D1%87/",
+    "source_url": "https://iate.kpi.ua/about/departments/software-engineering-in-energy/academic-staff/",
+    "contact_source": "https://ipze.kpi.ua/%D0%9D%D0%B0%D0%B2%D1%87%D0%B0%D0%BD%D0%BD%D1%8F/%D0%9E%D1%80%D0%B3%D0%B0%D0%BD%D1%96%D0%B7%D0%B0%D1%86%D1%96%D1%8F%D0%BD%D0%B0%D0%B2%D1%87%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%B3%D0%BE-%D0%BF%D1%80%D0%BE%D1%86%D0%B5%D1%81%D1%83/%D0%9A%D0%BE%D0%BD%D1%82%D0%B0%D0%BA%D1%82%D0%B8-%D0%B2%D0%B8%D0%BA%D0%BB%D0%B0%D0%B4%D0%B0%D1%87%D1%96%D0%B2-%D0%BA%D0%B0%D1%84%D0%B5%D0%B4%D1%80%D0%B8/",
+    "contact_emails": [
+      "gagarin.info@gmail.com"
+    ],
+    "contact_telegram": null,
+    "login_email": "haharin@faculty.example.test",
+    "diploma_specialty": "Електронні обчислювальні машини",
+    "checked_on": "2026-10-06",
+    "mentoring_confirmed": false,
+    "source_full_name": "Олександр Олександрович Гагарін"
+  },
+  {
+    "slug": "husieva",
+    "full_name": "Ірина Гусєва",
+    "full_name_en": "Iryna Husieva",
+    "position": "викладачка кафедри",
+    "areas_uk": "Програмування; мережі; захист програмних засобів",
+    "areas_en": "Programming; networks; software protection",
+    "photo_url": "https://iate.kpi.ua/wp-content/uploads/iate-staff/staff-bcbee0faa037ae43cbe5.webp",
+    "profile_url": "https://ipze.kpi.ua/%D0%93%D1%83%D1%81%D1%94%D0%B2%D0%B0-%D0%86%D1%80%D0%B8%D0%BD%D0%B0-%D0%86%D0%B3%D0%BE%D1%80%D1%96%D0%B2%D0%BD%D0%B0/",
+    "source_url": "https://iate.kpi.ua/about/departments/software-engineering-in-energy/academic-staff/",
+    "contact_source": "https://ipze.kpi.ua/%D0%9D%D0%B0%D0%B2%D1%87%D0%B0%D0%BD%D0%BD%D1%8F/%D0%9E%D1%80%D0%B3%D0%B0%D0%BD%D1%96%D0%B7%D0%B0%D1%86%D1%96%D1%8F%D0%BD%D0%B0%D0%B2%D1%87%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%B3%D0%BE-%D0%BF%D1%80%D0%BE%D1%86%D0%B5%D1%81%D1%83/%D0%9A%D0%BE%D0%BD%D1%82%D0%B0%D0%BA%D1%82%D0%B8-%D0%B2%D0%B8%D0%BA%D0%BB%D0%B0%D0%B4%D0%B0%D1%87%D1%96%D0%B2-%D0%BA%D0%B0%D1%84%D0%B5%D0%B4%D1%80%D0%B8/",
+    "contact_emails": [
+      "iguseva@yahoo.com"
+    ],
+    "contact_telegram": null,
+    "login_email": "husieva@faculty.example.test",
+    "diploma_specialty": "Програмне забезпечення автоматизованих систем",
+    "checked_on": "2026-10-06",
+    "mentoring_confirmed": false,
+    "source_full_name": "Ірина Ігорівна Гусєва"
+  },
+  {
+    "slug": "datsiuk",
+    "full_name": "Оксана Дацюк",
+    "full_name_en": "Oksana Datsiuk",
+    "position": "старший викладач кафедри",
+    "areas_uk": "Бази даних; бази знань; алгоритми",
+    "areas_en": "Databases; knowledge bases; algorithms",
+    "photo_url": "https://iate.kpi.ua/wp-content/uploads/iate-staff/staff-d41aba61862af3997f05.webp",
+    "profile_url": "https://ipze.kpi.ua/%D0%94%D0%B0%D1%86%D1%8E%D0%BA-%D0%9E%D0%BA%D1%81%D0%B0%D0%BD%D0%B0-%D0%90%D0%BD%D1%82%D0%BE%D0%BD%D1%96%D0%B2%D0%BD%D0%B0/",
+    "source_url": "https://iate.kpi.ua/about/departments/software-engineering-in-energy/academic-staff/",
+    "contact_source": "https://ipze.kpi.ua/%D0%9D%D0%B0%D0%B2%D1%87%D0%B0%D0%BD%D0%BD%D1%8F/%D0%9E%D1%80%D0%B3%D0%B0%D0%BD%D1%96%D0%B7%D0%B0%D1%86%D1%96%D1%8F%D0%BD%D0%B0%D0%B2%D1%87%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%B3%D0%BE-%D0%BF%D1%80%D0%BE%D1%86%D0%B5%D1%81%D1%83/%D0%9A%D0%BE%D0%BD%D1%82%D0%B0%D0%BA%D1%82%D0%B8-%D0%B2%D0%B8%D0%BA%D0%BB%D0%B0%D0%B4%D0%B0%D1%87%D1%96%D0%B2-%D0%BA%D0%B0%D1%84%D0%B5%D0%B4%D1%80%D0%B8/",
+    "contact_emails": [
+      "Dokabd@ukr.net"
+    ],
+    "contact_telegram": null,
+    "login_email": "datsiuk@faculty.example.test",
+    "diploma_specialty": "Системи автоматизованого проектування",
+    "checked_on": "2026-10-06",
+    "mentoring_confirmed": false,
+    "source_full_name": "Оксана Антонівна Дацюк"
+  },
+  {
+    "slug": "dmytrenko",
+    "full_name": "Олександра Дмитренко",
+    "full_name_en": "Oleksandra Dmytrenko",
+    "position": "асистентка кафедри",
+    "areas_uk": "Розробка ПЗ; кіберфізичні системи",
+    "areas_en": "Software development; cyber-physical systems",
+    "photo_url": "https://iate.kpi.ua/wp-content/uploads/iate-staff/staff-a93d5a4fee70880782c3.webp",
+    "profile_url": "https://ipze.kpi.ua/%D0%94%D0%BC%D0%B8%D1%82%D1%80%D0%B5%D0%BD%D0%BA%D0%BE-%D0%9E%D0%BB%D0%B5%D0%BA%D1%81%D0%B0%D0%BD%D0%B4%D1%80%D0%B8-%D0%90%D0%BD%D0%B0%D1%82%D0%BE%D0%BB%D1%96%D1%97%D0%B2%D0%BD%D0%B8/",
+    "source_url": "https://iate.kpi.ua/about/departments/software-engineering-in-energy/academic-staff/",
+    "contact_source": "https://pma.fpm.kpi.ua/uk/teachers/dmitrenko-oleksandra-anatoliyivna",
+    "contact_emails": [
+      "o_dmytrenko@lll.kpi.ua"
+    ],
+    "contact_telegram": null,
+    "login_email": "dmytrenko@faculty.example.test",
+    "diploma_specialty": "Прикладна математика",
+    "checked_on": "2026-10-06",
+    "mentoring_confirmed": false,
+    "source_full_name": "Олександра Анатоліївна Дмитренко"
+  },
+  {
+    "slug": "zalevska",
+    "full_name": "Ольга Залевська",
+    "full_name_en": "Olha Zalevska",
+    "position": "доцент кафедри",
+    "areas_uk": "Методологія інженерії програмного забезпечення",
+    "areas_en": "Software engineering methodology",
+    "photo_url": "https://iate.kpi.ua/wp-content/uploads/iate-staff/staff-2d813ca4825bb5473b7a.webp",
+    "profile_url": "https://ipze.kpi.ua/zalevska-olga/",
+    "source_url": "https://iate.kpi.ua/about/departments/software-engineering-in-energy/academic-staff/",
+    "contact_source": "https://ipze.kpi.ua/%D0%9D%D0%B0%D0%B2%D1%87%D0%B0%D0%BD%D0%BD%D1%8F/%D0%9E%D1%80%D0%B3%D0%B0%D0%BD%D1%96%D0%B7%D0%B0%D1%86%D1%96%D1%8F%D0%BD%D0%B0%D0%B2%D1%87%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%B3%D0%BE-%D0%BF%D1%80%D0%BE%D1%86%D0%B5%D1%81%D1%83/%D0%9A%D0%BE%D0%BD%D1%82%D0%B0%D0%BA%D1%82%D0%B8-%D0%B2%D0%B8%D0%BA%D0%BB%D0%B0%D0%B4%D0%B0%D1%87%D1%96%D0%B2-%D0%BA%D0%B0%D1%84%D0%B5%D0%B4%D1%80%D0%B8/",
+    "contact_emails": [
+      "o.zalevska@kpi.ua"
+    ],
+    "contact_telegram": null,
+    "login_email": "zalevska@faculty.example.test",
+    "diploma_specialty": null,
+    "checked_on": "2026-10-06",
+    "mentoring_confirmed": false,
+    "source_full_name": "Ольга Валеріївна Залевська"
+  },
+  {
+    "slug": "kolumbet",
+    "full_name": "Вадим Колумбет",
+    "full_name_en": "Vadym Kolumbet",
+    "position": "старший викладач кафедри",
+    "areas_uk": "Програмна інженерія; складні алгоритми",
+    "areas_en": "Software engineering; advanced algorithms",
+    "photo_url": "https://iate.kpi.ua/wp-content/uploads/iate-staff/staff-137d053d7e755008b020.webp",
+    "profile_url": "https://ipze.kpi.ua/%D0%9A%D0%BE%D0%BB%D1%83%D0%BC%D0%B1%D0%B5%D1%82-%D0%92%D0%B0%D0%B4%D0%B8%D0%BC-%D0%9F%D0%B5%D1%82%D1%80%D0%BE%D0%B2%D0%B8%D1%87/",
+    "source_url": "https://iate.kpi.ua/about/departments/software-engineering-in-energy/academic-staff/",
+    "contact_source": "https://ipze.kpi.ua/%D0%9D%D0%B0%D0%B2%D1%87%D0%B0%D0%BD%D0%BD%D1%8F/%D0%9E%D1%80%D0%B3%D0%B0%D0%BD%D1%96%D0%B7%D0%B0%D1%86%D1%96%D1%8F%D0%BD%D0%B0%D0%B2%D1%87%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%B3%D0%BE-%D0%BF%D1%80%D0%BE%D1%86%D0%B5%D1%81%D1%83/%D0%9A%D0%BE%D0%BD%D1%82%D0%B0%D0%BA%D1%82%D0%B8-%D0%B2%D0%B8%D0%BA%D0%BB%D0%B0%D0%B4%D0%B0%D1%87%D1%96%D0%B2-%D0%BA%D0%B0%D1%84%D0%B5%D0%B4%D1%80%D0%B8/",
+    "contact_emails": [
+      "vadym.kolumbet@lll.kpi.ua"
+    ],
+    "contact_telegram": "Asmitolaf",
+    "login_email": "kolumbet@faculty.example.test",
+    "diploma_specialty": "Програмне забезпечення автоматизованих систем",
+    "checked_on": "2026-10-06",
+    "mentoring_confirmed": false,
+    "source_full_name": "Вадим Петрович Колумбет"
+  },
+  {
+    "slug": "kuzminykh",
+    "full_name": "Валерій Кузьміних",
+    "full_name_en": "Valerii Kuzminykh",
+    "position": "доцент кафедри",
+    "areas_uk": "Моделювання; автоматизоване проєктування",
+    "areas_en": "Modelling; computer-aided design",
+    "photo_url": "https://iate.kpi.ua/wp-content/uploads/iate-staff/staff-eb923eec8fbc6c86e768.webp",
+    "profile_url": "https://ipze.kpi.ua/%D0%9A%D1%83%D0%B7%D1%8C%D0%BC%D1%96%D0%BD%D0%B8%D1%85-%D0%92%D0%B0%D0%BB%D0%B5%D1%80%D1%96%D0%B9-%D0%9E%D0%BB%D0%B5%D0%BA%D1%81%D0%B0%D0%BD%D0%B4%D1%80%D0%BE%D0%B2%D0%B8%D1%87/",
+    "source_url": "https://iate.kpi.ua/about/departments/software-engineering-in-energy/academic-staff/",
+    "contact_source": "https://ipze.kpi.ua/%D0%9D%D0%B0%D0%B2%D1%87%D0%B0%D0%BD%D0%BD%D1%8F/%D0%9E%D1%80%D0%B3%D0%B0%D0%BD%D1%96%D0%B7%D0%B0%D1%86%D1%96%D1%8F%D0%BD%D0%B0%D0%B2%D1%87%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%B3%D0%BE-%D0%BF%D1%80%D0%BE%D1%86%D0%B5%D1%81%D1%83/%D0%9A%D0%BE%D0%BD%D1%82%D0%B0%D0%BA%D1%82%D0%B8-%D0%B2%D0%B8%D0%BA%D0%BB%D0%B0%D0%B4%D0%B0%D1%87%D1%96%D0%B2-%D0%BA%D0%B0%D1%84%D0%B5%D0%B4%D1%80%D0%B8/",
+    "contact_emails": [
+      "vakuz0202@gmail.com"
+    ],
+    "contact_telegram": null,
+    "login_email": "kuzminykh@faculty.example.test",
+    "diploma_specialty": "Автоматизовані системи управління",
+    "checked_on": "2026-10-06",
+    "mentoring_confirmed": false,
+    "source_full_name": "Валерій Олександрович Кузьміних"
+  },
+  {
+    "slug": "musiienko",
+    "full_name": "Андрій Мусієнко",
+    "full_name_en": "Andrii Musiienko",
+    "position": "професор кафедри",
+    "areas_uk": "Діагностичні системи; інтелектуальне ПЗ",
+    "areas_en": "Diagnostic systems; intelligent software",
+    "photo_url": "https://iate.kpi.ua/wp-content/uploads/iate-staff/staff-1c525d4b4e2a620c5b99.webp",
+    "profile_url": "https://ipze.kpi.ua/%D0%9C%D1%83%D1%81%D1%96%D1%94%D0%BD%D0%BA%D0%BE-%D0%90%D0%BD%D0%B4%D1%80%D1%96%D0%B9-%D0%9F%D0%B5%D1%82%D1%80%D0%BE%D0%B2%D0%B8%D1%87/",
+    "source_url": "https://iate.kpi.ua/about/departments/software-engineering-in-energy/academic-staff/",
+    "contact_source": "https://ipze.kpi.ua/%D0%9D%D0%B0%D0%B2%D1%87%D0%B0%D0%BD%D0%BD%D1%8F/%D0%9E%D1%80%D0%B3%D0%B0%D0%BD%D1%96%D0%B7%D0%B0%D1%86%D1%96%D1%8F%D0%BD%D0%B0%D0%B2%D1%87%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%B3%D0%BE-%D0%BF%D1%80%D0%BE%D1%86%D0%B5%D1%81%D1%83/%D0%9A%D0%BE%D0%BD%D1%82%D0%B0%D0%BA%D1%82%D0%B8-%D0%B2%D0%B8%D0%BA%D0%BB%D0%B0%D0%B4%D0%B0%D1%87%D1%96%D0%B2-%D0%BA%D0%B0%D1%84%D0%B5%D0%B4%D1%80%D0%B8/",
+    "contact_emails": [
+      "mysienkoandrey@gmail.com"
+    ],
+    "contact_telegram": null,
+    "login_email": "musiienko@faculty.example.test",
+    "diploma_specialty": "Математика; Телекомунікаційні системи та мережі",
+    "checked_on": "2026-10-06",
+    "mentoring_confirmed": false,
+    "source_full_name": "Андрій Петрович Мусієнко"
+  },
+  {
+    "slug": "nedashkivskyi",
+    "full_name": "Олексій Недашківський",
+    "full_name_en": "Oleksii Nedashkivskyi",
+    "position": "професор кафедри",
+    "areas_uk": "Мобільні застосунки; кросплатформна розробка; веб",
+    "areas_en": "Mobile applications; cross-platform development; web",
+    "photo_url": "https://iate.kpi.ua/wp-content/uploads/iate-staff/staff-97010f370bc884a0360e.webp",
+    "profile_url": "https://ipze.kpi.ua/%D0%9D%D0%B5%D0%B4%D0%B0%D1%88%D0%BA%D1%96%D0%B2%D1%81%D1%8C%D0%BA%D0%B8%D0%B9-%D0%9E%D0%BB%D0%B5%D0%BA%D1%81%D1%96%D0%B9-%D0%9B%D0%B5%D0%BE%D0%BD%D1%96%D0%B4%D0%BE%D0%B2%D0%B8%D1%87/",
+    "source_url": "https://iate.kpi.ua/about/departments/software-engineering-in-energy/academic-staff/",
+    "contact_source": "https://ipze.kpi.ua/%D0%9D%D0%B0%D0%B2%D1%87%D0%B0%D0%BD%D0%BD%D1%8F/%D0%9E%D1%80%D0%B3%D0%B0%D0%BD%D1%96%D0%B7%D0%B0%D1%86%D1%96%D1%8F%D0%BD%D0%B0%D0%B2%D1%87%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%B3%D0%BE-%D0%BF%D1%80%D0%BE%D1%86%D0%B5%D1%81%D1%83/%D0%9A%D0%BE%D0%BD%D1%82%D0%B0%D0%BA%D1%82%D0%B8-%D0%B2%D0%B8%D0%BA%D0%BB%D0%B0%D0%B4%D0%B0%D1%87%D1%96%D0%B2-%D0%BA%D0%B0%D1%84%D0%B5%D0%B4%D1%80%D0%B8/",
+    "contact_emails": [
+      "nedaskevskii_oleksii@lll.kpi.ua"
+    ],
+    "contact_telegram": null,
+    "login_email": "nedashkivskyi@faculty.example.test",
+    "diploma_specialty": "Інформаційні мережі зв’язку; Управління суспільним розвитком",
+    "checked_on": "2026-10-06",
+    "mentoring_confirmed": false,
+    "source_full_name": "Олексій Леонідович Недашківський"
+  }
+]

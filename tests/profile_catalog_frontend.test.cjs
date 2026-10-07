@@ -32,13 +32,20 @@ for (const [year, classification] of [['2014', 'legacy'], ['2015', '2015'],
 }
 const f = fixture();
 assert.equal(f.year.min, '1965');
+assert.equal(f.admission.min, '1900');
 f.birth.value = '2000-01-01'; f.birth.emit('change');
 assert.equal(f.year.min, '2015');
+assert.equal(f.admission.min, '2000');
+f.birth.value = '2002-12-05'; f.birth.emit('change');
+f.admission.value = '1940'; f.admission.emit('input');
+assert.equal(f.admission.min, '2002');
+assert.equal(f.year.min, '2017');
 f.admission.value = '2020'; f.admission.emit('input');
 assert.equal(f.year.min, '2020');
 f.birth.value = ''; f.birth.emit('change');
 f.admission.value = ''; f.admission.emit('input');
 assert.equal(f.year.min, '1965');
+assert.equal(f.admission.min, '1900');
 f.scheme.value = 'legacy'; f.scheme.emit('change');
 f.year.value = '2025'; f.year.emit('change');
 assert.equal(f.scheme.value, 'legacy');
@@ -48,4 +55,4 @@ assert.equal(f.specialty.options[3].disabled, false);
 const existing = fixture('2025', 'legacy');
 assert.equal(existing.specialty.value, 'legacy');
 assert.equal(existing.scheme.value, '');
-console.log('Profile catalog frontend checks passed (13 assertions).');
+console.log('Profile catalog frontend checks passed.');
