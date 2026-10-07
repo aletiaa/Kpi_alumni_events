@@ -36,7 +36,7 @@
 <section class="personal-dashboard mb-4">
   <div class="personal-welcome">
     <div class="kicker">Персональна стрічка</div>
-    <h2>Вітаємо, {{ ident.full_name }}</h2>
+    <h2><span data-ops-uk="Вітаємо" data-ops-en="Hello">Вітаємо</span>, <span data-no-translate>{{ ident.full_name }}</span></h2>
     <p>Тут зібрані ваші найближчі події, повідомлення та швидкі переходи до розділів, які найчастіше потрібні після входу.</p>
   </div>
   <div class="personal-grid">
@@ -58,7 +58,7 @@
   </div>
   <div class="personal-list">
     {% for event in personal_events %}
-      <a href="/events#event-{{ event.id }}"><b>{{ content_text('event', event.id, 'title', event.title) }}</b><span>{{ display_datetime(event.start_time) }} · {{ event.location }}</span></a>
+      <a href="/events#event-{{ event.id }}"><b>{{ content_text('event', event.id, 'title', event.title) }}</b><span>{{ display_datetime(event.start_time) }} · {{ content_text('event', event.id, 'location', event.location) }}</span></a>
     {% else %}
       <a href="/events"><b>Зареєструйтесь на першу подію</b><span>Після реєстрації вона з'явиться тут автоматично.</span></a>
     {% endfor %}
@@ -145,7 +145,7 @@
     <div class="live-home-column">
       <h3>Події</h3>
       {% for event in upcoming_events %}
-        <a href="/events#event-{{ event.id }}" class="live-home-item"><b>{{ content_text('event', event.id, 'title', event.title) }}</b><span>{{ display_datetime(event.start_time) }} · {{ event.location }}</span></a>
+        <a href="/events#event-{{ event.id }}" class="live-home-item"><b>{{ content_text('event', event.id, 'title', event.title) }}</b><span>{{ display_datetime(event.start_time) }} · {{ content_text('event', event.id, 'location', event.location) }}</span></a>
       {% else %}
         <div class="text-muted">Майбутніх подій поки немає.</div>
       {% endfor %}
@@ -161,7 +161,7 @@
     <div class="live-home-column">
       <h3>Ментори</h3>
       {% for mentor in mentors %}
-        <a href="/mentors?q={{ mentor.full_name|urlencode }}" class="live-home-item"><b><span data-no-translate>{{ display_name(mentor) }}</span></b><span>{{ mentor.current_position or mentor.status or mentor.role }}{% if mentor.company %} · {{ mentor.company }}{% endif %}</span></a>
+        <a href="/mentors?q={{ mentor.full_name|urlencode }}" class="live-home-item"><b><span data-no-translate>{{ display_name(mentor) }}</span></b><span>{{ content_text('profile', mentor.id, 'position', mentor.current_position or mentor.status or mentor.role) }}{% if mentor.company %} · {{ content_text('profile', mentor.id, 'company', mentor.company) }}{% endif %}</span></a>
       {% else %}
         <div class="text-muted">Ментори з'являться після оновлення профілів.</div>
       {% endfor %}

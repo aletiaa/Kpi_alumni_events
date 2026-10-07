@@ -30,6 +30,13 @@ else { console.log('PASS: static template translation catalogue coverage'); }
 vm.runInContext('Object.assign(CONTENT_TRANSLATIONS.en, window.ALUMNIX_UI_EN);', context);
 const assert = require('node:assert/strict');
 assert.equal(vm.runInContext('translatedText("Зберегти питання", "en")',context), 'Save question');
+for (const [source, expected] of [
+  ['Вітаємо,', 'Hello,'], ['професор кафедри', 'Professor'],
+  ['доцент кафедри', 'Associate Professor'], ['викладач кафедри', 'Lecturer'],
+  ['КПІ ім. Ігоря Сікорського', 'Igor Sikorsky Kyiv Polytechnic Institute'],
+  ['КПІ, ІТ-центр', 'KPI, IT Centre'], ['Аудиторія 304', 'Room 304'],
+  ['Корпус 18, ауд. 214', 'Building 18, Room 214']
+]) assert.equal(vm.runInContext(`translatedText(${JSON.stringify(source)}, "en")`, context), expected);
 assert.equal(vm.runInContext('translatedText("121 - Інженерія програмного забезпечення", "en")',context), '121 - Software engineering');
 assert.equal(vm.runInContext('translatedText("Це нове повідомлення від користувача", "en")',context), 'Це нове повідомлення від користувача');
 console.log('PASS: complete phrases, specialties, no partial replacements');
