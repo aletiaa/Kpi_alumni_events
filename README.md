@@ -1,241 +1,174 @@
 # AlumnixHub
 
-Веб-система адміністрування Telegram-бота для комунікації випускників університету.  
-Web-based Telegram bot administration and university alumni communication platform.
+Інтелектуальна вебсистема для комунікації випускників університету, створена в межах магістерського проєкту. Об’єднує студентів, випускників, гостей і менторів, підтримує українську та англійську мови, персональні рекомендації, опитування, аналітику та інтеграцію з Telegram.
 
-**Website / Сайт:** http://77.47.192.6:4063/  
-**Telegram:** https://t.me/NniteUnity_bot
+Поточна реалізація: **Python + FastAPI + SQLAlchemy + Jinja2**. Сервер формує HTML-сторінки; статичні стилі й клієнтські сценарії розташовані в `app/static`.
 
-**Admin guide / Посібник адміністратора:** [docs/ADMINISTRATION.md](docs/ADMINISTRATION.md)
+- Сайт університетського сервера: [AlumnixHub](http://77.47.192.6:4063/).
+- Telegram: [@NniteUnity_bot](https://t.me/NniteUnity_bot).
+- [Посібник адміністратора](docs/ADMINISTRATION.md).
+- [Двомовний посібник користувача та адміністратора Word](docs/AlumnixHub_User_Guide_UA_EN.docx).
 
-**Full Word guide / Повна інструкція Word:** [AlumnixHub_User_Guide_UA_EN.docx](docs/AlumnixHub_User_Guide_UA_EN.docx)
+## Можливості
 
-Ця інструкція пояснює щоденну роботу користувачів, адміністраторів і відповідального за сервер. Для використання сайту встановлювати програму на комп'ютер не потрібно.
-
-This guide covers everyday tasks for users, administrators and the server operator. Website users do not need to install an application.
-
-## Українська
-
-### Реєстрація та профіль
-1. Зареєструйтеся, вказавши власну електронну адресу.
-2. Перейдіть за посиланням підтвердження з листа. Перевірте спам; без підтвердження вхід недоступний.
-3. Заповніть профіль: ім'я українською та англійською, факультет, спеціальність, групу, рік випуску, опис, навички, інтереси та місце проживання.
-4. За бажанням увімкніть менторство й зазначте напрям допомоги. Це не надає адміністративних прав.
-
-### Використання сайту
-| Розділ | Можливості |
+| Модуль | Реалізація |
 | --- | --- |
-| Головна | Актуальні матеріали й можливості спільноти |
-| Події | Пошук, календар, повний опис, реєстрація й QR-посилання для реєстрації |
-| Мої події | Власні реєстрації; доступність залежить від строків та вільних місць |
-| Новини | Опубліковані матеріали спільноти та КПІ |
-| Випускники | Пошук людей за інформацією профілю |
-| Ментори | Пошук за навичками та напрямом допомоги |
-| Повідомлення | Особисте спілкування зареєстрованих користувачів |
-| Чати | Групове спілкування |
-| Опитування | Надсилання відповідей після входу, доступні результати й діаграми |
-| Сповіщення | Повідомлення про активність |
+| Облікові записи | Реєстрація, підтвердження email, вхід, відновлення пароля, окремі адміністративні права |
+| Профілі | Українське й англійське ім’я, освіта, спеціальність, країна, навички, інтереси, професійний статус, місце роботи та публічність |
+| Спільнота | Каталоги випускників і менторів, особисті повідомлення, посилання на групові чати |
+| Події | Пошук, календар, реєстрації, обмеження місць і строків, QR-посилання, зображення з файлу або URL |
+| Новини | Публікації, модерація пропозицій, зображення, короткі описи, імпорт матеріалів КПІ для перевірки |
+| Опитування | Анкети, відповіді, результати й діаграми відповідно до налаштувань доступу |
+| Аналітика | Відвідування та активність, фільтри, експорт CSV, дані профілів і опитувань для аналізу спільноти |
+| Асистент | Навігаційні підказки та пошук подій за підтримуваними текстовими запитами й часовими обмеженнями |
+| Telegram | Прив’язування акаунта, меню, сповіщення за згодою, розсилки, пропозиції новин та робота з файлами |
+| Адміністрування | Керування контентом, користувачами, довідниками, ботом і операційними функціями |
 
-Рекомендації зіставляють тематики інтересів, а не частоту повторення слів. Адміністратор керує двомовним каталогом тематик та додатковими синонімами через сайт. Явно обрані інтереси мають пріоритет; за їх відсутності використовуються тематики реєстрацій та переглядів. Без тематичних сигналів рекомендацій немає. Це детермінований тематичний алгоритм, не генеративна модель. Перемикач UA/EN змінює інтерфейс. Переклади матеріалів через DeepL кешуються; при недоступності сервісу може залишатися оригінальний текст. Закриті демонстраційні анкети із синтетичними відповідями не є реальними результатами дослідження.
+### Інтелектуальні функції та мультимовність
 
-### Telegram
-У профілі відкрийте підключення Telegram, оберіть згоду на потрібні сповіщення, перейдіть за персональним посиланням і натисніть Start. Не передавайте це посилання іншій людині.
+- Персональні рекомендації зіставляють тематики інтересів. Явно обрані інтереси мають пріоритет; за їх відсутності використовуються тематики реєстрацій і переглядів. Без тематичних сигналів рекомендації не формуються.
+- У `app/ml` також реалізовано текстову подібність, гібридне ранжування з урахуванням популярності й актуальності, скорочення текстів і QR-утиліти.
+- Асистент використовує правила та розбір підтримуваних запитів. Поточний код не реалізує універсальний генеративний чат або RAG по документах.
+- Інтерфейс має перемикач UA/EN. Довідники й окремі поля профілів двомовні; переклади контенту через DeepL кешуються. Якщо переклад недоступний, може показуватися оригінал.
+- Закриті демонстраційні анкети із синтетичними відповідями слугують прикладами, а не результатами реального дослідження.
 
-Бот відкриває події, новини, профіль, повідомлення, опитування й файли. /menu відкриває меню; /stop припиняє підписку. Посилання на сайт потребують окремого входу в браузері. Адміністративний вхід і особистий профіль мають різні права.
+## Технології та структура
 
-### Покрокові сценарії користувача
+Python 3.11, FastAPI, Uvicorn, Jinja2, SQLAlchemy, SQLite / PostgreSQL, Pydantic, NumPy, scikit-learn, NLTK, Pillow та qrcode. Паролі хешуються PBKDF2-SHA256; підписані сесії реалізовано через itsdangerous.
 
-**Вхід і відновлення доступу.** Відкрийте сайт, оберіть вхід і введіть email та пароль. Якщо пароль втрачено, скористайтеся відновленням пароля й посиланням із листа. Не передавайте пароль або посилання відновлення іншим людям. Якщо лист не надійшов, перевірте спам та зверніться до адміністратора; не створюйте дублікати акаунта.
-
-**Редагування профілю.** У профілі заповніть біографію, навички, професійний статус, поточну посаду та організацію. Оберіть країну з довідника, а факультет або навчально-науковий інститут зазначте у відповідному полі. Виберіть спеціальність і код, що відповідають періоду навчання. Збережіть зміни та перевірте власну картку у каталозі. Налаштування публічності визначає видимість профілю для інших людей.
-
-Роль «студент», «випускник» або «гість» описує зв'язок зі спільнотою. Професійний статус описує роботу або кар'єрний стан; це не стан блокування акаунта. Права адміністратора та ознака ментора є окремими налаштуваннями. Гість із акаунтом отримує персональні можливості, яких немає в анонімного відвідувача. Якщо коректний рік випуску студента менший за поточний рік, система переводить його у випускники; випуск у поточному році сам по собі ще не запускає таку зміну.
-
-Дата народження не може бути в майбутньому. Рік випуску має бути від 1965 до поточного року, не раніше року вступу та щонайменше на 15 років пізніше року народження, якщо дата народження вказана. Рік вступу не може передувати року народження. Якщо дата народження не вказана, перевірка віку при випуску не застосовується, але інші обмеження залишаються.
-
-**Реєстрація на подію.** Відкрийте «Події», знайдіть потрібну подію за назвою, тематикою або календарем, прочитайте повний опис і натисніть реєстрацію. Перевірте результат у «Моїх подіях». Якщо доступне скасування, скористайтеся ним на сторінці події. Обмеження кількості місць і строків можуть не дозволяти нову реєстрацію. QR-код унизу опису відкриває сторінку реєстрації, але не реєструє людину автоматично.
-
-**Новини та рекомендації.** Оберіть власні інтереси у профілі, відкрийте новини або події та перегляньте запропоновані матеріали. Кнопки персональних рекомендацій використовують тематичні сигнали; слова «та», «що» й інші службові слова самі по собі не є інтересами. У проєкті також існує окремий алгоритм текстової подібності для пошуку подій. Рекомендації не є гарантією відповідності й не замінюють рішення користувача.
-
-**Ментори та повідомлення.** Відкрийте каталог менторів, перегляньте спеціалізацію та опис допомоги. Для особистої розмови знайдіть іншого користувача в розділі повідомлень і надішліть повідомлення. Власний акаунт не показується як адресат. Доступність співрозмовника залежить від активності, підтвердження email, блокування та публічності профілю. Розділ чатів може відкривати посилання на зовнішні групи, а не окремий вбудований месенджер. Профілі викладачів із позначкою непідтвердженої участі не означають, що вони погодилися на менторство.
-
-**Опитування.** Відкрийте доступне опитування, заповніть потрібні відповіді та надішліть форму. Перевірте повідомлення про результат. Доступ до результатів залежить від налаштувань анкети; закрита анкета не приймає нових відповідей.
-
-### Що можна зробити через Telegram
-
-1. Спочатку створіть і підтвердьте акаунт на сайті. Кнопка «Register / log in» у боті відкриває сайт, а не створює акаунт повністю всередині Telegram. Автоматичний імпорт аватара Telegram не слід очікувати.
-2. Підключіть акаунт через персональне посилання з профілю. Звичайний `/start` без прив'язування не надає доступу до персональних даних.
-3. Відкрийте `/menu`, оберіть новини або події й виконайте доступну дію. Частина кнопок відкриває сторінки сайту, де потрібен окремий вхід.
-4. Для пропозиції новини надішліть `/submit_news Заголовок`, а з нового рядка додайте текст. Заголовок має містити не більше 200 символів, текст не більше 10000; дозволено до трьох пропозицій на годину. Новина потрапляє на модерацію і не публікується автоматично.
-5. Для файлів використовуйте відповідну дію меню. Ліміт надсилання становить 20 МБ. Telegram-файли можуть зберігатися як посилання та ідентифікатори Telegram, а не як завантажені копії на сервері.
-6. Змініть згоду на сповіщення у профілі або скористайтеся `/stop`, щоб припинити підписку.
-
-Бот відповідає, коли працює серверний застосунок та його обробник Telegram. Натискання Start не запускає сервер. Якщо немає відповіді, відповідальний за сервер перевіряє контейнер і журнали; користувачу не потрібно запускати бот локально.
-
-### Адміністрування
-Адміністратор входить з приватно наданими обліковими даними та керує подіями, новинами, користувачами, анкетами, файлами й аналітикою. Щоденний імпорт КПІ додає матеріали на перевірку, а не публікує їх автоматично. Перевірте текст, переклад, зображення та згенерований короткий опис перед публікацією.
-
-У розділі ботів перевіряйте підключення, обирайте аудиторію лише серед користувачів зі згодою та переглядайте статуси доставки. Прийняття повідомлення Telegram не означає його прочитання.
-
-### Покрокові сценарії адміністратора
-
-1. **Новини:** створіть матеріал або відкрийте пропозицію Telegram; перевірте заголовок, текст, переклад і зображення. Згенеруйте короткий опис, перевірте його та опублікуйте матеріал. Згенерований опис є автоматично відібраним текстом, а не гарантовано точним авторським переказом.
-2. **Події:** заповніть назву, опис, дату, місце, тематику та обмеження реєстрації. Збережіть і перевірте сторінку події зі звичайного акаунта. Реєстрації на сайті та доступні дії бота використовують спільні дані.
-3. **Користувачі:** знайдіть акаунт і перевірте роль, професійний статус, активність та підтвердження email. Змінюйте права лише уповноваженим людям. Перед блокуванням чи видаленням переконайтеся, що обрано правильний акаунт.
-4. **Інші адміністратори:** призначайте права через інтерфейс керування користувачами, без зміни коду. Активний адміністратор із підтвердженим email може прив'язати власний Telegram персональним одноразовим посиланням. Прив'язування Telegram не створює адміністративну сесію браузера.
-5. **Довідники:** додайте спеціальність із кодом, двомовною назвою та періодом застосування. Для однієї спеціальності можуть існувати різні коди: до 2015 року, у 2015–2024 роках та після 2024 року. Не замінюйте старі коди новими для всіх випускників. Країни обираються зі спільного довідника кодів і назв.
-6. **Розсилки:** перевірте підключення бота, підготуйте текст, виберіть аудиторію зі згодою, перевірте кількість одержувачів і запустіть надсилання. Перегляньте помилки та результати доставки. Не повторюйте розсилку наосліп, якщо попередній результат невідомий.
-7. **Опитування та файли:** перевіряйте питання й строки анкети до відкриття; переглядайте результати та модеровані файли через відповідні розділи.
-
-### Перевірка сервера та типові проблеми
-
-Відкрийте PuTTY, виберіть SSH, вкажіть сервер `77.47.192.6` і порт `22`. Увійдіть під виданим серверним акаунтом. Пароль сервера, токен бота та поштові ключі не повинні бути у цьому README чи GitHub.
-
-Відповідальний за сервер може перевірити стан такими командами:
-
-```sh
-docker ps --filter name=alumnixhub-std19
-docker logs --tail 100 alumnixhub-std19
-curl -I http://127.0.0.1:4063/
+```text
+app/
+  main.py             # FastAPI, ініціалізація БД та фонових задач
+  config.py           # конфігурація з .env і змінних середовища
+  db.py, models.py    # підключення SQLAlchemy та моделі
+  routers/            # HTTP-маршрути й обробники
+  services/           # бізнес-логіка, переклади, Telegram, імпорт, резервні копії
+  middleware/         # аналітика й адміністративний аудит
+  ml/                 # рекомендації, обробка текстів і QR
+  templates/          # HTML-шаблони Jinja2
+  static/             # стилі, сценарії, зображення та uploads
+scripts/              # допоміжні операції й обслуговування
+tests/                # автоматизовані й навантажувальні перевірки
+docs/                 # посібники та матеріали перевірок
+Dockerfile            # образ застосунку
+render.yaml           # конфігурація розгортання Render
 ```
 
-Лише за потреби й після перевірки журналів перезапустіть сервіс:
+Моделі, шаблони та обробники розділені між відповідними модулями; прикладна логіка винесена в сервіси. Локально за замовчуванням використовується SQLite. Для PostgreSQL у залежностях є драйвер `psycopg2-binary`.
 
-```sh
-docker restart alumnixhub-std19
+## Локальний запуск у Windows / VS Code
+
+### 1. Відкрити проєкт і створити середовище
+
+Встановіть Python 3.11 та розширення Python для VS Code. Відкрийте папку проєкту через **File → Open Folder**, потім відкрийте термінал PowerShell у корені проєкту:
+
+```powershell
+py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-Не видаляйте каталог даних, uploads або `.env` під час оновлення. Резервні копії перевіряйте за інструкцією обслуговування. Для налаштованого щоденного механізму узгоджено зберігання останніх 14 копій; сама наявність правила не замінює перевірку фактичного створення та відновлення архівів.
+У VS Code виконайте **Python: Select Interpreter** через `Ctrl+Shift+P` та оберіть `.venv\Scripts\python.exe`. Команди нижче використовують інтерпретатор напряму й не потребують активації середовища.
 
-- **403:** перевірте, що потрібна дія доступна вашій ролі та що використовується належний адміністративний вхід.
-- **Бот мовчить:** перевірте сервер, прив'язування акаунта і журнали. Не запускайте другого обробника того самого токена.
-- **Лист не надходить:** перевірте спам, email і поштові налаштування. У діагностичних сценаріях відновлення можуть відображатися службові посилання; їх не слід публікувати чи передавати стороннім.
-- **Не знаходить користувача:** перевірте ім'я, мову, публічність та стан акаунта; власний акаунт не є адресатом нової розмови.
-- **Не зберігає дату:** перевірте хронологію народження, вступу та випуску.
-- **Не реєструє на подію:** перевірте вхід, строки, вільні місця та попередню реєстрацію.
+### 2. Налаштувати середовище
 
-### Сервер і база даних
-Сайт працює на університетському сервері незалежно від ноутбука. Зовнішній порт — **4063**. Для PuTTY: сервер 77.47.192.6, SSH-порт **22**, користувач std19.
+Якщо `.env` ще немає, створіть його з прикладу, не перезаписуючи власні налаштування:
 
-Контейнер alumnixhub-std19 запускає сайт і обробник Telegram; його внутрішній порт 8000 відображається на 4063. Закриття PuTTY не зупиняє сервіс. Не запускайте другий локальний обробник того самого бота.
+```powershell
+if (!(Test-Path .env)) { Copy-Item .env.example .env }
+```
 
-SQLite зберігається на сервері в /home/std19/alumnixhub/data/dev.db, підключеному до контейнера як /data/dev.db. Перезапуск і оновлення контейнера зберігають базу та окремий каталог uploads. Локальна й серверна бази не синхронізуються автоматично.
+Основні параметри:
 
-Ліміту кількості профілів у застосунку немає. База росте разом із записами, повідомленнями та аналітикою, але диск автоматично не розширюється. SQLite допускає один запис одночасно: кількість збережених користувачів не визначає допустиму кількість одночасних відвідувачів. Для значного навантаження на записи потрібен PostgreSQL.
-
-Поточне підключення HTTP не шифрує трафік. Для захищеної публічної експлуатації потрібні домен і HTTPS.
-
-[Обслуговування та резервні копії](DEPLOYMENT.md) · [JMeter і результати тесту](tests/performance/README.md)
-
-## English
-
-### Registration and Profile
-1. Register using an email address you control.
-2. Follow the emailed verification link. Check spam; login requires verification.
-3. Complete your Ukrainian and English names, faculty, specialty, cohort, graduation year, biography, skills, interests and location.
-4. Optionally enable mentoring and describe how you can help. Mentoring does not grant administrative access.
-
-### Using the Website
-| Area | Available actions |
+| Змінна | Призначення |
 | --- | --- |
-| Home | Browse current community content and opportunities |
-| Events | Search, use the calendar, read full details, register and generate a registration QR link |
-| My events | Review registrations; availability depends on deadlines and capacity |
-| News | Read published community and KPI articles |
-| Alumni | Find people using profile filters |
-| Mentors | Find mentors by skills and support areas |
-| Messages | Contact other registered users through personal accounts |
-| Chats | Participate in group conversations |
-| Surveys | Submit answers after login and view available results and charts |
-| Notifications | Review activity notifications |
+| `DATABASE_URL` | `sqlite:///./dev.db` локально або URL PostgreSQL з `.env.example` |
+| `SECRET_KEY` | Власний випадковий секрет для підписування сесій і токенів |
+| `APP_BASE_URL` | `http://127.0.0.1:8000` локально; зовнішня адреса для листів і посилань бота |
+| `EMAIL_ENABLED` | Увімкнення надсилання листів; для реєстрації з підтвердженням потрібна працездатна пошта |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_TLS` | Параметри поштового сервера |
+| `EMAIL_FROM_NAME`, `EMAIL_FROM_EMAIL` | Ім’я та адреса відправника |
+| `DEEPL_API_KEY` | Ключ перекладу контенту, якщо використовується DeepL |
+| `TELEGRAM_ENABLED`, `TELEGRAM_BOT_TOKEN` | Увімкнення Telegram і токен бота; додайте вручну за потреби |
+| `ADMINS_CSV_PATH` | Шлях до приватного CSV адміністраторів; за замовчуванням `admins.csv` у корені |
+| `SEED_DEMO_DATA` | Створення демонстраційного контенту; за замовчуванням `false` |
+| `IOT_API_KEY` | Ключ демонстраційної IoT-інтеграції |
+| `BACKUP_ENABLED` | Увімкнення фонового резервування SQLite; за замовчуванням вимкнено |
 
-Recommendations match interest topics rather than repeated-word frequency. Administrators manage bilingual topics and additional aliases through the website. Selected interests take priority; registration and reading topics are used when explicit topics are absent. No topical signal means no recommendations. This is a deterministic topic algorithm, not a generative model. UA/EN changes the interface language. DeepL content translations are cached; original text can remain visible when translation is unavailable. Closed demonstration surveys with synthetic answers are not real research findings.
+`EMAIL_ENABLED=false` дозволяє запустити сайт без пошти, але не забезпечує завершення реєстрації нового користувача: вхід потребує підтвердження email. Для повного сценарію реєстрації налаштуйте SMTP та ввімкніть пошту.
 
-### Telegram
-Open Telegram linking in your profile, select notification consent, follow your personal link and press Start. Do not share your linking link.
+Не використовуйте токен серверного Telegram-бота для одночасного локального polling. Для розробки залиште інтеграцію вимкненою або використовуйте окремого тестового бота.
 
-The bot provides events, news, profiles, messages, surveys and files. /menu opens the menu; /stop unsubscribes. Website links require a separate browser login. Administrator sessions and personal accounts have different permissions.
+### 3. Запустити сайт
 
-### Step by Step User Tasks
-
-**Sign in and recover access.** Open the website and sign in with your email and password. Use password recovery if necessary and follow the emailed link. Keep passwords and recovery links private. Check spam or contact an administrator if the message is missing; do not create duplicate accounts.
-
-**Edit your profile.** Enter your biography, skills, professional status, current position and organization. Select a country from the directory and specify your faculty or educational and scientific institute. Choose the specialty and code applicable to your study period. Save and check your directory entry. Profile visibility controls whether other people can find it.
-
-Student, alumni and guest describe your relationship to the community. Professional status describes your career, not whether the account is blocked. Administrator permissions and mentoring are separate settings. A registered guest can access personal features unavailable to an anonymous visitor. A student with a valid graduation year earlier than the current year becomes an alumnus; graduation in the current year does not trigger that transition by itself.
-
-Birth dates cannot be in the future. Graduation years must be between 1965 and the current year, no earlier than admission, and at least 15 years after birth when a birth date is supplied. Admission cannot precede birth. Omitting a birth date removes the age check, not the other date restrictions.
-
-**Register for an event.** Open Events, search or use the calendar, read the full description and register. Check My events for the result. Cancel from the event page when cancellation is available. Deadlines and capacity may prevent registration. The QR code at the bottom opens a registration page; scanning it does not automatically register a person.
-
-**Read news and recommendations.** Select your interests in the profile and browse news or events. Personalized recommendations use topic signals, not common connecting words. A separate text similarity algorithm also exists for event discovery. Suggestions are not a guarantee of relevance. UA/EN changes the interface; unavailable content translations can leave original text visible.
-
-**Contact mentors and users.** Browse mentors by their skills and support areas. In Messages, find another eligible user and start a conversation. You cannot select yourself as a recipient. Availability depends on account activity, email verification, blocking and public visibility. Chats may open external group links rather than an internal group messenger. An unconfirmed mentoring label means that the displayed staff member has not confirmed participation.
-
-**Answer surveys.** Open an available survey, complete the required answers and submit. Check the confirmation. Results depend on survey settings; closed surveys do not accept new submissions.
-
-### Telegram Tasks and Limits
-
-1. Create and verify an account on the website first. Register / log in opens the website rather than completing registration inside Telegram. Automatic Telegram avatar import is not provided by this workflow.
-2. Link the account using the personal link from your profile. An ordinary `/start` without linking does not grant personal account access.
-3. Open `/menu` and choose news, events or another available action. Some buttons open website pages requiring a separate browser login.
-4. Propose news with `/submit_news Title`, followed by the article text on a new line. Maximum title length is 200 characters, body length 10000; up to three proposals per hour are allowed. Submissions await moderation rather than publishing automatically.
-5. Use the file submission menu for files. The limit is 20 MB. Telegram files may be stored as Telegram references and identifiers rather than downloaded server copies.
-6. Change notification consent in your profile or use `/stop` to unsubscribe.
-
-The bot responds while the server application and its Telegram worker are running. Pressing Start does not start the server. If it does not respond, the server operator checks the container and logs; users do not need a local bot process.
-
-### Administration
-Use the administrator login with privately supplied credentials. Administrators manage events, news, accounts, surveys, files and analytics. Daily KPI imports enter a review queue rather than publishing automatically. Review text, translations, images and generated short descriptions before publication.
-
-In bot administration, check connection status, select only consenting recipients and inspect delivery results. Acceptance by Telegram does not prove that a message was read.
-
-### Step by Step Administrator Tasks
-
-1. **News:** create an article or open a Telegram proposal. Review its title, text, translation and image. Generate and review the short description before publishing. Automatic summaries select source text; they are not guaranteed editorial rewrites.
-2. **Events:** enter the title, description, date, venue, topic and registration limits. Save and check the public page using an ordinary account. Website registration and available bot actions share application data.
-3. **Users:** find the correct account and check its role, professional status, activity and email verification. Grant permissions only to authorized people. Verify the selected account before blocking or deleting it.
-4. **Administrator delegation:** grant rights through user management without editing code. Active administrators with verified email can link their own Telegram through a personal one-time link. Linking Telegram does not sign them into the browser administration area.
-5. **Directories:** add a specialty code, bilingual names and applicable period. The same specialty can have codes from before 2015, from 2015–2024 and after 2024. Do not replace every historical graduate code with a current code. Countries use the shared code and name directory.
-6. **Broadcasts:** check bot connectivity, prepare the message, select consenting recipients, review the recipient count and send. Inspect delivery results and errors. Do not blindly resend when the previous outcome is uncertain.
-7. **Surveys and files:** review survey questions and deadlines before opening participation; manage results and moderated files through their respective sections.
-
-### Server Checks and Troubleshooting
-
-In PuTTY, select SSH, enter `77.47.192.6` and port `22`, then use your assigned server account. Never publish the server password, bot token or email credentials in README or GitHub.
-
-The server operator can check service health:
-
-```sh
-docker ps --filter name=alumnixhub-std19
-docker logs --tail 100 alumnixhub-std19
-curl -I http://127.0.0.1:4063/
+```powershell
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-Restart only when necessary after reviewing the logs:
+Відкрийте [локальний сайт](http://127.0.0.1:8000/) або [OpenAPI / Swagger UI](http://127.0.0.1:8000/docs).
 
-```sh
-docker restart alumnixhub-std19
+Запускайте з кореня проєкту: шляхи шаблонів, статичних файлів та локальної БД залежать від робочої папки. Під час старту застосунок створює таблиці, виконує передбачені кодом оновлення схеми та ініціалізує довідники. Перед запуском нової версії з наявною БД зробіть резервну копію. Деякі опитування ініціалізуються незалежно від `SEED_DEMO_DATA`.
+
+### 4. Адміністративний доступ
+
+Адміністративна панель доступна через `/admin`. Особистий акаунт і адміністративна сесія мають окремі права. Дані початкового адміністратора зберігаються у приватному CSV; доступ також керується через інтерфейс адміністратора. Деталі — у [посібнику адміністратора](docs/ADMINISTRATION.md).
+
+Для старого CSV з паролями у відкритому вигляді передбачено одноразове перетворення:
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.hash_admin_passwords
 ```
 
-Preserve the data directory, uploads and `.env` during upgrades. Follow the maintenance guide for backups. The agreed daily backup retention is the latest 14 archives when the mechanism is configured; a retention rule alone does not verify backup creation or restoration.
+Команда змінює CSV, указаний у `ADMINS_CSV_PATH`. Вона призначена для наявних записів, а не створення нового адміністратора. Не публікуйте файл із реальними обліковими даними.
 
-- **403:** check your permissions and the appropriate administrator login.
-- **Silent bot:** check server health, account linking and logs. Do not run a second worker with the same token.
-- **Missing email:** check spam, the address and mail settings. Diagnostic recovery paths can expose operational links; keep them private.
-- **Missing search recipient:** check the name, language, public visibility and account state. Your own account is not a new conversation recipient.
-- **Rejected dates:** check the chronology of birth, admission and graduation.
-- **Rejected event registration:** check login, deadlines, capacity and an existing registration.
+## Перевірки
 
-### Server and Database
-The website runs on the university server independently of a laptop. Public port: **4063**. PuTTY uses host 77.47.192.6, SSH port **22**, username std19.
+Залежності для тестів установлюються окремо від `requirements.txt`:
 
-The alumnixhub-std19 container runs the website and Telegram worker. Internal port 8000 maps to public port 4063. Closing PuTTY leaves it running. Do not run a competing local worker for the same bot.
+```powershell
+.\.venv\Scripts\python.exe -m pip install pytest pytest-asyncio httpx
+.\.venv\Scripts\python.exe -m pytest -q
+node scripts/check_i18n.cjs
+```
 
-SQLite lives at /home/std19/alumnixhub/data/dev.db, mounted as /data/dev.db. Container restarts and source updates preserve the database and the separate uploads directory. Laptop and server databases do not synchronize automatically.
+Для перевірки перекладів потрібен Node.js. Додаткові матеріали:
 
-There is no fixed account limit in the application. The file grows with records, messages and analytics, but storage does not expand automatically. SQLite permits one writer at a time: stored account capacity is not concurrent visitor capacity. Use PostgreSQL for substantial write-heavy workloads.
+- [Перевірка випуску](RELEASE_CHECKLIST.md).
+- [Ручне тестування](docs/MANUAL_TESTING_2026-10-02.md).
+- [Навантажувальні тести JMeter](tests/performance/README.md).
 
-The current HTTP endpoint does not encrypt traffic. A domain and HTTPS are needed for secure public production use.
+Проходження локальних тестів не підтверджує доставку листів, роботу Telegram або стан сервера: ці інтеграції перевіряються в цільовому середовищі.
 
-[Maintenance and backups](DEPLOYMENT.md) · [JMeter test and results](tests/performance/README.md)
+## Розгортання та дані
+
+Університетський сервер використовує Docker-контейнер `alumnixhub-std19`, зовнішній порт `4063` та внутрішній порт `8000`. Шляхи за конфігурацією розгортання:
+
+| Шлях на сервері | Призначення |
+| --- | --- |
+| `/home/std19/alumnixhub/source` | Код застосунку |
+| `/home/std19/alumnixhub/.env` | Приватні налаштування |
+| `/home/std19/alumnixhub/data` | Постійні дані, зокрема `dev.db` |
+| `/home/std19/alumnixhub/uploads` | Завантажені файли |
+
+Локальна й серверна БД автоматично не синхронізуються. Push у GitHub не переносить БД і не підтверджує оновлення запущеного контейнера. Версію сервера потрібно перевіряти окремо; README описує конфігурацію, а не поточний стан деплою.
+
+- [Обслуговування, оновлення та резервні копії](DEPLOYMENT.md).
+- [Підключення до університетського сервера](UNIVERSITY_SERVER.md).
+- [Інтеграція Telegram](BOT_INTEGRATION.md).
+- [Імпорт матеріалів КПІ](KPI_IMPORT.md).
+- [Переклади](TRANSLATION.md).
+- [Довідники профілів](docs/PROFILE_CATALOGS.md).
+
+У репозиторії також є `Dockerfile`, `Procfile` і `render.yaml`. Наявність конфігурації Render не означає, що відповідний сервіс зараз розгорнутий. Параметри пошти й зовнішню адресу потрібно налаштувати для обраного середовища.
+
+Не додавайте до Git `.env`, токени, паролі, робочі бази, приватні CSV, завантаження та резервні копії. Перед оновленням зберігайте дані й налаштування та перевіряйте можливість відновлення. SQLite має обмеження одночасного запису; для інтенсивного навантаження оцініть PostgreSQL. Публічна адреса сервера використовує HTTP; для захищеної роботи потрібні домен, HTTPS і відповідний проксі.
+
+## English overview
+
+AlumnixHub is a university alumni communication platform developed as a master's project. It uses Python, FastAPI, SQLAlchemy and Jinja2, with Ukrainian and English interfaces. Features include profiles, alumni and mentor directories, events, news, private messages, surveys, activity analytics, topic recommendations and Telegram integration.
+
+The assistant provides rule-based navigation and event queries. Recommendations and text-processing modules do not imply a general-purpose generative AI or document RAG implementation.
+
+For local development, use Python 3.11, create `.venv`, install `requirements.txt`, copy `.env.example` only if `.env` does not exist, and configure your own secret and integrations. Run `python -m uvicorn app.main:app --reload` from the project root. SQLite tables and application-specific schema updates are initialized at startup. SMTP is required to complete email-verified registration; leave Telegram disabled locally unless using a separate test bot.
+
+See the [bilingual user guide](docs/AlumnixHub_User_Guide_UA_EN.docx), [administrator guide](docs/ADMINISTRATION.md), and [deployment guide](DEPLOYMENT.md). Git pushes do not synchronize databases or prove that the server runs the latest code.
