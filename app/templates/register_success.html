@@ -4,9 +4,8 @@
 {% if email_sent %}
   <div class="alert alert-info shadow-soft">Ми надіслали лист підтвердження на {{ email }}.</div>
 {% else %}
-  <div class="alert alert-warning shadow-soft">Надсилання email не налаштовано. Демо-посилання для підтвердження:</div>
-  {% if verify_link %}<div class="card shadow-soft mb-3"><div class="card-body"><a class="text-break" href="{{ verify_link }}">{{ verify_link }}</a></div></div>{% endif %}
-  {% if email_error %}<div class="alert alert-danger shadow-soft">SMTP помилка: {{ email_error }}</div>{% endif %}
+  <div class="alert alert-warning shadow-soft">Акаунт створено, але лист підтвердження не вдалося надіслати автоматично. Спробуйте пізніше або зверніться до адміністратора платформи.</div>
+  {% if email_unavailable %}<div class="text-muted mb-3">Вхід буде доступний після підтвердження email.</div>{% endif %}
 {% endif %}
 <a class="btn btn-primary" href="/login">До входу</a>
 {% endblock %}

@@ -323,6 +323,39 @@ def test_registered_user_is_public_in_alumni_search(client, db):
     assert user.is_profile_public is True
 
 
+def test_register_does_not_show_verification_link_when_email_disabled(client, db):
+    response = client.post(
+        "/register",
+        data={"full_name": "No Link User", "email": "no-link@example.com", "password": "demo12345", "role": "student"},
+    )
+    assert response.status_code == 200
+    assert "/verify?token=" not in response.text
+    assert "Підтвердити акаунт" not in response.text
+    user = db.query(User).filter_by(email="no-link@example.com").first()
+    assert user is not None
+    assert user.is_email_verified is False
+
+
+def test_register_sends_verification_email_when_email_enabled(monkeypatch, client, db):
+    sent = {}
+
+    def fake_send_verification_email(to_email: str, verify_link: str):
+        sent["to_email"] = to_email
+        sent["verify_link"] = verify_link
+
+    monkeypatch.setattr("app.routers.auth.EMAIL_ENABLED", True)
+    monkeypatch.setattr("app.routers.auth.send_verification_email", fake_send_verification_email)
+
+    response = client.post(
+        "/register",
+        data={"full_name": "Email User", "email": "email-user@example.com", "password": "demo12345", "role": "student"},
+    )
+    assert response.status_code == 200
+    assert sent["to_email"] == "email-user@example.com"
+    assert "/verify?token=" in sent["verify_link"]
+    assert "/verify?token=" not in response.text
+
+
 def test_assistant_page_and_query_are_available(client, db):
     event = Event(
         title="AI meetup",
